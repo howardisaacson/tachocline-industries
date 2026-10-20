@@ -1,0 +1,7 @@
+---
+description: Project-wide rules. AGENTS.md is the source of truth.
+alwaysApply: true
+---
+
+- Before any task, read and follow `AGENTS.md` at the repo root. It is the single source of truth.
+- Key reminders: teach and explain reasoning (Howard must be able to explain everything in interviews); write ADRs for significant decisions and never edit Accepted ones; update the page's About doc in the same PR; every UI change needs mobile and desktop specs and tests; never commit secrets.
