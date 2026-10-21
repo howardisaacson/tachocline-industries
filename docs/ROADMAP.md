@@ -5,7 +5,7 @@ Phased milestones. Each phase ends with something demoable, its About pages writ
 ## Phase 0: Foundations *(now)*
 - [ ] Create the GitHub repo `tachocline`, push this tree, protect `main` **[H1]**, [ADR 0010](decisions/0010-use-git-and-github-from-day-one.md)
 - [ ] Decide public vs private; enable secret scanning
-- [ ] Review Proposed ADRs 0002–0015 and accept or revise them
+- [ ] Review Proposed ADRs 0002–0017 and accept or revise them
 - [ ] Handle Dropbox + git: one machine, ignore heavy folders, or clone outside Dropbox (AGENTS.md §9)
 - [ ] Add the TI solar graphic to `assets/brand/` when ready **[H3]**
 
@@ -28,15 +28,22 @@ Phased milestones. Each phase ends with something demoable, its About pages writ
 - [ ] React + Plotly.js frontend reading only from the API, [ADR 0007](decisions/0007-grafana-now-react-later-for-frontend.md)
 - [ ] Mobile-first breakpoints and Playwright viewport tests for every page **[H5]**, [ADR 0012](decisions/0012-responsive-design-mobile-and-desktop.md)
 - [ ] About link on every page, [ADR 0009](decisions/0009-about-this-page-for-every-section.md)
+- [ ] **"How the science is done" page** built from [data-science-workflow.md](data-science-workflow.md), with its own About page, [ADR 0016](decisions/0016-data-science-workflow-as-first-class-feature.md)
+- [ ] **First AI agent: space-weather briefing** (SWPC alerts + current indices → short cited briefing, labelled AI-generated, eval set in CI), [ADR 0017](decisions/0017-where-ai-agents-fit.md), [ai-agents.md](ai-agents.md)
+- [ ] TI **MCP server** wrapping the read-only API (may slip to Phase 4)
 
 ## Phase 4: Deploy to the cloud
 - [ ] New ADR choosing the provider using the criteria in [ADR 0011](decisions/0011-cloud-deployment-target-deferred-with-criteria.md) (AWS / Google Cloud / other) **[H2]**
 - [ ] Infrastructure as code, billing alerts, CI/CD deploy, uptime monitoring
+- [ ] Natural-language (text-to-SQL) query agent with SELECT-only role, timeouts, row limits, and the SQL shown to the user ([ai-agents.md](ai-agents.md))
 
 ## Phase 5: Value-add science features
-- [ ] **Orbital decay and re-entry predictor:** how long tracked satellites stay up, and how flares/storms inflate the thermosphere and speed up drag; Starlink Feb 2022 as the validation case study **[H6] [H11]**
+- [ ] **Drag Watch, the orbital decay and re-entry predictor**, run through the full [data science workflow](data-science-workflow.md) (provenance → backtests vs SATCAT decay dates → intervals → monitoring), [ADR 0016](decisions/0016-data-science-workflow-as-first-class-feature.md): how long tracked satellites stay up, and how flares/storms inflate the thermosphere and speed up drag; Starlink Feb 2022 as the validation case study **[H6] [H11]**
 - [ ] **Rust (PyO3) propagation/drag module** benchmarked against Python, [ADR 0015](decisions/0015-where-rust-could-fit.md) **[H9]**
 - [ ] **Sun-as-a-star:** compare solar activity with stellar activity (S-index, Ca II H&K) from Howard's domain **[H7]**
 - [ ] **Space weather → power grids:** "impact of flare/storm X on power grids" explainer **[H8]**
+
+- [ ] Stretch: ingestion anomaly-triage agent; ADS/arXiv literature agent ([ai-agents.md](ai-agents.md))
+- [ ] Experiment tracking (MLflow) once model variants multiply (new ADR)
 
 Order within Phase 5 is flexible; each item needs its own ADR(s) and About page.

@@ -85,5 +85,7 @@ What becomes easier? What becomes harder? What new risks or follow-up work does 
 | [0013](0013-design-by-studying-existing-sites.md) | Design by studying existing sites | Proposed |
 | [0014](0014-when-to-use-more-than-one-docker-container.md) | When to use more than one Docker container | Proposed |
 | [0015](0015-where-rust-could-fit.md) | Where Rust could fit | Proposed |
+| [0016](0016-data-science-workflow-as-first-class-feature.md) | Treat the data science workflow as a first-class, documented feature | Proposed |
+| [0017](0017-where-ai-agents-fit.md) | Where AI agents fit in TI | Proposed |
 
 Tooling (optional): [adr-tools](https://github.com/npryce/adr-tools) is a small CLI that creates numbered ADR files. Copying the template by hand works just as well.

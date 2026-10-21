@@ -40,7 +40,19 @@ Summarised faithfully; [Hn] tags are referenced from [ROADMAP.md](ROADMAP.md).
 - Feature: for a given flare/CME event (from DONKI), show the chain flare → CME → arrival → Kp/G-level → typical grid impacts at that level. **Framing:** educational and based on published scale descriptions, not a prediction of actual damage. Note that flares (X-rays) mainly affect HF radio; grid effects come from geomagnetic storms, usually CME-driven.
 - Historic examples to research and verify before use (e.g., the March 1989 Québec blackout).
 
-### 4. Other ideas
+### 4. Data science workflow as a showcase (Howard, 2026-10-20)
+Howard wants data science workflow to be a **highlighted** skill. The plan is [data-science-workflow.md](data-science-workflow.md) ([ADR 0016](decisions/0016-data-science-workflow-as-first-class-feature.md)): an 11-step workflow with Drag Watch as the worked example, published as a public "How the science is done" page with its own About page.
+
+### 5. AI agents (Howard, 2026-10-20)
+Opportunities to use AI agents both to build TI and inside it. See [ai-agents.md](ai-agents.md) and [ADR 0017](decisions/0017-where-ai-agents-fit.md).
+- Space-weather briefing agent (first; Phase 3)
+- TI MCP server exposing live data to AI clients
+- Text-to-SQL over TimescaleDB with guardrails
+- Ingestion anomaly triage
+- ADS/arXiv literature agent
+- Related resource Howard is tracking: DOE Genesis Mission "Genesis Agent Skills" ([links.md](links.md))
+
+### 6. Other ideas
 - Live ISS / satellite ground tracks over Berkeley; next-pass predictions (CelesTrak + SGP4).
 - SatNOGS "listen to a satellite": the latest observation's waterfall and audio.
 - Aurora probability map (SWPC OVATION) with mobile "will I see it tonight?" view.

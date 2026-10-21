@@ -57,6 +57,8 @@ Per [ADR 0012](docs/decisions/0012-responsive-design-mobile-and-desktop.md):
 | Responsive UI | Mobile-first, defined breakpoints | [0012](docs/decisions/0012-responsive-design-mobile-and-desktop.md) |
 | Design process | Study existing sites first | [0013](docs/decisions/0013-design-by-studying-existing-sites.md) |
 | Rust | Only for measured hot paths (PyO3) | [0015](docs/decisions/0015-where-rust-could-fit.md) |
+| Data science | Documented, reproducible workflow as a feature | [0016](docs/decisions/0016-data-science-workflow-as-first-class-feature.md) |
+| AI agents | Small, read-only, evaluated agents; build with AGENTS.md | [0017](docs/decisions/0017-where-ai-agents-fit.md) |
 
 All but 0001 are **Proposed**. Ask before building on a Proposed decision in a way that would be costly to undo.
 
@@ -80,7 +82,10 @@ All but 0001 are **Proposed**. Ask before building on a Proposed decision in a w
     ├── research/                # data_sources.md, design_survey.md (forthcoming)
     ├── about-this-page-template.md
     ├── ROADMAP.md
-    └── ideas.md
+    ├── ideas.md
+    ├── data-science-workflow.md # how analysis/modelling is done here (follow it)
+    ├── ai-agents.md             # agent use: building TI + agents in the product
+    └── links.md                 # relevant articles, newest first
 ```
 
 ## 8. Conventions
@@ -108,7 +113,12 @@ The working copy is at `~/Dropbox/TI/` on Howard's Mac. Dropbox syncs files one 
 - Database data must live in **Docker named volumes**, not bind mounts inside Dropbox.
 - A safer long-term setup is to keep the clone outside Dropbox (e.g., `~/code/tachocline`). See [ADR 0010](docs/decisions/0010-use-git-and-github-from-day-one.md).
 
-## 10. Data and science integrity
+## 10. Data science and AI agent work
+- Analysis and modelling follow [docs/data-science-workflow.md](docs/data-science-workflow.md): reusable code goes in a tested `analysis/` package (not notebooks), raw data is immutable, validation is time-aware, and predictions are published with uncertainty ([ADR 0016](docs/decisions/0016-data-science-workflow-as-first-class-feature.md)).
+- Any in-product AI agent follows [docs/ai-agents.md](docs/ai-agents.md) and [ADR 0017](docs/decisions/0017-where-ai-agents-fit.md): read-only tools through the API, grounded and cited answers, an eval set before shipping, cost caps, and AI output labelled.
+- As a coding agent, verify citations by resolving IDs (DOI/arXiv/ADS) and checking titles match. A wrong arXiv citation was already caught once in this repo.
+
+## 11. Data and science integrity
 - Cite every data source on the page that uses it and in its About page.
 - Label provisional or real-time data as such, and never present a model prediction as an observation.
 - Science claims must link to a source (paper, agency page). Mark speculation as speculation.

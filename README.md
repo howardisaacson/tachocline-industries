@@ -13,7 +13,7 @@ Tachocline Industries (TI) is a portfolio project by **Howard Isaacson** (astron
 
 ## Current status (2026-10-20)
 - ✅ Data-source research: [docs/research/data_sources.md](docs/research/data_sources.md)
-- ✅ ADR process accepted ([0001](docs/decisions/0001-record-architecture-decisions.md)); ADRs 0002–0015 **Proposed**, awaiting review
+- ✅ ADR process accepted ([0001](docs/decisions/0001-record-architecture-decisions.md)); ADRs 0002–0017 **Proposed**, awaiting review
 - ⏳ Next: Phase 0/1 of the [roadmap](docs/ROADMAP.md): GitHub repo, Docker Compose, first feed (NOAA SWPC solar wind) end to end
 - No application code yet
 
@@ -26,8 +26,11 @@ Python pollers (APScheduler) → PostgreSQL + TimescaleDB → FastAPI → Grafan
 | [AGENTS.md](AGENTS.md) | Rules for AI coding agents *and* humans contributing |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Phased milestones |
 | [docs/ideas.md](docs/ideas.md) | Product and science ideas backlog |
+| [docs/data-science-workflow.md](docs/data-science-workflow.md) | End-to-end data science workflow (Drag Watch example) |
+| [docs/ai-agents.md](docs/ai-agents.md) | AI agents: building with them and features in the product |
+| [docs/links.md](docs/links.md) | Relevant articles and news (newest first) |
 | [docs/decisions/](docs/decisions/README.md) | Architecture Decision Records |
-| [docs/research/](docs/research/) | Research notes (data sources; design survey forthcoming) |
+| [docs/research/](docs/research/) | Research notes (data sources, design survey, satellite orbit decay data) |
 | [docs/about-this-page-template.md](docs/about-this-page-template.md) | Template for each page's About section |
 
 ## Quick start
