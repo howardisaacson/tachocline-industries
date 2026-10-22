@@ -1,0 +1,37 @@
+name: Bug report
+description: Something is broken or wrong (code, data, or docs)
+title: "[Bug]: "
+labels: ["type: bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: "1. docker compose up  2. ...  3. see error"
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / screenshots / ingest_log rows
+      render: shell
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where
+      options: [ingest, db, api, dashboards, web, ds, agents, infra, docs, other]
+  - type: dropdown
+    id: viewport
+    attributes:
+      label: Viewport (UI bugs)
+      options: [n/a, mobile, tablet, desktop]

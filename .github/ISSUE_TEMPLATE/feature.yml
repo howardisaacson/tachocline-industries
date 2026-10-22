@@ -1,0 +1,41 @@
+name: Feature / task
+description: A piece of planned work (feature, docs, research, chore)
+title: "[Feature]: "
+labels: ["type: feature"]
+body:
+  - type: markdown
+    attributes:
+      value: "Keep it small enough for one PR if possible. Big items become a parent issue with sub-issues."
+  - type: textarea
+    id: why
+    attributes:
+      label: Why
+      description: What problem does this solve, and for whom?
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: A checklist that defines "done".
+      value: |
+        - [ ] 
+        - [ ] About page created/updated (if a page or pipeline changes)
+        - [ ] Mobile + desktop checked (if UI)
+    validations:
+      required: true
+  - type: textarea
+    id: related
+    attributes:
+      label: Related docs / ADRs
+      placeholder: "docs/decisions/00NN-....md, docs/ROADMAP.md"
+  - type: textarea
+    id: learn
+    attributes:
+      label: What you'll learn
+      description: The skill this builds, and how you'd explain it in an interview.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options: [ingest, db, api, dashboards, web, ds, agents, infra, rust, brand, docs]

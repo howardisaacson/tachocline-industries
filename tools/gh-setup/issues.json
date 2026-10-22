@@ -1,0 +1,743 @@
+{
+  "repo": "howardisaacson/tachocline-industries",
+  "labels": [
+    {
+      "name": "type: feature",
+      "color": "1D76DB",
+      "description": "New user-visible capability"
+    },
+    {
+      "name": "type: docs",
+      "color": "0075CA",
+      "description": "Documentation, About pages, explanations"
+    },
+    {
+      "name": "type: research",
+      "color": "5319E7",
+      "description": "Investigation or survey before building"
+    },
+    {
+      "name": "type: adr",
+      "color": "D4C5F9",
+      "description": "Write or review an Architecture Decision Record"
+    },
+    {
+      "name": "type: chore",
+      "color": "C5DEF5",
+      "description": "Setup, maintenance, tooling, CI"
+    },
+    {
+      "name": "type: bug",
+      "color": "D73A4A",
+      "description": "Something isn't working"
+    },
+    {
+      "name": "area: ingest",
+      "color": "FBCA04",
+      "description": "Pollers, raw landing zone, validation"
+    },
+    {
+      "name": "area: db",
+      "color": "F9D0C4",
+      "description": "PostgreSQL / TimescaleDB, migrations"
+    },
+    {
+      "name": "area: api",
+      "color": "0E8A16",
+      "description": "FastAPI backend"
+    },
+    {
+      "name": "area: dashboards",
+      "color": "FEF2C0",
+      "description": "Grafana dashboards"
+    },
+    {
+      "name": "area: web",
+      "color": "C2E0C6",
+      "description": "React frontend, design, responsive UI"
+    },
+    {
+      "name": "area: ds",
+      "color": "BFD4F2",
+      "description": "Data science: features, models, backtests"
+    },
+    {
+      "name": "area: agents",
+      "color": "E99695",
+      "description": "AI agents, MCP, evals"
+    },
+    {
+      "name": "area: infra",
+      "color": "BFDADC",
+      "description": "Docker, CI/CD, cloud, GitHub settings"
+    },
+    {
+      "name": "area: rust",
+      "color": "B60205",
+      "description": "Rust / PyO3 work"
+    },
+    {
+      "name": "area: brand",
+      "color": "FF9F1C",
+      "description": "Logo, graphics, visual identity"
+    },
+    {
+      "name": "good first issue",
+      "color": "7057FF",
+      "description": "Small, well-defined starter task"
+    },
+    {
+      "name": "learning",
+      "color": "006B75",
+      "description": "Main goal is learning a new skill (note it for interviews)"
+    }
+  ],
+  "milestones": [
+    {
+      "title": "Phase 0: Foundations",
+      "description": "GitHub repo hygiene, ADR review, Dropbox/git safety, brand graphic. See docs/ROADMAP.md."
+    },
+    {
+      "title": "Phase 1: First feed end to end",
+      "description": "NOAA SWPC solar wind: poll -> raw landing zone -> TimescaleDB -> Grafana, with CI and an About page."
+    },
+    {
+      "title": "Phase 2: Space weather + satellites",
+      "description": "GOES X-rays, Kp, alerts; CelesTrak satellite history with altitude; FastAPI read endpoints."
+    },
+    {
+      "title": "Phase 3: Public website",
+      "description": "Design survey and brief, React + Plotly frontend, responsive tests, About links, science page, first AI agent."
+    },
+    {
+      "title": "Phase 4: Deploy to the cloud",
+      "description": "Choose provider (ADR 0011 criteria), infrastructure as code, deploy pipeline, text-to-SQL agent."
+    },
+    {
+      "title": "Phase 5: Value-add science",
+      "description": "Drag Watch, Rust benchmark, Sun-as-a-star, power-grid explainer, stretch agents, MLflow."
+    }
+  ],
+  "issues": [
+    {
+      "key": "p0-protect",
+      "title": "Protect main and enable secret scanning",
+      "milestone": "Phase 0: Foundations",
+      "labels": [
+        "type: chore",
+        "area: infra",
+        "learning"
+      ],
+      "body": "## Why\nThe repo exists (private). `main` should only change through PRs that pass CI, and leaked secrets should be blocked on push.\n\n## Acceptance criteria\n- [ ] Branch protection (or a ruleset) on `main`: require PR, require status checks once CI exists\n- [ ] Secret scanning + push protection enabled (check availability for private repos on your plan)\n- [ ] Note what you enabled in docs/github-workflow.md\n\n## Related docs / ADRs\n- [ADR 0010](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0010-use-git-and-github-from-day-one.md)\n- [docs/github-workflow.md](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/github-workflow.md)\n\n## What you'll learn\nBranch protection vs rulesets, secret scanning, why solo devs still use PRs.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._"
+    },
+    {
+      "key": "p0-visibility",
+      "title": "Decide repo visibility: private now, public when?",
+      "milestone": "Phase 0: Foundations",
+      "labels": [
+        "type: chore",
+        "area: infra"
+      ],
+      "body": "## Why\nADR 0010 recommends public for portfolio value; the repo is currently private.\n\n## Acceptance criteria\n- [ ] Decide and record the trigger for going public (e.g., end of Phase 1)\n- [ ] Check history for anything that must not be public before flipping\n\n## Related docs / ADRs\n- [ADR 0010](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0010-use-git-and-github-from-day-one.md)\n\n## What you'll learn\nTrade-offs of building in public; auditing git history.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._"
+    },
+    {
+      "key": "p0-adr-epic",
+      "title": "Review all Proposed ADRs (0002–0018)",
+      "milestone": "Phase 0: Foundations",
+      "labels": [
+        "type: adr",
+        "learning"
+      ],
+      "body": "## Why\nEvery decision so far is Proposed. Reviewing each one is the fastest way to understand (and be able to defend) the architecture.\n\n## Acceptance criteria\n- [ ] Every sub-issue closed (Accepted, revised, or Rejected)\n- [ ] ADR index statuses match\n\n## Related docs / ADRs\n- [ADR index](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/README.md)\n\n## What you'll learn\nHow ADR lifecycles work; how parent issues and sub-issues track a group of work.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._"
+    },
+    {
+      "key": "adr-0002",
+      "title": "Review ADR 0002: Build locally first with Docker Compose",
+      "milestone": "Phase 0: Foundations",
+      "labels": [
+        "type: adr"
+      ],
+      "body": "## Why\nADR 0002 is Proposed. Read it, challenge the options, then accept, revise, or reject it.\n\n## Acceptance criteria\n- [ ] Read the ADR and its Learn more links\n- [ ] Can explain the decision out loud in 2–3 sentences (its interview section)\n- [ ] Status changed to Accepted / Rejected (or revised via PR) and index updated\n- [ ] Close this issue from the PR (`Closes #<this>`)\n\n## Related docs / ADRs\n- [ADR 0002](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0002-build-locally-first-with-docker-compose.md)\n- [ADR index](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/README.md)\n\n## What you'll learn\nThe reasoning behind this part of the stack, well enough to defend it in an interview.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._",
+      "parent": "p0-adr-epic"
+    },
+    {
+      "key": "adr-0003",
+      "title": "Review ADR 0003: First data source: NOAA SWPC real-time solar wind",
+      "milestone": "Phase 0: Foundations",
+      "labels": [
+        "type: adr"
+      ],
+      "body": "## Why\nADR 0003 is Proposed. Read it, challenge the options, then accept, revise, or reject it.\n\n## Acceptance criteria\n- [ ] Read the ADR and its Learn more links\n- [ ] Can explain the decision out loud in 2–3 sentences (its interview section)\n- [ ] Status changed to Accepted / Rejected (or revised via PR) and index updated\n- [ ] Close this issue from the PR (`Closes #<this>`)\n\n## Related docs / ADRs\n- [ADR 0003](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0003-first-data-source-noaa-swpc-real-time-solar-wind.md)\n- [ADR index](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/README.md)\n\n## What you'll learn\nThe reasoning behind this part of the stack, well enough to defend it in an interview.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._",
+      "parent": "p0-adr-epic"
+    },
+    {
+      "key": "adr-0004",
+      "title": "Review ADR 0004: Python scheduled pollers with a raw landing zone",
+      "milestone": "Phase 0: Foundations",
+      "labels": [
+        "type: adr"
+      ],
+      "body": "## Why\nADR 0004 is Proposed. Read it, challenge the options, then accept, revise, or reject it.\n\n## Acceptance criteria\n- [ ] Read the ADR and its Learn more links\n- [ ] Can explain the decision out loud in 2–3 sentences (its interview section)\n- [ ] Status changed to Accepted / Rejected (or revised via PR) and index updated\n- [ ] Close this issue from the PR (`Closes #<this>`)\n\n## Related docs / ADRs\n- [ADR 0004](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0004-python-scheduled-pollers-with-raw-landing-zone.md)\n- [ADR index](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/README.md)\n\n## What you'll learn\nThe reasoning behind this part of the stack, well enough to defend it in an interview.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._",
+      "parent": "p0-adr-epic"
+    },
+    {
+      "key": "adr-0005",
+      "title": "Review ADR 0005: PostgreSQL + TimescaleDB for time-series storage",
+      "milestone": "Phase 0: Foundations",
+      "labels": [
+        "type: adr"
+      ],
+      "body": "## Why\nADR 0005 is Proposed. Read it, challenge the options, then accept, revise, or reject it.\n\n## Acceptance criteria\n- [ ] Read the ADR and its Learn more links\n- [ ] Can explain the decision out loud in 2–3 sentences (its interview section)\n- [ ] Status changed to Accepted / Rejected (or revised via PR) and index updated\n- [ ] Close this issue from the PR (`Closes #<this>`)\n\n## Related docs / ADRs\n- [ADR 0005](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0005-postgresql-timescaledb-for-time-series-storage.md)\n- [ADR index](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/README.md)\n\n## What you'll learn\nThe reasoning behind this part of the stack, well enough to defend it in an interview.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._",
+      "parent": "p0-adr-epic"
+    },
+    {
+      "key": "adr-0006",
+      "title": "Review ADR 0006: FastAPI for the backend API",
+      "milestone": "Phase 0: Foundations",
+      "labels": [
+        "type: adr"
+      ],
+      "body": "## Why\nADR 0006 is Proposed. Read it, challenge the options, then accept, revise, or reject it.\n\n## Acceptance criteria\n- [ ] Read the ADR and its Learn more links\n- [ ] Can explain the decision out loud in 2–3 sentences (its interview section)\n- [ ] Status changed to Accepted / Rejected (or revised via PR) and index updated\n- [ ] Close this issue from the PR (`Closes #<this>`)\n\n## Related docs / ADRs\n- [ADR 0006](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0006-fastapi-for-backend-api.md)\n- [ADR index](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/README.md)\n\n## What you'll learn\nThe reasoning behind this part of the stack, well enough to defend it in an interview.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._",
+      "parent": "p0-adr-epic"
+    },
+    {
+      "key": "adr-0007",
+      "title": "Review ADR 0007: Grafana now, React later for the frontend",
+      "milestone": "Phase 0: Foundations",
+      "labels": [
+        "type: adr"
+      ],
+      "body": "## Why\nADR 0007 is Proposed. Read it, challenge the options, then accept, revise, or reject it.\n\n## Acceptance criteria\n- [ ] Read the ADR and its Learn more links\n- [ ] Can explain the decision out loud in 2–3 sentences (its interview section)\n- [ ] Status changed to Accepted / Rejected (or revised via PR) and index updated\n- [ ] Close this issue from the PR (`Closes #<this>`)\n\n## Related docs / ADRs\n- [ADR 0007](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0007-grafana-now-react-later-for-frontend.md)\n- [ADR index](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/README.md)\n\n## What you'll learn\nThe reasoning behind this part of the stack, well enough to defend it in an interview.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._",
+      "parent": "p0-adr-epic"
+    },
+    {
+      "key": "adr-0008",
+      "title": "Review ADR 0008: Modular monolith before microservices",
+      "milestone": "Phase 0: Foundations",
+      "labels": [
+        "type: adr"
+      ],
+      "body": "## Why\nADR 0008 is Proposed. Read it, challenge the options, then accept, revise, or reject it.\n\n## Acceptance criteria\n- [ ] Read the ADR and its Learn more links\n- [ ] Can explain the decision out loud in 2–3 sentences (its interview section)\n- [ ] Status changed to Accepted / Rejected (or revised via PR) and index updated\n- [ ] Close this issue from the PR (`Closes #<this>`)\n\n## Related docs / ADRs\n- [ADR 0008](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0008-modular-monolith-before-microservices.md)\n- [ADR index](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/README.md)\n\n## What you'll learn\nThe reasoning behind this part of the stack, well enough to defend it in an interview.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._",
+      "parent": "p0-adr-epic"
+    },
+    {
+      "key": "adr-0009",
+      "title": "Review ADR 0009: \"About this page\" for every section",
+      "milestone": "Phase 0: Foundations",
+      "labels": [
+        "type: adr"
+      ],
+      "body": "## Why\nADR 0009 is Proposed. Read it, challenge the options, then accept, revise, or reject it.\n\n## Acceptance criteria\n- [ ] Read the ADR and its Learn more links\n- [ ] Can explain the decision out loud in 2–3 sentences (its interview section)\n- [ ] Status changed to Accepted / Rejected (or revised via PR) and index updated\n- [ ] Close this issue from the PR (`Closes #<this>`)\n\n## Related docs / ADRs\n- [ADR 0009](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0009-about-this-page-for-every-section.md)\n- [ADR index](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/README.md)\n\n## What you'll learn\nThe reasoning behind this part of the stack, well enough to defend it in an interview.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._",
+      "parent": "p0-adr-epic"
+    },
+    {
+      "key": "adr-0010",
+      "title": "Review ADR 0010: Use git and GitHub from day one",
+      "milestone": "Phase 0: Foundations",
+      "labels": [
+        "type: adr"
+      ],
+      "body": "## Why\nADR 0010 is Proposed. Read it, challenge the options, then accept, revise, or reject it.\n\n## Acceptance criteria\n- [ ] Read the ADR and its Learn more links\n- [ ] Can explain the decision out loud in 2–3 sentences (its interview section)\n- [ ] Status changed to Accepted / Rejected (or revised via PR) and index updated\n- [ ] Close this issue from the PR (`Closes #<this>`)\n\n## Related docs / ADRs\n- [ADR 0010](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0010-use-git-and-github-from-day-one.md)\n- [ADR index](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/README.md)\n\n## What you'll learn\nThe reasoning behind this part of the stack, well enough to defend it in an interview.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._",
+      "parent": "p0-adr-epic"
+    },
+    {
+      "key": "adr-0011",
+      "title": "Review ADR 0011: Cloud deployment target: defer the choice, define the criteria now",
+      "milestone": "Phase 0: Foundations",
+      "labels": [
+        "type: adr"
+      ],
+      "body": "## Why\nADR 0011 is Proposed. Read it, challenge the options, then accept, revise, or reject it.\n\n## Acceptance criteria\n- [ ] Read the ADR and its Learn more links\n- [ ] Can explain the decision out loud in 2–3 sentences (its interview section)\n- [ ] Status changed to Accepted / Rejected (or revised via PR) and index updated\n- [ ] Close this issue from the PR (`Closes #<this>`)\n\n## Related docs / ADRs\n- [ADR 0011](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0011-cloud-deployment-target-deferred-with-criteria.md)\n- [ADR index](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/README.md)\n\n## What you'll learn\nThe reasoning behind this part of the stack, well enough to defend it in an interview.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._",
+      "parent": "p0-adr-epic"
+    },
+    {
+      "key": "adr-0012",
+      "title": "Review ADR 0012: Responsive design: every page specified for mobile and desktop",
+      "milestone": "Phase 0: Foundations",
+      "labels": [
+        "type: adr"
+      ],
+      "body": "## Why\nADR 0012 is Proposed. Read it, challenge the options, then accept, revise, or reject it.\n\n## Acceptance criteria\n- [ ] Read the ADR and its Learn more links\n- [ ] Can explain the decision out loud in 2–3 sentences (its interview section)\n- [ ] Status changed to Accepted / Rejected (or revised via PR) and index updated\n- [ ] Close this issue from the PR (`Closes #<this>`)\n\n## Related docs / ADRs\n- [ADR 0012](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0012-responsive-design-mobile-and-desktop.md)\n- [ADR index](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/README.md)\n\n## What you'll learn\nThe reasoning behind this part of the stack, well enough to defend it in an interview.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._",
+      "parent": "p0-adr-epic"
+    },
+    {
+      "key": "adr-0013",
+      "title": "Review ADR 0013: Design by studying existing sites, not from scratch",
+      "milestone": "Phase 0: Foundations",
+      "labels": [
+        "type: adr"
+      ],
+      "body": "## Why\nADR 0013 is Proposed. Read it, challenge the options, then accept, revise, or reject it.\n\n## Acceptance criteria\n- [ ] Read the ADR and its Learn more links\n- [ ] Can explain the decision out loud in 2–3 sentences (its interview section)\n- [ ] Status changed to Accepted / Rejected (or revised via PR) and index updated\n- [ ] Close this issue from the PR (`Closes #<this>`)\n\n## Related docs / ADRs\n- [ADR 0013](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0013-design-by-studying-existing-sites.md)\n- [ADR index](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/README.md)\n\n## What you'll learn\nThe reasoning behind this part of the stack, well enough to defend it in an interview.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._",
+      "parent": "p0-adr-epic"
+    },
+    {
+      "key": "adr-0014",
+      "title": "Review ADR 0014: When to use more than one Docker container",
+      "milestone": "Phase 0: Foundations",
+      "labels": [
+        "type: adr"
+      ],
+      "body": "## Why\nADR 0014 is Proposed. Read it, challenge the options, then accept, revise, or reject it.\n\n## Acceptance criteria\n- [ ] Read the ADR and its Learn more links\n- [ ] Can explain the decision out loud in 2–3 sentences (its interview section)\n- [ ] Status changed to Accepted / Rejected (or revised via PR) and index updated\n- [ ] Close this issue from the PR (`Closes #<this>`)\n\n## Related docs / ADRs\n- [ADR 0014](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0014-when-to-use-more-than-one-docker-container.md)\n- [ADR index](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/README.md)\n\n## What you'll learn\nThe reasoning behind this part of the stack, well enough to defend it in an interview.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._",
+      "parent": "p0-adr-epic"
+    },
+    {
+      "key": "adr-0015",
+      "title": "Review ADR 0015: Where Rust could fit",
+      "milestone": "Phase 0: Foundations",
+      "labels": [
+        "type: adr"
+      ],
+      "body": "## Why\nADR 0015 is Proposed. Read it, challenge the options, then accept, revise, or reject it.\n\n## Acceptance criteria\n- [ ] Read the ADR and its Learn more links\n- [ ] Can explain the decision out loud in 2–3 sentences (its interview section)\n- [ ] Status changed to Accepted / Rejected (or revised via PR) and index updated\n- [ ] Close this issue from the PR (`Closes #<this>`)\n\n## Related docs / ADRs\n- [ADR 0015](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0015-where-rust-could-fit.md)\n- [ADR index](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/README.md)\n\n## What you'll learn\nThe reasoning behind this part of the stack, well enough to defend it in an interview.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._",
+      "parent": "p0-adr-epic"
+    },
+    {
+      "key": "adr-0016",
+      "title": "Review ADR 0016: Treat the data science workflow as a first-class, documented feature",
+      "milestone": "Phase 0: Foundations",
+      "labels": [
+        "type: adr"
+      ],
+      "body": "## Why\nADR 0016 is Proposed. Read it, challenge the options, then accept, revise, or reject it.\n\n## Acceptance criteria\n- [ ] Read the ADR and its Learn more links\n- [ ] Can explain the decision out loud in 2–3 sentences (its interview section)\n- [ ] Status changed to Accepted / Rejected (or revised via PR) and index updated\n- [ ] Close this issue from the PR (`Closes #<this>`)\n\n## Related docs / ADRs\n- [ADR 0016](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0016-data-science-workflow-as-first-class-feature.md)\n- [ADR index](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/README.md)\n\n## What you'll learn\nThe reasoning behind this part of the stack, well enough to defend it in an interview.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._",
+      "parent": "p0-adr-epic"
+    },
+    {
+      "key": "adr-0017",
+      "title": "Review ADR 0017: Where AI agents fit in TI",
+      "milestone": "Phase 0: Foundations",
+      "labels": [
+        "type: adr"
+      ],
+      "body": "## Why\nADR 0017 is Proposed. Read it, challenge the options, then accept, revise, or reject it.\n\n## Acceptance criteria\n- [ ] Read the ADR and its Learn more links\n- [ ] Can explain the decision out loud in 2–3 sentences (its interview section)\n- [ ] Status changed to Accepted / Rejected (or revised via PR) and index updated\n- [ ] Close this issue from the PR (`Closes #<this>`)\n\n## Related docs / ADRs\n- [ADR 0017](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0017-where-ai-agents-fit.md)\n- [ADR index](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/README.md)\n\n## What you'll learn\nThe reasoning behind this part of the stack, well enough to defend it in an interview.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._",
+      "parent": "p0-adr-epic"
+    },
+    {
+      "key": "adr-0018",
+      "title": "Review ADR 0018: Plan work with GitHub Issues, Milestones, and Projects",
+      "milestone": "Phase 0: Foundations",
+      "labels": [
+        "type: adr"
+      ],
+      "body": "## Why\nADR 0018 is Proposed. Read it, challenge the options, then accept, revise, or reject it.\n\n## Acceptance criteria\n- [ ] Read the ADR and its Learn more links\n- [ ] Can explain the decision out loud in 2–3 sentences (its interview section)\n- [ ] Status changed to Accepted / Rejected (or revised via PR) and index updated\n- [ ] Close this issue from the PR (`Closes #<this>`)\n\n## Related docs / ADRs\n- [ADR 0018](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0018-plan-work-with-github-issues-milestones-projects.md)\n- [ADR index](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/README.md)\n\n## What you'll learn\nThe reasoning behind this part of the stack, well enough to defend it in an interview.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._",
+      "parent": "p0-adr-epic"
+    },
+    {
+      "key": "p0-dropbox",
+      "title": "Make the Dropbox + git setup safe",
+      "milestone": "Phase 0: Foundations",
+      "labels": [
+        "type: chore",
+        "area: infra",
+        "learning",
+        "good first issue"
+      ],
+      "body": "## Why\nThe working copy lives in Dropbox, which can corrupt `.git/` and wastes sync on heavy folders.\n\n## Acceptance criteria\n- [ ] Decide: keep in Dropbox (one machine, ignored folders) or move the clone to ~/code\n- [ ] Mark node_modules/.venv/data as Dropbox-ignored if staying\n- [ ] Docker DB data uses named volumes, not Dropbox paths\n\n## Related docs / ADRs\n- [AGENTS.md §9](https://github.com/howardisaacson/tachocline-industries/blob/main/AGENTS.md)\n- [ADR 0010](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0010-use-git-and-github-from-day-one.md)\n\n## What you'll learn\nHow file sync differs from version control.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._"
+    },
+    {
+      "key": "p0-brand",
+      "title": "Add the TI solar graphic to assets/brand",
+      "milestone": "Phase 0: Foundations",
+      "labels": [
+        "type: feature",
+        "area: brand"
+      ],
+      "body": "## Why\nThe site needs its identity (eclipse, prominences, plage, faculae, sunspots, flares, sub-surface loops, satellites).\n\n## Acceptance criteria\n- [ ] Vector master + web icons + wide/tall hero added per assets/brand/README.md\n- [ ] LICENSE-ASSETS.md records creator and rights\n\n## Related docs / ADRs\n- [assets/brand/README.md](https://github.com/howardisaacson/tachocline-industries/blob/main/assets/brand/README.md)\n- [ROADMAP](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/ROADMAP.md)\n\n## What you'll learn\nAsset pipelines: SVG masters, responsive images, licensing.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._"
+    },
+    {
+      "key": "p1-epic",
+      "title": "Phase 1: solar wind end to end (poll → store → chart)",
+      "milestone": "Phase 1: First feed end to end",
+      "labels": [
+        "type: feature",
+        "area: ingest"
+      ],
+      "body": "## Why\nThe first milestone proves the whole pipeline with one feed.\n\n## Acceptance criteria\n- [ ] All sub-issues closed\n- [ ] `docker compose up` shows live solar wind in Grafana\n- [ ] README quick start works on a fresh clone\n\n## Related docs / ADRs\n- [ADR 0003](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0003-first-data-source-noaa-swpc-real-time-solar-wind.md)\n- [ADR 0004](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0004-python-scheduled-pollers-with-raw-landing-zone.md)\n- [ROADMAP](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/ROADMAP.md)\n\n## What you'll learn\nHow the pieces of a data platform connect end to end.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._"
+    },
+    {
+      "key": "p1-compose",
+      "title": "docker-compose.yml with db, migrate, ingest, grafana",
+      "milestone": "Phase 1: First feed end to end",
+      "labels": [
+        "type: chore",
+        "area: infra",
+        "learning"
+      ],
+      "body": "## Why\nOne command should start the whole local stack.\n\n## Acceptance criteria\n- [ ] Services: db (timescale/timescaledb), migrate (one-shot), ingest, grafana\n- [ ] DB uses a named volume and a healthcheck; others wait via depends_on\n- [ ] All config from .env (see .env.example)\n\n## Related docs / ADRs\n- [ADR 0002](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0002-build-locally-first-with-docker-compose.md)\n- [ADR 0014](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0014-when-to-use-more-than-one-docker-container.md)\n\n## What you'll learn\nCompose services, volumes, networks, healthchecks, startup order.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._",
+      "parent": "p1-epic"
+    },
+    {
+      "key": "p1-schema",
+      "title": "First migration: solar wind, magnetic field, ingest_log tables",
+      "milestone": "Phase 1: First feed end to end",
+      "labels": [
+        "type: feature",
+        "area: db",
+        "learning",
+        "good first issue"
+      ],
+      "body": "## Why\nTables need natural keys so re-ingesting is idempotent.\n\n## Acceptance criteria\n- [ ] db/migrations/0001_*.sql creates hypertables keyed on (time_tag, source)\n- [ ] ingest_log table for run health\n- [ ] Read-only role for Grafana/API\n\n## Related docs / ADRs\n- [ADR 0005](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0005-postgresql-timescaledb-for-time-series-storage.md)\n\n## What you'll learn\nPrimary keys, hypertables, roles and GRANTs.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._",
+      "parent": "p1-epic"
+    },
+    {
+      "key": "p1-poller",
+      "title": "SWPC poller: fetch rtsw_wind_1m + rtsw_mag_1m into the raw landing zone",
+      "milestone": "Phase 1: First feed end to end",
+      "labels": [
+        "type: feature",
+        "area: ingest",
+        "learning"
+      ],
+      "body": "## Why\nSWPC only serves ~24 h, so we must fetch on a schedule and keep our own history.\n\n## Acceptance criteria\n- [ ] APScheduler job every 5 min with timeout + User-Agent\n- [ ] Raw response saved to data/raw/swpc_rtsw/<date>/\n- [ ] Stops and logs on 4xx; unit tests with mocked HTTP\n\n## Related docs / ADRs\n- [ADR 0003](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0003-first-data-source-noaa-swpc-real-time-solar-wind.md)\n- [ADR 0004](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0004-python-scheduled-pollers-with-raw-landing-zone.md)\n\n## What you'll learn\nScheduling, HTTP clients, polite polling, raw zones.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._",
+      "parent": "p1-epic"
+    },
+    {
+      "key": "p1-upsert",
+      "title": "Validate with pydantic and upsert into TimescaleDB",
+      "milestone": "Phase 1: First feed end to end",
+      "labels": [
+        "type: feature",
+        "area: ingest",
+        "area: db"
+      ],
+      "body": "## Why\nValidation catches upstream schema changes; upserts make reruns safe.\n\n## Acceptance criteria\n- [ ] pydantic models for wind and mag rows; rejects counted\n- [ ] INSERT … ON CONFLICT DO UPDATE on (time_tag, source)\n- [ ] ingest_log row per run; tests prove a rerun adds no duplicates\n\n## Related docs / ADRs\n- [ADR 0004](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0004-python-scheduled-pollers-with-raw-landing-zone.md)\n- [ADR 0005](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0005-postgresql-timescaledb-for-time-series-storage.md)\n\n## What you'll learn\nIdempotency, schema validation, transactional writes.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._",
+      "parent": "p1-epic"
+    },
+    {
+      "key": "p1-grafana",
+      "title": "Grafana dashboard: solar wind + pipeline health",
+      "milestone": "Phase 1: First feed end to end",
+      "labels": [
+        "type: feature",
+        "area: dashboards",
+        "learning"
+      ],
+      "body": "## Why\nFirst visible result, plus a way to see if ingestion is healthy.\n\n## Acceptance criteria\n- [ ] Provisioned datasource + dashboard JSON in dashboards/\n- [ ] Panels: speed, density, Bz (active source), minutes since last good ingest\n- [ ] Checked in a narrow (mobile-width) window; limits noted\n\n## Related docs / ADRs\n- [ADR 0007](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0007-grafana-now-react-later-for-frontend.md)\n- [ADR 0012](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0012-responsive-design-mobile-and-desktop.md)\n\n## What you'll learn\nGrafana provisioning, time-series SQL with time_bucket().\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._",
+      "parent": "p1-epic"
+    },
+    {
+      "key": "p1-ci",
+      "title": "GitHub Actions CI: ruff + pytest on every PR",
+      "milestone": "Phase 1: First feed end to end",
+      "labels": [
+        "type: chore",
+        "area: infra",
+        "good first issue",
+        "learning"
+      ],
+      "body": "## Why\nAutomated checks make PRs trustworthy and enable branch protection checks.\n\n## Acceptance criteria\n- [ ] .github/workflows/ci.yml runs ruff and pytest\n- [ ] Required status check on main\n\n## Related docs / ADRs\n- [ADR 0010](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0010-use-git-and-github-from-day-one.md)\n- [docs/github-workflow.md](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/github-workflow.md)\n\n## What you'll learn\nCI workflows, required checks.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._",
+      "parent": "p1-epic"
+    },
+    {
+      "key": "p1-about",
+      "title": "About page: docs/about/solar-wind.md",
+      "milestone": "Phase 1: First feed end to end",
+      "labels": [
+        "type: docs"
+      ],
+      "body": "## Why\nEvery page ships with an About page (ADR 0009).\n\n## Acceptance criteria\n- [ ] Written from the template, including Mermaid data flow and interview talking points\n- [ ] Linked from the Grafana dashboard\n\n## Related docs / ADRs\n- [ADR 0009](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0009-about-this-page-for-every-section.md)\n- [docs/about-this-page-template.md](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/about-this-page-template.md)\n\n## What you'll learn\nExplaining a system clearly, which is an interview skill in itself.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._",
+      "parent": "p1-epic"
+    },
+    {
+      "key": "p2-goes",
+      "title": "Ingest GOES X-ray flux (flares)",
+      "milestone": "Phase 2: Space weather + satellites",
+      "labels": [
+        "type: feature",
+        "area: ingest"
+      ],
+      "body": "## Why\nFlares are the most visible solar events; same server and pattern as Phase 1.\n\n## Acceptance criteria\n- [ ] Poller + table + Grafana panel (log scale, flare-class bands)\n- [ ] About page updated\n\n## Related docs / ADRs\n- [data_sources.md](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/research/data_sources.md)\n\n## What you'll learn\nReusing a pipeline pattern for a second source.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._"
+    },
+    {
+      "key": "p2-kp",
+      "title": "Ingest Kp index and SWPC alerts",
+      "milestone": "Phase 2: Space weather + satellites",
+      "labels": [
+        "type: feature",
+        "area: ingest"
+      ],
+      "body": "## Why\nKp is the geomagnetic response; alerts feed the future briefing agent.\n\n## Acceptance criteria\n- [ ] Kp (1-min estimated + 3-hourly) and alerts.json stored\n- [ ] Dashboard correlates Bz with Kp\n\n## Related docs / ADRs\n- [data_sources.md](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/research/data_sources.md)\n\n## What you'll learn\nJoining cause and effect time series.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._"
+    },
+    {
+      "key": "p2-satset",
+      "title": "Choose the tracked satellite set",
+      "milestone": "Phase 2: Space weather + satellites",
+      "labels": [
+        "type: research",
+        "area: ds",
+        "good first issue"
+      ],
+      "body": "## Why\nDrag Watch needs a defined set (ISS, Hubble, Tiangong, Starlink incl. Feb 2022 group, a decayed cubesat).\n\n## Acceptance criteria\n- [ ] List of NORAD IDs with reasons, in docs/research/\n- [ ] Ground-truth decay dates identified for decayed objects\n\n## Related docs / ADRs\n- [orbit decay research](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/research/satellite_orbit_decay_data.md)\n\n## What you'll learn\nSampling design for a modelling dataset.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._"
+    },
+    {
+      "key": "p2-celestrak",
+      "title": "Store GP/TLE history for tracked satellites with derived altitude",
+      "milestone": "Phase 2: Space weather + satellites",
+      "labels": [
+        "type: feature",
+        "area: ingest",
+        "area: ds"
+      ],
+      "body": "## Why\nAltitude over time is the core Drag Watch dataset.\n\n## Acceptance criteria\n- [ ] Polls at most once per 2 h (CelesTrak policy); Space-Track gp_history backfill optional\n- [ ] Perigee/apogee altitude computed and tested against known values\n\n## Related docs / ADRs\n- [orbit decay research](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/research/satellite_orbit_decay_data.md)\n\n## What you'll learn\nOrbital elements, rate-limit etiquette, derived columns.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._"
+    },
+    {
+      "key": "p2-decaydash",
+      "title": "Dashboard: space weather vs satellite altitude decay",
+      "milestone": "Phase 2: Space weather + satellites",
+      "labels": [
+        "type: feature",
+        "area: dashboards",
+        "area: ds"
+      ],
+      "body": "## Why\nFirst visual evidence that storms speed up decay.\n\n## Acceptance criteria\n- [ ] Altitude and dh/dt per satellite with storm periods shaded\n- [ ] About page\n\n## Related docs / ADRs\n- [ADR 0016](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0016-data-science-workflow-as-first-class-feature.md)\n\n## What you'll learn\nExploratory visualisation for a hypothesis.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._"
+    },
+    {
+      "key": "p2-api",
+      "title": "FastAPI read-only endpoints",
+      "milestone": "Phase 2: Space weather + satellites",
+      "labels": [
+        "type: feature",
+        "area: api",
+        "learning"
+      ],
+      "body": "## Why\nThe public site and agents must go through an API, not the database.\n\n## Acceptance criteria\n- [ ] /api/health, /api/solar-wind, /api/sources, /api/ingest-log with limits\n- [ ] OpenAPI docs at /docs; tests with TestClient\n- [ ] api service in Compose\n\n## Related docs / ADRs\n- [ADR 0006](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0006-fastapi-for-backend-api.md)\n\n## What you'll learn\nREST design, pydantic response models, OpenAPI.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._"
+    },
+    {
+      "key": "p3-survey",
+      "title": "Finalize the design survey (5 design + 5 scientific sites)",
+      "milestone": "Phase 3: Public website",
+      "labels": [
+        "type: research",
+        "area: web"
+      ],
+      "body": "## Why\nA draft exists; finalize the site list and mobile/desktop scoring.\n\n## Acceptance criteria\n- [ ] Final 10 sites chosen with Howard\n- [ ] Unverified claims checked or removed\n- [ ] Patterns to adopt / avoid summarised\n\n## Related docs / ADRs\n- [design_survey.md](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/research/design_survey.md)\n- [ADR 0013](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0013-design-by-studying-existing-sites.md)\n\n## What you'll learn\nCompetitive analysis as a design method.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._"
+    },
+    {
+      "key": "p3-brief",
+      "title": "Design brief using the TI graphic",
+      "milestone": "Phase 3: Public website",
+      "labels": [
+        "type: docs",
+        "area: web",
+        "area: brand"
+      ],
+      "body": "## Why\nTurn the survey into palette, type scale, grid, chart style, components.\n\n## Acceptance criteria\n- [ ] docs/design-brief.md\n- [ ] Significant choices become ADRs\n\n## Related docs / ADRs\n- [ADR 0013](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0013-design-by-studying-existing-sites.md)\n- [ADR 0012](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0012-responsive-design-mobile-and-desktop.md)\n\n## What you'll learn\nDesign systems vocabulary.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._"
+    },
+    {
+      "key": "p3-react",
+      "title": "Scaffold the React + Plotly.js frontend reading from the API",
+      "milestone": "Phase 3: Public website",
+      "labels": [
+        "type: feature",
+        "area: web",
+        "learning"
+      ],
+      "body": "## Why\nThe public portfolio site.\n\n## Acceptance criteria\n- [ ] ADR for build tool/hosting written first\n- [ ] First page (solar wind) renders from /api\n- [ ] web service or static build in Compose\n\n## Related docs / ADRs\n- [ADR 0007](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0007-grafana-now-react-later-for-frontend.md)\n\n## What you'll learn\nReact components, state, fetching data, build tooling.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._"
+    },
+    {
+      "key": "p3-playwright",
+      "title": "Responsive breakpoints + Playwright viewport tests",
+      "milestone": "Phase 3: Public website",
+      "labels": [
+        "type: chore",
+        "area: web",
+        "learning"
+      ],
+      "body": "## Why\nEvery page must work on mobile and desktop (ADR 0012).\n\n## Acceptance criteria\n- [ ] Tests at 375, 768, 1280 px in CI\n- [ ] No horizontal scroll at 320 px\n\n## Related docs / ADRs\n- [ADR 0012](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0012-responsive-design-mobile-and-desktop.md)\n\n## What you'll learn\nResponsive CSS and end-to-end testing.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._"
+    },
+    {
+      "key": "p3-aboutlinks",
+      "title": "About link on every site page",
+      "milestone": "Phase 3: Public website",
+      "labels": [
+        "type: docs",
+        "area: web"
+      ],
+      "body": "## Why\nADR 0009: each page explains itself.\n\n## Acceptance criteria\n- [ ] About markdown rendered in the React site\n- [ ] Every page has an About link\n\n## Related docs / ADRs\n- [ADR 0009](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0009-about-this-page-for-every-section.md)\n\n## What you'll learn\nDocs-as-code rendered in an app.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._"
+    },
+    {
+      "key": "p3-science",
+      "title": "Build the 'How the science is done' page",
+      "milestone": "Phase 3: Public website",
+      "labels": [
+        "type: feature",
+        "area: web",
+        "area: ds",
+        "type: docs"
+      ],
+      "body": "## Why\nShowcases the data science workflow (ADR 0016).\n\n## Acceptance criteria\n- [ ] Page built from data-science-workflow.md incl. Mermaid diagram\n- [ ] Own About page; mobile + desktop checked\n\n## Related docs / ADRs\n- [ADR 0016](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0016-data-science-workflow-as-first-class-feature.md)\n- [docs/data-science-workflow.md](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/data-science-workflow.md)\n\n## What you'll learn\nCommunicating process, not just results.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._"
+    },
+    {
+      "key": "p3-briefing",
+      "title": "First AI agent: space-weather briefing",
+      "milestone": "Phase 3: Public website",
+      "labels": [
+        "type: feature",
+        "area: agents",
+        "learning"
+      ],
+      "body": "## Why\nSmall, read-only, evaluable agent (ADR 0017).\n\n## Acceptance criteria\n- [ ] Fetches via the TI API only; each sentence cites a product/time\n- [ ] Labelled AI-generated; cached per new alert; spend cap\n- [ ] Eval set of past alerts runs in CI; model ADR written\n\n## Related docs / ADRs\n- [ADR 0017](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0017-where-ai-agents-fit.md)\n- [docs/ai-agents.md](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/ai-agents.md)\n\n## What you'll learn\nTool calling, grounding, evals, cost control.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._"
+    },
+    {
+      "key": "p3-mcp",
+      "title": "TI MCP server wrapping the read-only API",
+      "milestone": "Phase 3: Public website",
+      "labels": [
+        "type: feature",
+        "area: agents",
+        "area: api"
+      ],
+      "body": "## Why\nLets AI clients query live TI data safely (may slip to Phase 4).\n\n## Acceptance criteria\n- [ ] Tools: get_solar_wind, get_alerts, get_satellite_altitude\n- [ ] Uses API, never DB credentials; documented in an About page\n\n## Related docs / ADRs\n- [ADR 0017](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0017-where-ai-agents-fit.md)\n- [docs/ai-agents.md](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/ai-agents.md)\n\n## What you'll learn\nModel Context Protocol servers.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._"
+    },
+    {
+      "key": "p4-cloudadr",
+      "title": "ADR: choose the cloud provider",
+      "milestone": "Phase 4: Deploy to the cloud",
+      "labels": [
+        "type: adr",
+        "area: infra",
+        "learning"
+      ],
+      "body": "## Why\nADR 0011 deferred the choice and defined the criteria.\n\n## Acceptance criteria\n- [ ] Job-posting count for target roles\n- [ ] Scored comparison (AWS / Google Cloud / other) against ADR 0011 criteria\n- [ ] New ADR Proposed\n\n## Related docs / ADRs\n- [ADR 0011](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0011-cloud-deployment-target-deferred-with-criteria.md)\n\n## What you'll learn\nEvaluating cloud platforms against explicit criteria.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._"
+    },
+    {
+      "key": "p4-deploy",
+      "title": "Infrastructure as code, billing alerts, CI/CD deploy, uptime monitoring",
+      "milestone": "Phase 4: Deploy to the cloud",
+      "labels": [
+        "type: chore",
+        "area: infra",
+        "learning"
+      ],
+      "body": "## Why\nMake the site public and keep it running cheaply.\n\n## Acceptance criteria\n- [ ] Terraform/OpenTofu (or chosen tool) in repo\n- [ ] Billing alerts set before anything runs\n- [ ] Deploy on merge to main; uptime check\n\n## Related docs / ADRs\n- [ADR 0011](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0011-cloud-deployment-target-deferred-with-criteria.md)\n\n## What you'll learn\nIaC, CD pipelines, cost control.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._"
+    },
+    {
+      "key": "p4-text2sql",
+      "title": "Text-to-SQL query agent with guardrails",
+      "milestone": "Phase 4: Deploy to the cloud",
+      "labels": [
+        "type: feature",
+        "area: agents",
+        "area: db"
+      ],
+      "body": "## Why\nNatural-language questions over TI data.\n\n## Acceptance criteria\n- [ ] SELECT-only role on curated views; statement_timeout; row limits\n- [ ] Only single SELECTs accepted; SQL shown to the user; queries logged\n- [ ] Eval set of ~30 questions\n\n## Related docs / ADRs\n- [ADR 0017](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0017-where-ai-agents-fit.md)\n- [docs/ai-agents.md](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/ai-agents.md)\n\n## What you'll learn\nLLM safety engineering, DB permissions.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._"
+    },
+    {
+      "key": "p5-dw-epic",
+      "title": "Drag Watch: storm-driven orbital decay and re-entry predictor",
+      "milestone": "Phase 5: Value-add science",
+      "labels": [
+        "type: feature",
+        "area: ds"
+      ],
+      "body": "## Why\nThe flagship science feature, run through the full data science workflow; Starlink Feb 2022 as validation case.\n\n## Acceptance criteria\n- [ ] All sub-issues closed\n- [ ] Public page with predictions as ranges and backtest errors\n\n## Related docs / ADRs\n- [ADR 0016](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0016-data-science-workflow-as-first-class-feature.md)\n- [docs/data-science-workflow.md](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/data-science-workflow.md)\n- [orbit decay research](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/research/satellite_orbit_decay_data.md)\n\n## What you'll learn\nEnd-to-end applied data science on a physical problem.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._"
+    },
+    {
+      "key": "p5-dw-data",
+      "title": "Drag Watch: data acquisition and provenance",
+      "milestone": "Phase 5: Value-add science",
+      "labels": [
+        "type: feature",
+        "area: ds",
+        "area: ingest"
+      ],
+      "body": "## Why\nEvery number must trace back to its source bytes.\n\n## Acceptance criteria\n- [ ] GP history, SATCAT decay dates, GFZ Kp/ap/F10.7 file in raw zone with manifest (URL, time, sha256)\n\n## Related docs / ADRs\n- [ADR 0016](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0016-data-science-workflow-as-first-class-feature.md)\n\n## What you'll learn\nData provenance and manifests.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._",
+      "parent": "p5-dw-epic"
+    },
+    {
+      "key": "p5-dw-features",
+      "title": "Drag Watch: EDA and feature engineering",
+      "milestone": "Phase 5: Value-add science",
+      "labels": [
+        "type: feature",
+        "area: ds",
+        "learning"
+      ],
+      "body": "## Why\nEncode the physics: altitude, lagged Ap/Kp, F10.7 (81-day), MSIS density.\n\n## Acceptance criteria\n- [ ] Notebook EDA; reusable features in analysis/ with tests\n- [ ] ISS reboosts detected\n\n## Related docs / ADRs\n- [ADR 0016](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0016-data-science-workflow-as-first-class-feature.md)\n\n## What you'll learn\nPhysics-informed features, notebooks vs packages.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._",
+      "parent": "p5-dw-epic"
+    },
+    {
+      "key": "p5-dw-model",
+      "title": "Drag Watch: baselines and physics-lite decay model",
+      "milestone": "Phase 5: Value-add science",
+      "labels": [
+        "type: feature",
+        "area: ds"
+      ],
+      "body": "## Why\nEvery model must beat persistence and a simple drag model.\n\n## Acceptance criteria\n- [ ] Persistence baseline\n- [ ] dh/dt ≈ −k·ρ(h, F10.7, Ap) fit per satellite; scenario integration\n\n## Related docs / ADRs\n- [ADR 0016](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0016-data-science-workflow-as-first-class-feature.md)\n\n## What you'll learn\nBaselines and model selection.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._",
+      "parent": "p5-dw-epic"
+    },
+    {
+      "key": "p5-dw-backtest",
+      "title": "Drag Watch: backtest against real decay dates (incl. Starlink Feb 2022)",
+      "milestone": "Phase 5: Value-add science",
+      "labels": [
+        "type: feature",
+        "area: ds"
+      ],
+      "body": "## Why\nHonest validation against ground truth.\n\n## Acceptance criteria\n- [ ] Time-ordered backtests at T−30/7/1 days vs SATCAT decay dates\n- [ ] Error by altitude band and activity level published\n\n## Related docs / ADRs\n- [ADR 0016](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0016-data-science-workflow-as-first-class-feature.md)\n\n## What you'll learn\nTime-aware validation, leakage avoidance.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._",
+      "parent": "p5-dw-epic"
+    },
+    {
+      "key": "p5-dw-page",
+      "title": "Drag Watch: uncertainty, public page, and About",
+      "milestone": "Phase 5: Value-add science",
+      "labels": [
+        "type: feature",
+        "area: ds",
+        "area: web"
+      ],
+      "body": "## Why\nPredictions are ranges; the page explains method and limits.\n\n## Acceptance criteria\n- [ ] Intervals from backtest residuals + quiet/storm scenarios\n- [ ] Page + About; mobile + desktop checked\n\n## Related docs / ADRs\n- [ADR 0016](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0016-data-science-workflow-as-first-class-feature.md)\n- [ADR 0009](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0009-about-this-page-for-every-section.md)\n- [ADR 0012](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0012-responsive-design-mobile-and-desktop.md)\n\n## What you'll learn\nCommunicating uncertainty.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._",
+      "parent": "p5-dw-epic"
+    },
+    {
+      "key": "p5-rust",
+      "title": "Rust (PyO3) propagation/drag module with benchmark",
+      "milestone": "Phase 5: Value-add science",
+      "labels": [
+        "type: feature",
+        "area: rust",
+        "learning"
+      ],
+      "body": "## Why\nLearn when Rust is worth it, driven by profiling (ADR 0015).\n\n## Acceptance criteria\n- [ ] Python baseline profiled first\n- [ ] PyO3/maturin crate; numerical agreement tests\n- [ ] Benchmark vs NumPy and C++-backed sgp4 published, even if Rust doesn't win\n\n## Related docs / ADRs\n- [ADR 0015](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0015-where-rust-could-fit.md)\n\n## What you'll learn\nRust, PyO3, profiling, benchmarking.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._"
+    },
+    {
+      "key": "p5-sunstar",
+      "title": "Sun-as-a-star: research public stellar activity datasets",
+      "milestone": "Phase 5: Value-add science",
+      "labels": [
+        "type: research",
+        "area: ds"
+      ],
+      "body": "## Why\nCompare solar activity with Sun-like stars (S-index, Ca II H&K), drawing on Howard's domain.\n\n## Acceptance criteria\n- [ ] Citable public datasets identified (with licences)\n- [ ] Feature sketch + ADR if significant\n\n## Related docs / ADRs\n- [ideas.md](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/ideas.md)\n\n## What you'll learn\nBringing domain expertise into a product.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._"
+    },
+    {
+      "key": "p5-grid",
+      "title": "Space weather and power grids explainer",
+      "milestone": "Phase 5: Value-add science",
+      "labels": [
+        "type: feature",
+        "type: docs"
+      ],
+      "body": "## Why\nEducational chain: flare → CME → Kp/G-level → typical grid impacts (not damage predictions).\n\n## Acceptance criteria\n- [ ] Uses NOAA G-scale descriptions; historic examples verified before use\n- [ ] About page\n\n## Related docs / ADRs\n- [ideas.md](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/ideas.md)\n\n## What you'll learn\nScience communication with careful framing.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._"
+    },
+    {
+      "key": "p5-agents",
+      "title": "Stretch agents: ingestion anomaly triage and ADS/arXiv literature",
+      "milestone": "Phase 5: Value-add science",
+      "labels": [
+        "type: feature",
+        "area: agents"
+      ],
+      "body": "## Why\nFurther agents once the first is proven.\n\n## Acceptance criteria\n- [ ] Triage agent drafts issues but never auto-fixes\n- [ ] Literature agent resolves every ID via ADS/arXiv and checks titles\n\n## Related docs / ADRs\n- [ADR 0017](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0017-where-ai-agents-fit.md)\n- [docs/ai-agents.md](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/ai-agents.md)\n\n## What you'll learn\nAgent evaluation and citation integrity.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._"
+    },
+    {
+      "key": "p5-mlflow",
+      "title": "ADR: experiment tracking with MLflow",
+      "milestone": "Phase 5: Value-add science",
+      "labels": [
+        "type: adr",
+        "area: ds"
+      ],
+      "body": "## Why\nAdopt when model variants multiply (ADR 0016).\n\n## Acceptance criteria\n- [ ] ADR comparing simple log / MLflow / DVC experiments\n- [ ] Self-hosted MLflow container if accepted\n\n## Related docs / ADRs\n- [ADR 0016](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/decisions/0016-data-science-workflow-as-first-class-feature.md)\n\n## What you'll learn\nExperiment tracking and model registries.\n\n_Generated from docs/ROADMAP.md by gh-setup/build_plan.py._"
+    }
+  ]
+}

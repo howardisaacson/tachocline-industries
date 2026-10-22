@@ -5,7 +5,8 @@ Phased milestones. Each phase ends with something demoable, its About pages writ
 ## Phase 0: Foundations *(now)*
 - [ ] Create the GitHub repo `tachocline`, push this tree, protect `main` **[H1]**, [ADR 0010](decisions/0010-use-git-and-github-from-day-one.md)
 - [ ] Decide public vs private; enable secret scanning
-- [ ] Review Proposed ADRs 0002–0017 and accept or revise them
+- [ ] Review Proposed ADRs 0002–0018
+- [ ] Seed GitHub Issues/Milestones/Project from this roadmap and finish Project views in the web UI, [ADR 0018](decisions/0018-plan-work-with-github-issues-milestones-projects.md) and accept or revise them
 - [ ] Handle Dropbox + git: one machine, ignore heavy folders, or clone outside Dropbox (AGENTS.md §9)
 - [ ] Add the TI solar graphic to `assets/brand/` when ready **[H3]**
 

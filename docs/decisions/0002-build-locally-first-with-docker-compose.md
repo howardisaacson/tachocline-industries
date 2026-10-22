@@ -1,6 +1,6 @@
 # 0002. Build locally first with Docker Compose
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-10-18
 - **Deciders:** Howard Isaacson
 
@@ -31,7 +31,7 @@ We will develop locally with **Docker Compose**. Each component (database, Grafa
 
 ## Consequences
 - Easier: reproducible setup, a clean README ("install Docker, run one command"), a future move to a server.
-- Harder: I need to learn basic Docker concepts and debug container networking (services reach each other by service name, e.g. `db:5432`, not `localhost`).
+- Harder: Debugging container networking can be time consuming (services reach each other by service name, e.g. `db:5432`, not `localhost`).
 - Risk: the site isn't public until a deployment ADR is written and done. Screenshots and a demo video cover the gap.
 - Pollers only collect data while my computer is on, so history will have gaps. This is acceptable for now and should be documented on the relevant About pages.
 

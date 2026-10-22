@@ -1,6 +1,6 @@
 # 0003. First data source: NOAA SWPC real-time solar wind
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-10-18
 - **Deciders:** Howard Isaacson
 

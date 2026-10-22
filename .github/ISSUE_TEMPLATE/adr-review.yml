@@ -1,0 +1,25 @@
+name: ADR proposal / review
+description: Propose a new decision or review a Proposed ADR
+title: "Review ADR NNNN: "
+labels: ["type: adr"]
+body:
+  - type: input
+    id: adr
+    attributes:
+      label: ADR file
+      placeholder: docs/decisions/00NN-short-title.md
+    validations:
+      required: true
+  - type: textarea
+    id: checklist
+    attributes:
+      label: Review checklist
+      value: |
+        - [ ] Read the ADR and its Learn more links
+        - [ ] Options and trade-offs make sense to me
+        - [ ] I can say the "How to explain this in an interview" part in my own words
+        - [ ] Status set to Accepted / Rejected (or revised) and index updated via PR that says "Closes #<this issue>"
+  - type: textarea
+    id: questions
+    attributes:
+      label: Questions or concerns

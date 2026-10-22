@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Project roadmap
+    url: https://github.com/howardisaacson/tachocline-industries/blob/main/docs/ROADMAP.md
+    about: Phased plan; check here before opening a new feature issue.
+  - name: How we use GitHub (workflow guide)
+    url: https://github.com/howardisaacson/tachocline-industries/blob/main/docs/github-workflow.md
+    about: Issues, milestones, Projects, PRs explained.

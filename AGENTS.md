@@ -59,6 +59,7 @@ Per [ADR 0012](docs/decisions/0012-responsive-design-mobile-and-desktop.md):
 | Rust | Only for measured hot paths (PyO3) | [0015](docs/decisions/0015-where-rust-could-fit.md) |
 | Data science | Documented, reproducible workflow as a feature | [0016](docs/decisions/0016-data-science-workflow-as-first-class-feature.md) |
 | AI agents | Small, read-only, evaluated agents; build with AGENTS.md | [0017](docs/decisions/0017-where-ai-agents-fit.md) |
+| Planning | GitHub Issues, Milestones, Project | [0018](docs/decisions/0018-plan-work-with-github-issues-milestones-projects.md) |
 
 All but 0001 are **Proposed**. Ask before building on a Proposed decision in a way that would be costly to undo.
 
@@ -67,6 +68,7 @@ All but 0001 are **Proposed**. Ask before building on a Proposed decision in a w
 .
 ├── AGENTS.md  CLAUDE.md  GROK.md  README.md
 ├── .cursor/rules/agents.mdc     # Cursor rule → points here
+├── .github/                     # issue templates, PR template (CI workflows in Phase 1)
 ├── .env.example  .gitignore
 ├── docker-compose.yml           # (Phase 1) db, ingest, api, grafana
 ├── ingest/                      # Python pollers (one module per source)
@@ -85,10 +87,17 @@ All but 0001 are **Proposed**. Ask before building on a Proposed decision in a w
     ├── ideas.md
     ├── data-science-workflow.md # how analysis/modelling is done here (follow it)
     ├── ai-agents.md             # agent use: building TI + agents in the product
+    ├── github-workflow.md       # issues, milestones, Project, PR loop
     └── links.md                 # relevant articles, newest first
 ```
 
 ## 8. Conventions
+**Issues and planning** ([docs/github-workflow.md](docs/github-workflow.md), [ADR 0018](docs/decisions/0018-plan-work-with-github-issues-milestones-projects.md))
+- Work should start from a GitHub issue in `howardisaacson/tachocline-industries`. If none exists for a non-trivial task, propose one (title, Why, acceptance criteria, labels, milestone) instead of silently starting.
+- Name branches `type/<issue#>-short-name`, reference `#N` in commits, and put `Closes #N` in the PR description for each issue the PR completes. Fill in the PR template checklist.
+- Never close, relabel, or re-scope issues, or touch the Project board, unless Howard asks; suggest the change instead.
+- When scope changes, update the issue and ROADMAP.md together.
+
 **Git workflow**
 - `main` is always working. Work on short-lived branches: `feat/…`, `fix/…`, `docs/…`, `adr/NNNN-…`.
 - **Small PRs** with one purpose each, ideally under about 300 changed lines. The PR description says what, why, how it was tested, which viewports were checked (UI), and links ADR/About updates.

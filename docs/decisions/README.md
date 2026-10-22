@@ -87,5 +87,6 @@ What becomes easier? What becomes harder? What new risks or follow-up work does 
 | [0015](0015-where-rust-could-fit.md) | Where Rust could fit | Proposed |
 | [0016](0016-data-science-workflow-as-first-class-feature.md) | Treat the data science workflow as a first-class, documented feature | Proposed |
 | [0017](0017-where-ai-agents-fit.md) | Where AI agents fit in TI | Proposed |
+| [0018](0018-plan-work-with-github-issues-milestones-projects.md) | Plan work with GitHub Issues, Milestones, and Projects | Proposed |
 
 Tooling (optional): [adr-tools](https://github.com/npryce/adr-tools) is a small CLI that creates numbered ADR files. Copying the template by hand works just as well.
