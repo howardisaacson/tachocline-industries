@@ -1,6 +1,6 @@
 # 0010. Use git and GitHub from day one
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-10-20
 - **Deciders:** Howard Isaacson
 

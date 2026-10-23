@@ -1,6 +1,6 @@
 # 0009. "About this page" for every section
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-10-18
 - **Deciders:** Howard Isaacson
 
@@ -36,5 +36,4 @@ Implementation:
 
 ## Learn more
 - Write the Docs, [Docs as Code](https://www.writethedocs.org/guide/docs-as-code/)
-- Diátaxis, [Explanation](https://diataxis.fr/explanation/) (a framework for the kinds of documentation)
 - GitHub Docs, [Creating diagrams](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-diagrams) (Mermaid in markdown); [Mermaid docs](https://mermaid.js.org/intro/)

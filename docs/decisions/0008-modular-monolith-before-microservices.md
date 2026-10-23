@@ -1,6 +1,6 @@
 # 0008. Modular monolith before microservices
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-10-18
 - **Deciders:** Howard Isaacson
 
