@@ -1,6 +1,6 @@
 # 0004. Python scheduled pollers with a raw landing zone
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-10-18
 - **Deciders:** Howard Isaacson
 

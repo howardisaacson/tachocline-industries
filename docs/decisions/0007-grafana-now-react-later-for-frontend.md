@@ -1,6 +1,6 @@
 # 0007. Grafana now, React later for the frontend
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-10-18
 - **Deciders:** Howard Isaacson
 

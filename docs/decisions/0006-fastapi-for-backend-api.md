@@ -1,11 +1,11 @@
 # 0006. FastAPI for the backend API
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-10-18
 - **Deciders:** Howard Isaacson
 
 ## Context
-Grafana can read the database directly ([ADR 0007](0007-grafana-now-react-later-for-frontend.md)), but a public website and a React frontend should **not** connect to the database. They need an **API**: a web service that answers HTTP requests like `GET /api/solar-wind?from=2026-10-18T00:00Z` with JSON. An API hides database details, controls what is exposed, and lets other people (or a recruiter) use our cleaned data. I write Python; the pollers are Python.
+Grafana can read the database directly ([ADR 0007](0007-grafana-now-react-later-for-frontend.md)), but a public website and a React frontend should **not** connect to the database. They need an **API**: a web service that answers HTTP requests like `GET /api/solar-wind?from=2026-10-18T00:00Z` with JSON. An API hides database details, controls what is exposed, and lets other people use our cleaned data. I write Python; the pollers are Python.
 
 Key terms:
 - **REST API:** URLs represent resources (e.g., `/solar-wind`), and HTTP methods (GET, POST) act on them.

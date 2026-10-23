@@ -1,6 +1,6 @@
 # 0005. PostgreSQL + TimescaleDB for time-series storage
 
-- **Status:** Proposed
+- **Status:** Approved
 - **Date:** 2026-10-18
 - **Deciders:** Howard Isaacson
 
