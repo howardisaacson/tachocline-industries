@@ -56,6 +56,33 @@ Every Proposed ADR has a **"Review ADR NNNN: …"** issue (`type: adr`), as sub-
 
 **Sample interview answer:** "I ran the project like a small team would: a roadmap broken into milestones, issues with acceptance criteria and sub-issues for epics, a Project board with Priority and Size, and every PR closing an issue with CI required. I scripted the initial setup with the GitHub CLI so it was repeatable, which also taught me the REST and GraphQL APIs."
 
+## What is set up in the repo
+
+### Continuous integration
+
+A **GitHub Actions workflow** is a YAML file in `.github/workflows/` that GitHub runs when an event happens, such as opening a pull request. Ours is [`.github/workflows/ci.yml`](../.github/workflows/ci.yml). The workflow's name is `CI`. It runs on every pull request and on every push to `main`, on Python 3.12.
+
+A **status check** is the pass/fail result of one job. Branch protection can require a check by its exact name before a merge. These two jobs are the checks:
+
+| Job name | What it runs | Why two jobs |
+|---|---|---|
+| `lint` | `ruff check .` and `ruff format --check .` | A formatting failure stays visible even if tests fail, and the other way around. |
+| `test` | `pytest` | Unit tests read files in the repo. They do not call the network. |
+
+Tool versions are pinned in `requirements-dev.txt` (ruff 0.17.2, pytest 9.1.1). `tools/gh-setup/` is excluded from ruff in `pyproject.toml` so turning CI on did not reformat the plan generator. New Python under `tests/`, and later `ingest/` and `api/`, is checked.
+
+Confirm the live check names after a run with `gh pr checks`. They are the workflow name, a slash, and the job name.
+
+Learn more: [Building and testing Python](https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python), [About status checks](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/collaborating-on-repositories-with-code-quality-features/about-status-checks).
+
+### Branch protection and secret scanning
+
+A **branch protection rule** is a setting on a branch (here, `main`) that GitHub enforces: for example, changes must arrive through a pull request, required status checks must pass, and force-pushes are blocked. It is not a file in the repo. [About protected branches](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches).
+
+**Secret scanning** reads git history for known credentials (API keys, tokens). **Push protection** blocks a push that contains one. [About secret scanning](https://docs.github.com/en/code-security/secret-scanning/introduction/about-secret-scanning). On a user-owned private repository, GitHub's docs say secret scanning is available with GitHub Enterprise Cloud and Enterprise Managed Users, not on a personal Free/Pro private repo. Public repositories get secret scanning automatically.
+
+Status when the workflow landed: the workflow file is in the repo. Branch protection on `main` and secret scanning are not on yet. They are repository settings, and applying them needs an admin token. The exact API result and the commands an admin should run are added to this section in the same pull request. Until that update, do not treat either setting as enabled.
+
 ## Setup scripts
 The labels, milestones, issues, and Project were seeded from the roadmap by idempotent scripts kept outside the repo (`gh-setup/`: `issues.json`, `setup_labels_milestones_issues.sh`, `setup_project.sh`). They write only to `howardisaacson/tachocline-industries`. Project views and built-in workflows are finished in the web UI.
 

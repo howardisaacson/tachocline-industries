@@ -1,0 +1,65 @@
+# Continuous integration for every pull request and every push to main.
+#
+# A GitHub Actions workflow is a YAML file GitHub runs for you when an
+# event happens. This one is the event handler for pull requests.
+# https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+#
+# Each job below becomes a status check. A status check is the pass/fail
+# result of a job. Branch protection can require named checks before a
+# merge. Job names must stay unique across workflows.
+# https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches
+
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Read the repo. The jobs do not push, comment, or deploy.
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+
+      - name: Install lint tools
+        run: python -m pip install -r requirements-dev.txt
+
+      - name: Lint with ruff
+        run: ruff check .
+
+      - name: Check formatting with ruff
+        run: ruff format --check .
+
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+
+      - name: Install test tools
+        run: python -m pip install -r requirements-dev.txt
+
+      - name: Run unit tests
+        run: pytest
