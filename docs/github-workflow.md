@@ -71,7 +71,7 @@ A **status check** is the pass/fail result of one job. Branch protection can req
 
 Tool versions are pinned in `requirements-dev.txt` (ruff 0.17.2, pytest 9.1.1). `tools/gh-setup/` is excluded from ruff in `pyproject.toml` so turning CI on did not reformat the plan generator. New Python under `tests/`, and later `ingest/` and `api/`, is checked.
 
-Confirm the live check names after a run with `gh pr checks`. They are the workflow name, a slash, and the job name.
+The status-check names are whatever GitHub reports for the jobs, not the workflow filename. On the first run ([run 40066513270](https://github.com/howardisaacson/tachocline-industries/actions/runs/40066513270), pull request #60) `gh pr checks` and the check-runs API both reported exactly `lint` and `test`, from the GitHub Actions app (app id `15368`). Branch protection has to use those strings. A name like `CI / lint` would wait for a check that this workflow does not publish. Re-check with `gh pr checks` if a job is renamed.
 
 Learn more: [Building and testing Python](https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python), [About status checks](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/collaborating-on-repositories-with-code-quality-features/about-status-checks).
 
@@ -79,9 +79,74 @@ Learn more: [Building and testing Python](https://docs.github.com/en/actions/aut
 
 A **branch protection rule** is a setting on a branch (here, `main`) that GitHub enforces: for example, changes must arrive through a pull request, required status checks must pass, and force-pushes are blocked. It is not a file in the repo. [About protected branches](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches).
 
-**Secret scanning** reads git history for known credentials (API keys, tokens). **Push protection** blocks a push that contains one. [About secret scanning](https://docs.github.com/en/code-security/secret-scanning/introduction/about-secret-scanning). On a user-owned private repository, GitHub's docs say secret scanning is available with GitHub Enterprise Cloud and Enterprise Managed Users, not on a personal Free/Pro private repo. Public repositories get secret scanning automatically.
+**Secret scanning** reads git history for known credentials (API keys, tokens). **Push protection** blocks a push that contains one. [About secret scanning](https://docs.github.com/en/code-security/secret-scanning/introduction/about-secret-scanning).
 
-Status when the workflow landed: the workflow file is in the repo. Branch protection on `main` and secret scanning are not on yet. They are repository settings, and applying them needs an admin token. The exact API result and the commands an admin should run are added to this section in the same pull request. Until that update, do not treat either setting as enabled.
+**What this pull request enabled:** the workflow file above. `.gitignore` already keeps `.env` out of git, and `!.env.example` keeps the template.
+
+**What is not on:** branch protection on `main`, secret scanning, and push protection. Both API calls used the automation token and returned HTTP 403. The response header `X-Accepted-Github-Permissions: administration=write` means GitHub wanted the repository administration permission, which that token does not have (`permissions.admin` is false). The rules were not weakened to make the call succeed.
+
+Branch protection (`PUT /repos/howardisaacson/tachocline-industries/branches/main/protection`):
+
+```json
+{"message":"Resource not accessible by integration","documentation_url":"https://docs.github.com/rest/branches/branch-protection#update-branch-protection","status":"403"}
+```
+
+Secret scanning and push protection (`PATCH /repos/howardisaacson/tachocline-industries` with `security_and_analysis`):
+
+```json
+{"message":"Resource not accessible by integration","documentation_url":"https://docs.github.com/rest/repos/repos#update-a-repository","status":"403"}
+```
+
+An admin should run these two commands while logged in as the repo owner (`gh auth login`). The protection body is the full rule: a pull request is required, zero approving reviews (a solo maintainer can self-merge, which ADR 0010 allows), `lint` and `test` are required from GitHub Actions, the branch must be up to date, admins cannot bypass, force-pushes are blocked, and the branch cannot be deleted.
+
+```bash
+gh api --method PUT \
+  -H "Accept: application/vnd.github+json" \
+  repos/howardisaacson/tachocline-industries/branches/main/protection \
+  --input - <<'EOF'
+{
+  "required_status_checks": {
+    "strict": true,
+    "contexts": ["lint", "test"],
+    "checks": [
+      {"context": "lint", "app_id": 15368},
+      {"context": "test", "app_id": 15368}
+    ]
+  },
+  "enforce_admins": true,
+  "required_pull_request_reviews": {
+    "dismiss_stale_reviews": false,
+    "require_code_owner_reviews": false,
+    "required_approving_review_count": 0,
+    "require_last_push_approval": false
+  },
+  "restrictions": null,
+  "required_linear_history": false,
+  "allow_force_pushes": false,
+  "allow_deletions": false,
+  "block_creations": false,
+  "required_conversation_resolution": false,
+  "lock_branch": false,
+  "allow_fork_syncing": false
+}
+EOF
+```
+
+```bash
+gh api --method PATCH \
+  -H "Accept: application/vnd.github+json" \
+  repos/howardisaacson/tachocline-industries \
+  --input - <<'EOF'
+{
+  "security_and_analysis": {
+    "secret_scanning": {"status": "enabled"},
+    "secret_scanning_push_protection": {"status": "enabled"}
+  }
+}
+EOF
+```
+
+If those calls get past the 403, the plan can still refuse them. [Update branch protection](https://docs.github.com/en/rest/branches/branch-protection#update-branch-protection) says protected branches on a private user-owned repo need GitHub Pro, Team, or Enterprise (they are included for public repos on Free). [About secret scanning](https://docs.github.com/en/code-security/secret-scanning/introduction/about-secret-scanning) says secret scanning for a user-owned repository is available on GitHub Enterprise Cloud with Enterprise Managed Users; public repositories get it automatically. A plan error is the availability answer for issue #1. Repo visibility stays a separate decision.
 
 ## Setup scripts
 The labels, milestones, issues, and Project were seeded from the roadmap by idempotent scripts kept outside the repo (`gh-setup/`: `issues.json`, `setup_labels_milestones_issues.sh`, `setup_project.sh`). They write only to `howardisaacson/tachocline-industries`. Project views and built-in workflows are finished in the web UI.
