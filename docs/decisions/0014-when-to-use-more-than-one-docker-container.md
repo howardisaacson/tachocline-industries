@@ -1,6 +1,6 @@
 # 0014. When to use more than one Docker container
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-10-20
 - **Deciders:** Howard Isaacson
 

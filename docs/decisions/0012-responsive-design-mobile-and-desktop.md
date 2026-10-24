@@ -1,6 +1,6 @@
 # 0012. Responsive design: every page specified for mobile and desktop
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-10-20
 - **Deciders:** Howard Isaacson
 

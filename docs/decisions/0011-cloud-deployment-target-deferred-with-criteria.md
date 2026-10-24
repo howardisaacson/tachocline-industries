@@ -1,6 +1,6 @@
 # 0011. Cloud deployment target: defer the choice, define the criteria now
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-10-20
 - **Deciders:** Howard Isaacson
 

@@ -1,6 +1,6 @@
 # 0013. Design by studying existing sites, not from scratch
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-10-20
 - **Deciders:** Howard Isaacson
 

@@ -1,11 +1,11 @@
 # 0018. Plan work with GitHub Issues, Milestones, and Projects
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-10-21
 - **Deciders:** Howard Isaacson
 
 ## Context
-The plan lives in [ROADMAP.md](../ROADMAP.md) as checkboxes. That is fine for reading but can't show who is doing what, link work to code changes, or track progress. Howard also wants to learn the planning tools engineering teams actually use and be able to discuss them in interviews. The code is already on GitHub ([ADR 0010](0010-use-git-and-github-from-day-one.md)).
+The plan lives in [ROADMAP.md](../ROADMAP.md) as checkboxes. That is fine for reading but cannot show who is doing what, link work to code changes, or track progress. Howard also wants to learn the planning tools engineering teams actually use and be able to discuss them in interviews. The code is already on GitHub ([ADR 0010](0010-use-git-and-github-from-day-one.md)).
 
 Key terms:
 - **Issue:** one unit of work (task, bug, question) with a discussion thread.

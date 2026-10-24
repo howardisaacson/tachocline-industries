@@ -1,6 +1,6 @@
 # 0015. Where Rust could fit
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-10-20
 - **Deciders:** Howard Isaacson
 
@@ -17,7 +17,7 @@ Howard wants to learn **how and when** to use Rust. Rust is a compiled language 
 - **API glue and CRUD endpoints**: FastAPI is fast enough; the database is the bottleneck.
 - Anything not yet **measured**. Profile first.
 
-Note: Python's `sgp4` package already uses a C++ accelerated implementation when available, and NumPy vectorises well. A Rust module must beat *that* baseline honestly, not naïve Python.
+Note: Python's `sgp4` package (for satellite orbit propagation) already uses a C++ accelerated implementation when available, and NumPy vectorises well. A Rust module must beat *that* baseline honestly, not naïve Python.
 
 ## Options considered
 ### A. No Rust

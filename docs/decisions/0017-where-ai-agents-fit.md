@@ -1,6 +1,6 @@
 # 0017. Where AI agents fit in TI
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-10-20
 - **Deciders:** Howard Isaacson
 

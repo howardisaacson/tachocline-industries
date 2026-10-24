@@ -1,6 +1,6 @@
 # 0016. Treat the data science workflow as a first-class, documented feature
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-10-20
 - **Deciders:** Howard Isaacson
 
