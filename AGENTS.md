@@ -68,7 +68,7 @@ All but 0001 are **Proposed**. Ask before building on a Proposed decision in a w
 .
 ├── AGENTS.md  CLAUDE.md  GROK.md  README.md
 ├── .cursor/rules/agents.mdc     # Cursor rule → points here
-├── .github/                     # issue templates, PR template (CI workflows in Phase 1)
+├── .github/                     # issue templates, PR template, CI workflow
 ├── .env.example  .gitignore
 ├── docker-compose.yml           # (Phase 1) db, ingest, api, grafana
 ├── ingest/                      # Python pollers (one module per source)

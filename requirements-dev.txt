@@ -1,0 +1,4 @@
+# Dev tools for local checks and GitHub Actions. Not imported by the site.
+# Pinned so CI installs the same versions that were run locally.
+ruff==0.17.2
+pytest==9.1.1

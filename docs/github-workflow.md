@@ -56,6 +56,42 @@ Every Proposed ADR has a **"Review ADR NNNN: …"** issue (`type: adr`), as sub-
 
 **Sample interview answer:** "I ran the project like a small team would: a roadmap broken into milestones, issues with acceptance criteria and sub-issues for epics, a Project board with Priority and Size, and every PR closing an issue with CI required. I scripted the initial setup with the GitHub CLI so it was repeatable, which also taught me the REST and GraphQL APIs."
 
+## What is set up in the repo
+
+### Continuous integration
+
+A **GitHub Actions workflow** is a YAML file in `.github/workflows/` that GitHub runs when an event happens, such as opening a pull request. Ours is [`.github/workflows/ci.yml`](../.github/workflows/ci.yml). The workflow's name is `CI`. It runs on every pull request and on every push to `main`, on Python 3.12.
+
+A **status check** is the pass/fail result of one job. Branch protection can require a check by its exact name before a merge. These two jobs are the checks:
+
+| Job name | What it runs | Why two jobs |
+|---|---|---|
+| `lint` | `ruff check .` and `ruff format --check .` | A formatting failure stays visible even if tests fail, and the other way around. |
+| `test` | `pytest` | Unit tests read files in the repo. They do not call the network. |
+
+Tool versions are pinned in `requirements-dev.txt` (ruff 0.17.2, pytest 9.1.1). `tools/gh-setup/` is excluded from ruff in `pyproject.toml` so turning CI on did not reformat the plan generator. New Python under `tests/`, and later `ingest/` and `api/`, is checked.
+
+The status-check names are whatever GitHub reports for the jobs, not the workflow filename. On the first run ([run 40066513270](https://github.com/howardisaacson/tachocline-industries/actions/runs/40066513270), pull request #60) `gh pr checks` and the check-runs API both reported exactly `lint` and `test`, from the GitHub Actions app (app id `15368`). Branch protection has to use those strings. A name like `CI / lint` would wait for a check that this workflow does not publish. Re-check with `gh pr checks` if a job is renamed.
+
+Learn more: [Building and testing Python](https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python), [About status checks](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/collaborating-on-repositories-with-code-quality-features/about-status-checks).
+
+### Branch protection and secret scanning
+
+A **branch protection rule** is a setting on a branch (here, `main`) that GitHub enforces: for example, changes must arrive through a pull request, required status checks must pass, and force-pushes are blocked. It is not a file in the repo. [About protected branches](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches).
+
+**Secret scanning** reads git history for known credentials (API keys, tokens). **Push protection** blocks a push that contains one. [About secret scanning](https://docs.github.com/en/code-security/secret-scanning/introduction/about-secret-scanning).
+
+The repository is **public**. Howard saved the branch rule in the GitHub website. No protection `PUT` is required.
+
+**On:**
+
+- **Secret scanning** and **push protection**. `.gitignore` still keeps `.env` out of git, and `!.env.example` keeps the template.
+- **Branch protection on `main`.** `GET /repos/howardisaacson/tachocline-industries/branches/main` (a branch read, which does not need admin) returns `"protected": true` and `"protection.enabled": true`. `required_status_checks.checks` is `lint` and `test`, each with GitHub Actions app id `15368`. `enforcement_level` is `everyone`, which means the required checks apply to administrators too. [About protected branches](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches).
+
+That response is the proof for those three facts. The same payload also lists `contexts: ["lint", "test"]`. On a read, GitHub fills `contexts` from the checks. That is the response shape. A write still sends either `contexts` or `checks`, not both.
+
+**Set in the website form, not in this GET:** a pull request is required, approving reviews are zero (ADR 0010: the solo maintainer may self-merge), force-pushes are blocked, and deletion of `main` is blocked. The full protection object is `GET /repos/howardisaacson/tachocline-industries/branches/main/protection`. This token still receives HTTP 403 on that call, so those form settings are Howard's record of what he saved, not a field this token can re-read.
+
 ## Setup scripts
 The labels, milestones, issues, and Project were seeded from the roadmap by idempotent scripts kept outside the repo (`gh-setup/`: `issues.json`, `setup_labels_milestones_issues.sh`, `setup_project.sh`). They write only to `howardisaacson/tachocline-industries`. Project views and built-in workflows are finished in the web UI.
 

@@ -3,7 +3,7 @@
 Phased milestones. Each phase ends with something demoable, its About pages written, and its ADRs reviewed. Howard's original comments are numbered **[H1]–[H11]** (see [ideas.md](ideas.md#howards-comments-2026-10-20) for the full list).
 
 ## Phase 0: Foundations *(now)*
-- [ ] Create the GitHub repo `tachocline`, push this tree, protect `main` **[H1]**, [ADR 0010](decisions/0010-use-git-and-github-from-day-one.md)
+- [x] Create the GitHub repo `tachocline`, push this tree, protect `main` **[H1]**, [ADR 0010](decisions/0010-use-git-and-github-from-day-one.md). `GET` of `main` shows it protected, with `lint` and `test` required from GitHub Actions (app id 15368) and `enforcement_level` `everyone`. See [github-workflow.md](github-workflow.md).
 - [ ] Decide public vs private; enable secret scanning
 - [ ] Review Proposed ADRs 0002–0018
 - [ ] Seed GitHub Issues/Milestones/Project from this roadmap and finish Project views in the web UI, [ADR 0018](decisions/0018-plan-work-with-github-issues-milestones-projects.md) and accept or revise them
@@ -14,7 +14,7 @@ Phased milestones. Each phase ends with something demoable, its About pages writ
 - [ ] `docker-compose.yml`: `db` (TimescaleDB), `migrate`, `ingest`, `grafana`, [ADR 0002](decisions/0002-build-locally-first-with-docker-compose.md), [0014](decisions/0014-when-to-use-more-than-one-docker-container.md) **[H10]**
 - [ ] SWPC `rtsw_wind_1m` + `rtsw_mag_1m` poller → raw landing zone → upsert, `ingest_log`, [ADR 0003](decisions/0003-first-data-source-noaa-swpc-real-time-solar-wind.md), [0004](decisions/0004-python-scheduled-pollers-with-raw-landing-zone.md)
 - [ ] Grafana dashboard: speed, density, Bz, plus pipeline health; checked in a narrow window too **[H5]**
-- [ ] GitHub Actions: ruff + pytest
+- [x] GitHub Actions: ruff + pytest (`.github/workflows/ci.yml`)
 - [ ] About page: `docs/about/solar-wind.md`
 
 ## Phase 2: Space-weather context + satellites
