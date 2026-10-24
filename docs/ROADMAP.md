@@ -3,7 +3,7 @@
 Phased milestones. Each phase ends with something demoable, its About pages written, and its ADRs reviewed. Howard's original comments are numbered **[H1]–[H11]** (see [ideas.md](ideas.md#howards-comments-2026-10-20) for the full list).
 
 ## Phase 0: Foundations *(now)*
-- [ ] Create the GitHub repo `tachocline`, push this tree, protect `main` **[H1]**, [ADR 0010](decisions/0010-use-git-and-github-from-day-one.md)
+- [x] Create the GitHub repo `tachocline`, push this tree, protect `main` **[H1]**, [ADR 0010](decisions/0010-use-git-and-github-from-day-one.md). `GET` of `main` shows it protected, with `lint` and `test` required from GitHub Actions (app id 15368) and `enforcement_level` `everyone`. See [github-workflow.md](github-workflow.md).
 - [ ] Decide public vs private; enable secret scanning
 - [ ] Review Proposed ADRs 0002–0018
 - [ ] Seed GitHub Issues/Milestones/Project from this roadmap and finish Project views in the web UI, [ADR 0018](decisions/0018-plan-work-with-github-issues-milestones-projects.md) and accept or revise them

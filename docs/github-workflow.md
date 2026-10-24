@@ -81,52 +81,16 @@ A **branch protection rule** is a setting on a branch (here, `main`) that GitHub
 
 **Secret scanning** reads git history for known credentials (API keys, tokens). **Push protection** blocks a push that contains one. [About secret scanning](https://docs.github.com/en/code-security/secret-scanning/introduction/about-secret-scanning).
 
-The repository is **public**.
+The repository is **public**. Howard saved the branch rule in the GitHub website. No protection `PUT` is required.
 
 **On:**
 
-- The CI workflow above. Jobs `lint` and `test` are the status checks.
-- **Secret scanning** and **push protection**. Howard ran the admin `PATCH` on the public repo and it succeeded. `.gitignore` still keeps `.env` out of git, and `!.env.example` keeps the template.
+- **Secret scanning** and **push protection**. `.gitignore` still keeps `.env` out of git, and `!.env.example` keeps the template.
+- **Branch protection on `main`.** `GET /repos/howardisaacson/tachocline-industries/branches/main` (a branch read, which does not need admin) returns `"protected": true` and `"protection.enabled": true`. `required_status_checks.checks` is `lint` and `test`, each with GitHub Actions app id `15368`. `enforcement_level` is `everyone`, which means the required checks apply to administrators too. [About protected branches](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches).
 
-**Still off:** branch protection on `main`. Howard ran the admin `PUT`. GitHub returned HTTP 422:
+That response is the proof for those three facts. The same payload also lists `contexts: ["lint", "test"]`. On a read, GitHub fills `contexts` from the checks. That is the response shape. A write still sends either `contexts` or `checks`, not both.
 
-> No subschema in "anyOf" matched. More than one subschema in "oneOf" matched. Not all subschemas of "allOf" matched. For 'anyOf/1', the required_status_checks object that contains both "contexts" and "checks" is not a null.
-
-`required_status_checks` takes one of two shapes. `contexts` is the older list of check names. `checks` is the newer list, and each entry also names the GitHub App that must report that check. The schema allows one of those fields. Sending both fails validation before any rule is saved. [Update branch protection](https://docs.github.com/en/rest/branches/branch-protection#update-branch-protection).
-
-The command below drops `contexts` and keeps `strict` plus `checks` for `lint` and `test` from GitHub Actions (app id `15368`). The rest of the rule is unchanged: a pull request is required, zero approving reviews (ADR 0010: the solo maintainer may self-merge), the branch must be up to date, admins cannot bypass, force-pushes are blocked, and the branch cannot be deleted. This pull request does not call the API. The automation token is not an admin. An owner runs:
-
-```bash
-gh api --method PUT \
-  -H "Accept: application/vnd.github+json" \
-  repos/howardisaacson/tachocline-industries/branches/main/protection \
-  --input - <<'EOF'
-{
-  "required_status_checks": {
-    "strict": true,
-    "checks": [
-      {"context": "lint", "app_id": 15368},
-      {"context": "test", "app_id": 15368}
-    ]
-  },
-  "enforce_admins": true,
-  "required_pull_request_reviews": {
-    "dismiss_stale_reviews": false,
-    "require_code_owner_reviews": false,
-    "required_approving_review_count": 0,
-    "require_last_push_approval": false
-  },
-  "restrictions": null,
-  "required_linear_history": false,
-  "allow_force_pushes": false,
-  "allow_deletions": false,
-  "block_creations": false,
-  "required_conversation_resolution": false,
-  "lock_branch": false,
-  "allow_fork_syncing": false
-}
-EOF
-```
+**Set in the website form, not in this GET:** a pull request is required, approving reviews are zero (ADR 0010: the solo maintainer may self-merge), force-pushes are blocked, and deletion of `main` is blocked. The full protection object is `GET /repos/howardisaacson/tachocline-industries/branches/main/protection`. This token still receives HTTP 403 on that call, so those form settings are Howard's record of what he saved, not a field this token can re-read.
 
 ## Setup scripts
 The labels, milestones, issues, and Project were seeded from the roadmap by idempotent scripts kept outside the repo (`gh-setup/`: `issues.json`, `setup_labels_milestones_issues.sh`, `setup_project.sh`). They write only to `howardisaacson/tachocline-industries`. Project views and built-in workflows are finished in the web UI.
