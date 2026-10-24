@@ -81,23 +81,20 @@ A **branch protection rule** is a setting on a branch (here, `main`) that GitHub
 
 **Secret scanning** reads git history for known credentials (API keys, tokens). **Push protection** blocks a push that contains one. [About secret scanning](https://docs.github.com/en/code-security/secret-scanning/introduction/about-secret-scanning).
 
-**What this pull request enabled:** the workflow file above. `.gitignore` already keeps `.env` out of git, and `!.env.example` keeps the template.
+The repository is **public**.
 
-**What is not on:** branch protection on `main`, secret scanning, and push protection. Both API calls used the automation token and returned HTTP 403. The response header `X-Accepted-Github-Permissions: administration=write` means GitHub wanted the repository administration permission, which that token does not have (`permissions.admin` is false). The rules were not weakened to make the call succeed.
+**On:**
 
-Branch protection (`PUT /repos/howardisaacson/tachocline-industries/branches/main/protection`):
+- The CI workflow above. Jobs `lint` and `test` are the status checks.
+- **Secret scanning** and **push protection**. Howard ran the admin `PATCH` on the public repo and it succeeded. `.gitignore` still keeps `.env` out of git, and `!.env.example` keeps the template.
 
-```json
-{"message":"Resource not accessible by integration","documentation_url":"https://docs.github.com/rest/branches/branch-protection#update-branch-protection","status":"403"}
-```
+**Still off:** branch protection on `main`. Howard ran the admin `PUT`. GitHub returned HTTP 422:
 
-Secret scanning and push protection (`PATCH /repos/howardisaacson/tachocline-industries` with `security_and_analysis`):
+> No subschema in "anyOf" matched. More than one subschema in "oneOf" matched. Not all subschemas of "allOf" matched. For 'anyOf/1', the required_status_checks object that contains both "contexts" and "checks" is not a null.
 
-```json
-{"message":"Resource not accessible by integration","documentation_url":"https://docs.github.com/rest/repos/repos#update-a-repository","status":"403"}
-```
+`required_status_checks` takes one of two shapes. `contexts` is the older list of check names. `checks` is the newer list, and each entry also names the GitHub App that must report that check. The schema allows one of those fields. Sending both fails validation before any rule is saved. [Update branch protection](https://docs.github.com/en/rest/branches/branch-protection#update-branch-protection).
 
-An admin should run these two commands while logged in as the repo owner (`gh auth login`). The protection body is the full rule: a pull request is required, zero approving reviews (a solo maintainer can self-merge, which ADR 0010 allows), `lint` and `test` are required from GitHub Actions, the branch must be up to date, admins cannot bypass, force-pushes are blocked, and the branch cannot be deleted.
+The command below drops `contexts` and keeps `strict` plus `checks` for `lint` and `test` from GitHub Actions (app id `15368`). The rest of the rule is unchanged: a pull request is required, zero approving reviews (ADR 0010: the solo maintainer may self-merge), the branch must be up to date, admins cannot bypass, force-pushes are blocked, and the branch cannot be deleted. This pull request does not call the API. The automation token is not an admin. An owner runs:
 
 ```bash
 gh api --method PUT \
@@ -107,7 +104,6 @@ gh api --method PUT \
 {
   "required_status_checks": {
     "strict": true,
-    "contexts": ["lint", "test"],
     "checks": [
       {"context": "lint", "app_id": 15368},
       {"context": "test", "app_id": 15368}
@@ -131,22 +127,6 @@ gh api --method PUT \
 }
 EOF
 ```
-
-```bash
-gh api --method PATCH \
-  -H "Accept: application/vnd.github+json" \
-  repos/howardisaacson/tachocline-industries \
-  --input - <<'EOF'
-{
-  "security_and_analysis": {
-    "secret_scanning": {"status": "enabled"},
-    "secret_scanning_push_protection": {"status": "enabled"}
-  }
-}
-EOF
-```
-
-If those calls get past the 403, the plan can still refuse them. [Update branch protection](https://docs.github.com/en/rest/branches/branch-protection#update-branch-protection) says protected branches on a private user-owned repo need GitHub Pro, Team, or Enterprise (they are included for public repos on Free). [About secret scanning](https://docs.github.com/en/code-security/secret-scanning/introduction/about-secret-scanning) says secret scanning for a user-owned repository is available on GitHub Enterprise Cloud with Enterprise Managed Users; public repositories get it automatically. A plan error is the availability answer for issue #1. Repo visibility stays a separate decision.
 
 ## Setup scripts
 The labels, milestones, issues, and Project were seeded from the roadmap by idempotent scripts kept outside the repo (`gh-setup/`: `issues.json`, `setup_labels_milestones_issues.sh`, `setup_project.sh`). They write only to `howardisaacson/tachocline-industries`. Project views and built-in workflows are finished in the web UI.
