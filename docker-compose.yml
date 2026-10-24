@@ -1,0 +1,112 @@
+# Local stack for issue #24 (ADR 0002, ADR 0014).
+#
+# Docker Compose starts these containers together and puts them on one
+# network. A service is reached by its name, so migrate connects to
+# hostname `db`, not localhost.
+#
+# File order is not startup order. depends_on is. `db` must pass its
+# healthcheck; `migrate` must exit 0; then `ingest` starts. Grafana only
+# waits for the database: it has no dashboard yet (issue #28).
+#
+# There is no `api` service here. ADR 0014 lists one for later; issue #24
+# does not.
+#
+# https://docs.docker.com/compose/how-tos/startup-order/
+
+name: tachocline
+
+# The anchor copies the same image into migrate and ingest (one build).
+x-app-image: &app-image
+  image: tachocline-app:0.1
+  build:
+    context: ./ingest
+
+services:
+  db:
+    # Pinned Apache-2.0 build. The tag without -oss bundles extra
+    # Timescale License features this project does not use (ADR 0005).
+    image: timescale/timescaledb:2.31.0-pg17-oss
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER is required in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required in .env}
+      POSTGRES_DB: ${POSTGRES_DB:?POSTGRES_DB is required in .env}
+    # Named volume: Docker stores the files outside this repo, not in a
+    # checkout folder (AGENTS.md §9).
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:?POSTGRES_PORT is required in .env}:5432"
+    healthcheck:
+      # $$ becomes $ in the container. ${POSTGRES_USER} is the shell
+      # variable, matching the Compose startup-order docs.
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+    restart: unless-stopped
+
+  migrate:
+    <<: *app-image
+    command: ["python", "-m", "ti_ingest.migrate"]
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER is required in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required in .env}
+      POSTGRES_DB: ${POSTGRES_DB:?POSTGRES_DB is required in .env}
+      # In-container address. POSTGRES_PORT in .env is the laptop port.
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
+      MIGRATIONS_DIR: /migrations
+    volumes:
+      - ./db/migrations:/migrations:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    # A successful exit must not start the container again. Recreate it
+    # after adding a SQL file: docker compose up --force-recreate migrate
+    restart: "no"
+
+  ingest:
+    <<: *app-image
+    command: ["python", "-m", "ti_ingest"]
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER is required in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required in .env}
+      POSTGRES_DB: ${POSTGRES_DB:?POSTGRES_DB is required in .env}
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
+      INGEST_USER_AGENT: ${INGEST_USER_AGENT:?INGEST_USER_AGENT is required in .env}
+      SWPC_POLL_MINUTES: ${SWPC_POLL_MINUTES:?SWPC_POLL_MINUTES is required in .env}
+      RAW_DATA_DIR: ${RAW_DATA_DIR:?RAW_DATA_DIR is required in .env}
+    # Landing zone from ADR 0004, not database storage. The directory is
+    # git-ignored except for data/raw/.gitkeep. The process does not write
+    # yet (issue #26).
+    volumes:
+      - ./data/raw:/data/raw
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:13.2.4
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GF_SECURITY_ADMIN_USER:?GF_SECURITY_ADMIN_USER is required in .env}
+      GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD:?GF_SECURITY_ADMIN_PASSWORD is required in .env}
+      # Fixed local defaults, not secrets. No anonymous browsing, no open signup.
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "127.0.0.1:${GRAFANA_PORT:?GRAFANA_PORT is required in .env}:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  grafana_data:

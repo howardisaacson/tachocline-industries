@@ -1,0 +1,2 @@
+# SQL files named 0001_short_name.sql are applied by the migrate service.
+# The first tables are issue #25. This file only keeps the directory in git.

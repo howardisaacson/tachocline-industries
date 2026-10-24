@@ -1,13 +1,17 @@
-# Ruff and pytest settings. There is no installable package yet;
-# ingest/ and api/ arrive in later phases. Tool versions are pinned
-# in requirements-dev.txt so a laptop and GitHub Actions match.
+# Ruff and pytest settings. ti_ingest is not an installed distribution:
+# tests import it by putting ingest/ on pythonpath. The Docker image
+# copies that directory. Tool versions are pinned in requirements-dev.txt
+# so a laptop and GitHub Actions match.
 
 [tool.ruff]
 target-version = "py312"
 # The plan generator predates the formatter. Checking it in would be a
 # rewrite of tools/gh-setup/build_plan.py, which is a different change.
-# New Python (tests/, and later ingest/ and api/) is included.
 extend-exclude = ["tools/gh-setup"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["ti_ingest"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["ingest"]
