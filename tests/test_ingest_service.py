@@ -9,4 +9,4 @@ def test_startup_message_names_the_poller_and_landing_zone() -> None:
     assert "rtsw_wind_1m" in message
     assert "rtsw_mag_1m" in message
     assert "/data/raw/swpc_rtsw" in message
-    assert "issue #27" in message
+    assert "(time_tag, source)" in message

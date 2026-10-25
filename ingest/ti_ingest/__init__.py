@@ -1,1 +1,1 @@
-"""Ingest image code: migration runner and the SWPC raw-landing poller."""
+"""Ingest image code: migration runner and the SWPC poller."""

@@ -1,7 +1,8 @@
 # Dev tools for local checks and GitHub Actions. Not imported by the site.
 # Pinned so CI installs the same versions that were run locally.
 #
-# The next line pulls in the poller's libraries (httpx, APScheduler).
+# The next line pulls in the poller's libraries
+# (httpx, APScheduler, pydantic, psycopg).
 # The test job installs this file only. The Docker image installs
 # ingest/requirements.txt on its own; versions are pinned there.
 -r ingest/requirements.txt

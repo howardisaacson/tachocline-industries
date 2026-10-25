@@ -1,7 +1,6 @@
 """Locks the CI contract and the secret-file ignore rules.
 
 These tests only read files in the checkout. They do not open sockets.
-Parsing, validation, and upsert tests arrive with issue #27.
 """
 
 from pathlib import Path
