@@ -48,6 +48,7 @@ Per [ADR 0012](docs/decisions/0012-responsive-design-mobile-and-desktop.md):
 | First source | NOAA SWPC real-time solar wind (`json/rtsw/*`) | [0003](docs/decisions/0003-first-data-source-noaa-swpc-real-time-solar-wind.md) |
 | Ingestion | Python + httpx + pydantic, APScheduler 3.x, raw landing zone | [0004](docs/decisions/0004-python-scheduled-pollers-with-raw-landing-zone.md) |
 | Storage | PostgreSQL + TimescaleDB (+ PostGIS later) | [0005](docs/decisions/0005-postgresql-timescaledb-for-time-series-storage.md) |
+| Migrations | Numbered SQL files applied in order by `psql` | [0019](docs/decisions/0019-apply-sql-migrations-in-order.md) |
 | API | FastAPI | [0006](docs/decisions/0006-fastapi-for-backend-api.md) |
 | UI | Grafana now, React + Plotly.js later | [0007](docs/decisions/0007-grafana-now-react-later-for-frontend.md) |
 | Architecture | Modular monolith, a few containers | [0008](docs/decisions/0008-modular-monolith-before-microservices.md), [0014](docs/decisions/0014-when-to-use-more-than-one-docker-container.md) |
@@ -70,7 +71,7 @@ All but 0001 are **Proposed**. Ask before building on a Proposed decision in a w
 ├── .cursor/rules/agents.mdc     # Cursor rule → points here
 ├── .github/                     # issue templates, PR template, CI workflow
 ├── .env.example  .gitignore
-├── docker-compose.yml           # (Phase 1) db, ingest, api, grafana
+├── docker-compose.yml           # db, migrate, ingest, grafana (api is later)
 ├── ingest/                      # Python pollers (one module per source)
 ├── api/                         # FastAPI service
 ├── db/migrations/               # numbered SQL migrations

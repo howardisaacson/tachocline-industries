@@ -11,11 +11,11 @@ Tachocline Industries (TI) is a portfolio project by **Howard Isaacson** (astron
 2. **Learn by building**, with full understanding: databases, Grafana, APIs, JavaScript/React, service architecture, cloud, and Rust. Every decision is recorded as an [ADR](docs/decisions/README.md), and every page has an ["About this page"](docs/about-this-page-template.md).
 3. **Add scientific value** beyond plotting feeds: e.g., how solar activity inflates the thermosphere and shortens satellite lifetimes, and the Sun compared with other stars ([ideas](docs/ideas.md)).
 
-## Current status (2026-10-20)
+## Current status (2026-10-23)
 - ✅ Data-source research: [docs/research/data_sources.md](docs/research/data_sources.md)
 - ✅ ADR process accepted ([0001](docs/decisions/0001-record-architecture-decisions.md)); ADRs 0002–0018 **Proposed**, awaiting review
-- ⏳ Next: Phase 0/1 of the [roadmap](docs/ROADMAP.md): GitHub repo, Docker Compose, first feed (NOAA SWPC solar wind) end to end
-- No application code yet
+- ✅ Local Compose stack: TimescaleDB, a one-shot `migrate`, an idle `ingest` process, and Grafana. No poller and no dashboard yet.
+- ⏳ Next: Phase 1 of the [roadmap](docs/ROADMAP.md): first SQL migration, SWPC poller, Grafana dashboard. [ADR 0019](docs/decisions/0019-apply-sql-migrations-in-order.md) (how `migrate` applies SQL) is **Proposed**.
 
 ## Planned stack (all Proposed)
 Python pollers (APScheduler) → PostgreSQL + TimescaleDB → FastAPI → Grafana now, React later, run locally with Docker Compose. See [AGENTS.md](AGENTS.md#stack-summary) for the table with ADR links.
@@ -36,7 +36,18 @@ Python pollers (APScheduler) → PostgreSQL + TimescaleDB → FastAPI → Grafan
 | [docs/about-this-page-template.md](docs/about-this-page-template.md) | Template for each page's About section |
 
 ## Quick start
-*Coming in Phase 1.* It will be: install Docker → `cp .env.example .env` → `docker compose up`.
+Install [Docker](https://docs.docker.com/get-started/get-docker/), then from this directory:
+
+```bash
+cp .env.example .env
+# edit the passwords in .env; do not commit that file
+docker compose up --build
+```
+
+- Grafana: `http://127.0.0.1:3000` (user and password are `GF_SECURITY_ADMIN_USER` and `GF_SECURITY_ADMIN_PASSWORD` in `.env`). No dashboard is loaded yet (issue #28).
+- Postgres: `127.0.0.1` and `POSTGRES_PORT` from `.env`. The data directory is the Docker named volume `pgdata`, not a folder in this repo.
+- `ingest` stays up and does not fetch SWPC yet (issue #26). `migrate` applies any `db/migrations/NNNN_name.sql` files once, then exits. That directory has no SQL files until issue #25.
+- After adding a SQL file, run `docker compose up --force-recreate migrate`. A one-shot container that already exited successfully is not run again by a plain `docker compose up`.
 
 ## Data credits
 NOAA Space Weather Prediction Center, CelesTrak / 18th Space Defense Squadron, NASA (FIRMS, CMR, SDO, DONKI), ESA Copernicus, SatNOGS / Libre Space Foundation. See the research doc for details.
