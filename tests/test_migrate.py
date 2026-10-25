@@ -114,11 +114,25 @@ def test_missing_directory_does_not_run_sql(tmp_path: Path) -> None:
 def test_apply_args_quote_the_filename_instead_of_concatenating(tmp_path: Path) -> None:
     args = apply_file_args(tmp_path / "0001_init.sql")
     assert "s3cret" not in args
+    assert args[0] == "-1"
+    files = [args[index + 1] for index, part in enumerate(args) if part == "-f"]
+    assert files[0].endswith("0001_init.sql")
+    record = Path(files[1]).read_text(encoding="utf-8")
     assert (
         "INSERT INTO schema_migrations (filename) VALUES (:'ti_migration_filename')"
-        in args
+        in record
     )
+    assert "0001_init.sql" not in record
     assert "ti_migration_filename=0001_init.sql" in args
+
+
+def test_bookkeeping_insert_is_not_a_c_argument(tmp_path: Path) -> None:
+    # psql -c does not expand :'variables'. The colon would reach the server.
+    args = apply_file_args(tmp_path / "0001_init.sql")
+    for index, part in enumerate(args[:-1]):
+        if part == "-c":
+            assert "INSERT INTO schema_migrations" not in args[index + 1]
+            assert ":'ti_migration_filename'" not in args[index + 1]
 
 
 def test_password_is_in_the_environment_not_the_command(
