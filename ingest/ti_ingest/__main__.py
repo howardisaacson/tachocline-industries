@@ -1,25 +1,92 @@
-"""Idle ingest process.
+"""Long-running ingest process: the SWPC poller (issue #26).
 
-`python -m ti_ingest` stays running so Compose can show the service as up.
-Issue #26 adds the SWPC poller. This process does not open a socket.
+APScheduler's ``BlockingScheduler`` is the process. ``start()`` does not
+return until the scheduler shuts down. Docker stops the container with
+SIGTERM; that signal asks the scheduler to stop. An in-flight GET is
+not cancelled and is not retried. The next container start fetches again.
+
+This process does not validate rows or write to Postgres (issue #27).
+Compose still passes database settings so #27 can use them later.
+
+Interval jobs: https://apscheduler.readthedocs.io/en/3.x/userguide.html
 """
 
 from __future__ import annotations
 
 import logging
-import os
 import signal
-import time
+from collections.abc import Callable
+from datetime import UTC, datetime
+
+from apscheduler.job import Job
+from apscheduler.schedulers.blocking import BlockingScheduler
+
+from ti_ingest.swpc import SwpcSettings, make_client, poll_swpc
 
 logger = logging.getLogger("ti_ingest")
 
+JOB_ID = "swpc_rtsw"
+# A start that is a few seconds late still runs once. Later than this,
+# the run is skipped instead of firing a backlog. coalesce does the same
+# if several intervals were missed while the process was down.
+MISFIRE_GRACE_SECONDS = 60
 
-def startup_message(raw_dir: str) -> str:
-    """One line that states the process is idle on purpose."""
+
+def startup_message(raw_dir: str, poll_minutes: int) -> str:
+    """One line for the container log: what is scheduled, and what is not."""
     return (
-        "Ingest process started. No pollers are registered yet "
-        f"(GitHub issue #26). raw_dir={raw_dir}"
+        f"SWPC poller scheduled every {poll_minutes} min for "
+        f"rtsw_wind_1m and rtsw_mag_1m. "
+        f"raw_dir={raw_dir}/swpc_rtsw. "
+        "Responses are saved raw; Postgres upsert is issue #27."
     )
+
+
+def add_swpc_job(
+    scheduler: BlockingScheduler,
+    poll_minutes: int,
+    job: Callable[[], None],
+) -> Job:
+    """Register the interval job. Does not start the scheduler.
+
+    ``next_run_time`` is now, so the first fetch happens at startup
+    instead of after a quiet five minutes. ``max_instances=1`` means a
+    slow fetch does not overlap the next one. ``coalesce`` collapses a
+    missed backlog into a single run.
+    """
+    if poll_minutes < 1:
+        raise ValueError("poll_minutes must be at least 1")
+    return scheduler.add_job(
+        job,
+        "interval",
+        minutes=poll_minutes,
+        id=JOB_ID,
+        name="SWPC rtsw_wind_1m and rtsw_mag_1m",
+        next_run_time=datetime.now(UTC),
+        max_instances=1,
+        coalesce=True,
+        misfire_grace_time=MISFIRE_GRACE_SECONDS,
+    )
+
+
+def build_scheduler(poll_minutes: int, job: Callable[[], None]) -> BlockingScheduler:
+    scheduler = BlockingScheduler(timezone=UTC)
+    add_swpc_job(scheduler, poll_minutes, job)
+    return scheduler
+
+
+def make_job(settings: SwpcSettings) -> Callable[[], None]:
+    """One scheduled run. The client closes before the five-minute wait.
+
+    ``poll_swpc`` logs HTTP failures and returns. It does not raise, so
+    the scheduler waits for the interval instead of trying again at once.
+    """
+
+    def job() -> None:
+        with make_client(settings.user_agent) as client:
+            poll_swpc(client, settings.raw_dir)
+
+    return job
 
 
 def main() -> None:
@@ -27,19 +94,20 @@ def main() -> None:
         level=logging.INFO,
         format="%(asctime)s %(levelname)s %(name)s %(message)s",
     )
-    raw_dir = os.environ.get("RAW_DATA_DIR", "/data/raw")
-    logger.info("%s", startup_message(raw_dir))
-    stop = False
+    settings = SwpcSettings.from_env()
+    logger.info("%s", startup_message(str(settings.raw_dir), settings.poll_minutes))
+    scheduler = build_scheduler(settings.poll_minutes, make_job(settings))
 
     def handle_stop(signum: int, _frame: object) -> None:
-        nonlocal stop
         logger.info("Received signal %s; stopping", signum)
-        stop = True
+        if scheduler.running:
+            # wait=False returns without blocking on the GET. The request
+            # is not sent again.
+            scheduler.shutdown(wait=False)
 
     signal.signal(signal.SIGTERM, handle_stop)
     signal.signal(signal.SIGINT, handle_stop)
-    while not stop:
-        time.sleep(1)
+    scheduler.start()
     logger.info("Ingest process stopped")
 
 

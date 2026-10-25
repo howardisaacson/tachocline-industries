@@ -67,9 +67,9 @@ A **status check** is the pass/fail result of one job. Branch protection can req
 | Job name | What it runs | Why two jobs |
 |---|---|---|
 | `lint` | `ruff check .` and `ruff format --check .` | A formatting failure stays visible even if tests fail, and the other way around. |
-| `test` | `pytest` | Unit tests read files in the repo. They do not call the network. |
+| `test` | `pytest` | Unit tests read files in the repo. They do not call the network. The job installs `requirements-dev.txt`, which includes `ingest/requirements.txt` (httpx, APScheduler 3.11). |
 
-Tool versions are pinned in `requirements-dev.txt` (ruff 0.17.2, pytest 9.1.1). `tools/gh-setup/` is excluded from ruff in `pyproject.toml` so turning CI on did not reformat the plan generator. New Python under `tests/`, and later `ingest/` and `api/`, is checked.
+Tool versions are pinned in `requirements-dev.txt` (ruff 0.17.2, pytest 9.1.1). The poller's libraries are pinned in `ingest/requirements.txt` (httpx 0.28.1, APScheduler 3.11.3). `requirements-dev.txt` includes that file, so the `test` job installs them with `pip install -r requirements-dev.txt`. Those tests mock HTTP; they do not call SWPC. The image installs `ingest/requirements.txt` by itself. `tools/gh-setup/` is excluded from ruff in `pyproject.toml` so turning CI on did not reformat the plan generator. New Python under `tests/`, `ingest/`, and later `api/`, is checked.
 
 The status-check names are whatever GitHub reports for the jobs, not the workflow filename. On the first run ([run 40066513270](https://github.com/howardisaacson/tachocline-industries/actions/runs/40066513270), pull request #60) `gh pr checks` and the check-runs API both reported exactly `lint` and `test`, from the GitHub Actions app (app id `15368`). Branch protection has to use those strings. A name like `CI / lint` would wait for a check that this workflow does not publish. Re-check with `gh pr checks` if a job is renamed.
 

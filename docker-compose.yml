@@ -84,8 +84,8 @@ services:
       SWPC_POLL_MINUTES: ${SWPC_POLL_MINUTES:?SWPC_POLL_MINUTES is required in .env}
       RAW_DATA_DIR: ${RAW_DATA_DIR:?RAW_DATA_DIR is required in .env}
     # Landing zone from ADR 0004, not database storage. The directory is
-    # git-ignored except for data/raw/.gitkeep. The process does not write
-    # yet (issue #26).
+    # git-ignored except for data/raw/.gitkeep. Issue #26 writes
+    # swpc_rtsw/<date>/ here. It does not open Postgres (issue #27).
     volumes:
       - ./data/raw:/data/raw
     depends_on:

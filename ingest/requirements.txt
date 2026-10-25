@@ -1,0 +1,6 @@
+# Runtime libraries for the ingest image. Dev tools stay in
+# requirements-dev.txt at the repo root. Pinned so the image and CI
+# install the same versions. APScheduler 4 is a different API; ADR 0004
+# specifies the 3.x line.
+httpx==0.28.1
+APScheduler==3.11.3
