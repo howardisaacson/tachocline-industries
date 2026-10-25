@@ -1,7 +1,7 @@
 """Locks the CI contract and the secret-file ignore rules.
 
 These tests only read files in the checkout. They do not open sockets.
-Parsing, validation, and upsert tests arrive with the solar-wind poller.
+Parsing, validation, and upsert tests arrive with issue #27.
 """
 
 from pathlib import Path
@@ -23,6 +23,7 @@ def test_ci_workflow_lints_and_tests_on_python_312() -> None:
     assert "ruff format --check ." in workflow
     assert "run: pytest" in workflow
     assert "pull_request:" in workflow
+    assert "-r ingest/requirements.txt" in _text("requirements-dev.txt")
 
 
 def test_env_files_stay_out_of_git() -> None:

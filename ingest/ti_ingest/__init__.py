@@ -1,1 +1,1 @@
-"""Ingest image code: migration runner now, pollers in later issues."""
+"""Ingest image code: migration runner and the SWPC raw-landing poller."""

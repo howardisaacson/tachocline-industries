@@ -1,5 +1,5 @@
 # Image shared by the migrate and ingest services (ADR 0014).
-# Issue #26 adds the poller. This image runs migrations and an idle process.
+# migrate applies SQL. ingest runs the SWPC poller (issue #26).
 FROM python:3.12-slim-bookworm
 
 # Logs appear immediately instead of waiting for a full buffer.
@@ -13,9 +13,12 @@ RUN apt-get update \
     && useradd --create-home --shell /usr/sbin/nologin --uid 1000 app
 
 WORKDIR /app
+COPY --chown=app:app requirements.txt ./requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
 COPY --chown=app:app ti_ingest ./ti_ingest
 
-# uid 1000 matches a typical laptop user, so later writes to data/raw
-# stay editable on the host. The idle process does not write yet.
+# uid 1000 matches a typical laptop user, so files under data/raw stay
+# editable on the host. The poller writes only that mounted directory.
 USER app
 CMD ["python", "-m", "ti_ingest"]
