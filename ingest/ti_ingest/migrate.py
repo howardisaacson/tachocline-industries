@@ -151,13 +151,21 @@ def migration_files(directory: Path) -> list[Path]:
     return [path for _, path in matched]
 
 
+# Bookkeeping INSERT. ``psql -c`` does not expand ``:'variables'``; a file does.
+RECORD_SQL = Path(__file__).with_name("record_migration.sql")
+
+
 def apply_file_args(path: Path) -> list[str]:
     """``psql`` args that apply one file and record it in one transaction.
 
-    ``-1`` wraps every command in BEGIN/COMMIT. ``:'ti_migration_filename'``
-    inserts the name as a quoted SQL literal. The variable name is long so
-    a migration that happens to contain ``:filename`` is not rewritten:
-    psql substitutes every set variable it sees in the file.
+    ``-1`` wraps every ``-f`` in BEGIN/COMMIT. The INSERT is a second ``-f``,
+    not ``-c``. ``psql -c`` sends its string to the server unchanged, so
+    ``:'ti_migration_filename'`` would be a syntax error and the whole
+    transaction would roll back.
+
+    The variable name is long so a migration that happens to contain
+    ``:filename`` is not rewritten: psql substitutes every set variable
+    it sees in a file.
     """
     return [
         "-1",
@@ -165,8 +173,8 @@ def apply_file_args(path: Path) -> list[str]:
         f"ti_migration_filename={path.name}",
         "-f",
         str(path),
-        "-c",
-        "INSERT INTO schema_migrations (filename) VALUES (:'ti_migration_filename')",
+        "-f",
+        str(RECORD_SQL),
     ]
 
 

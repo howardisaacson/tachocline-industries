@@ -30,6 +30,8 @@ The database password is the `PGPASSWORD` environment variable. It is not a `psq
 
 Migration files must not open their own `BEGIN`/`COMMIT`. The runner already wraps the file. Editing a file after it has been applied is not allowed; add a new number (this matches AGENTS.md: never edit an applied migration).
 
+The bookkeeping `INSERT` is a second `-f` script in that same `psql -1` invocation. `psql -c` does not expand `:'variables'`, so putting the insert on `-c` sends the colon to the server and rolls the migration back.
+
 ## Consequences
 - Easier: the migrate path is one screen of Python plus `psql`, and a failed file leaves no applied row.
 - Harder: a later column is a new file. Concurrent index builds need a different path if we ever need them.
