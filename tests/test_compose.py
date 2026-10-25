@@ -41,6 +41,8 @@ def test_compose_file_has_no_password_literal() -> None:
     assert "dashboards/" not in COMPOSE
 
 
-def test_no_numbered_sql_until_issue_25() -> None:
-    sql_files = list((ROOT / "db" / "migrations").glob("*.sql"))
-    assert sql_files == []
+def test_issue_25_migrations_and_readonly_env() -> None:
+    names = sorted(path.name for path in (ROOT / "db" / "migrations").glob("*.sql"))
+    assert names == ["0001_solar_wind.sql"]
+    assert "TI_READONLY_USER:" in COMPOSE
+    assert "TI_READONLY_PASSWORD:" in COMPOSE

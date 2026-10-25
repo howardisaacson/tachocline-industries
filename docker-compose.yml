@@ -57,6 +57,11 @@ services:
       POSTGRES_HOST: db
       POSTGRES_PORT: "5432"
       MIGRATIONS_DIR: /migrations
+      # Local read-only role (issue #25). The password stays in the
+      # environment. 0001_solar_wind.sql reads it with psql's \getenv,
+      # so it is not a process argument (ADR 0019).
+      TI_READONLY_USER: ${TI_READONLY_USER:?TI_READONLY_USER is required in .env}
+      TI_READONLY_PASSWORD: ${TI_READONLY_PASSWORD:?TI_READONLY_PASSWORD is required in .env}
     volumes:
       - ./db/migrations:/migrations:ro
     depends_on:

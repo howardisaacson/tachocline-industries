@@ -15,7 +15,8 @@ Tachocline Industries (TI) is a portfolio project by **Howard Isaacson** (astron
 - ✅ Data-source research: [docs/research/data_sources.md](docs/research/data_sources.md)
 - ✅ ADR process accepted ([0001](docs/decisions/0001-record-architecture-decisions.md)); ADRs 0002–0018 **Proposed**, awaiting review
 - ✅ Local Compose stack: TimescaleDB, a one-shot `migrate`, an idle `ingest` process, and Grafana. No poller and no dashboard yet.
-- ⏳ Next: Phase 1 of the [roadmap](docs/ROADMAP.md): first SQL migration, SWPC poller, Grafana dashboard. [ADR 0019](docs/decisions/0019-apply-sql-migrations-in-order.md) (how `migrate` applies SQL) is **Proposed**.
+- ✅ First SQL migration: `solar_wind` and `rtsw_mag_1m` hypertables, `ingest_log`, and a read-only role (issue #25). [ADR 0019](docs/decisions/0019-apply-sql-migrations-in-order.md) (how `migrate` applies SQL) is **Proposed**.
+- ⏳ Next: Phase 1 of the [roadmap](docs/ROADMAP.md): SWPC poller, then the Grafana dashboard.
 
 ## Planned stack (all Proposed)
 Python pollers (APScheduler) → PostgreSQL + TimescaleDB → FastAPI → Grafana now, React later, run locally with Docker Compose. See [AGENTS.md](AGENTS.md#stack-summary) for the table with ADR links.
@@ -46,7 +47,7 @@ docker compose up --build
 
 - Grafana: `http://127.0.0.1:3000` (user and password are `GF_SECURITY_ADMIN_USER` and `GF_SECURITY_ADMIN_PASSWORD` in `.env`). No dashboard is loaded yet (issue #28).
 - Postgres: `127.0.0.1` and `POSTGRES_PORT` from `.env`. The data directory is the Docker named volume `pgdata`, not a folder in this repo.
-- `ingest` stays up and does not fetch SWPC yet (issue #26). `migrate` applies any `db/migrations/NNNN_name.sql` files once, then exits. That directory has no SQL files until issue #25.
+- `ingest` stays up and does not fetch SWPC yet (issue #26). `migrate` applies `db/migrations/0001_solar_wind.sql`, then exits. Copy `TI_READONLY_USER` and `TI_READONLY_PASSWORD` from `.env.example` into `.env` before the first migrate. Those two values are local-dev only.
 - After adding a SQL file, run `docker compose up --force-recreate migrate`. A one-shot container that already exited successfully is not run again by a plain `docker compose up`.
 
 ## Data credits
