@@ -16,7 +16,7 @@ Phased milestones. Each phase ends with something demoable, its About pages writ
 - [x] SWPC `rtsw_wind_1m` + `rtsw_mag_1m`: raw landing zone (issue #26) → validate, upsert, `ingest_log` (issue #27), [ADR 0003](decisions/0003-first-data-source-noaa-swpc-real-time-solar-wind.md), [0004](decisions/0004-python-scheduled-pollers-with-raw-landing-zone.md)
 - [ ] Grafana dashboard: speed, density, Bz, plus pipeline health **[H5]** (issue #28). JSON is provisioned; the narrow-window limit is written on the dashboard (full-width stacked panels; Grafana's own menu is unchanged below 640 px). A live browser check is still open.
 - [x] GitHub Actions: ruff + pytest (`.github/workflows/ci.yml`)
-- [ ] About page: `docs/about/solar-wind.md`
+- [x] About page: [`docs/about/solar-wind.md`](about/solar-wind.md) (issue #30), linked from the Grafana dashboard. A live narrow-window browser check of that dashboard is still open (issue #28).
 
 ## Phase 2: Space-weather context + satellites
 - [ ] GOES X-ray flux (flares), Kp, SWPC alerts

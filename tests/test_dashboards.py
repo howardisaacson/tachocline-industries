@@ -112,3 +112,17 @@ def test_pipeline_health_reads_ingest_log_only() -> None:
     assert _WRITE_SQL.search(sql) is None
     panel = _panels_by_title()["Minutes since last good ingest"]
     assert panel["fieldConfig"]["defaults"]["noValue"] == "no good ingest"
+
+
+def test_dashboard_links_to_the_solar_wind_about_page() -> None:
+    """ADR 0009: the Grafana dashboard links to docs/about/solar-wind.md."""
+    links = DASHBOARD["links"]
+    assert isinstance(links, list)
+    urls = [link["url"] for link in links]
+    assert urls == [
+        "https://github.com/howardisaacson/tachocline-industries/blob/main/docs/about/solar-wind.md"
+    ]
+    assert links[0]["title"] == "About this page"
+    note = _panels_by_title()["Narrow window"]["options"]
+    assert isinstance(note, dict)
+    assert "docs/about/solar-wind.md" in note["content"]
