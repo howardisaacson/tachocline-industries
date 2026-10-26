@@ -4,15 +4,15 @@
 >
 > Written from [the About template](../about-this-page-template.md) ([ADR 0009](../decisions/0009-about-this-page-for-every-section.md)).
 
-There is no altitude chart yet. That join is the next dashboard task. The rows live in `satellite_gp`. The Solar wind dashboard links here so the feed has an About page, and its health stat leaves these rows out on purpose. After `docker compose up`, the link **About satellite GP** is on that dashboard: [`docs/about/satellite-gp.md`](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/about/satellite-gp.md).
+The rows live in `satellite_gp`. Perigee and its change over time are drawn on the **Orbit decay** dashboard ([orbit-decay.md](orbit-decay.md)). The Solar wind dashboard still links here, and its health stat leaves these rows out on purpose. After `docker compose up`, open `http://127.0.0.1:3000` and the **Orbit decay** dashboard. The link **About satellite GP** is on both dashboards: [`docs/about/satellite-gp.md`](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/about/satellite-gp.md).
 
 ## 1. Purpose
 Keeps a history of general perturbations (GP) for five satellites and stores a perigee and apogee altitude derived from each element set. The set is the International Space Station, Landsat 8, Landsat 9, the Hubble Space Telescope, and NASA Swift ([tracked-satellites.md](../research/tracked-satellites.md)). The page is for someone asking where the orbit numbers come from, and for an interviewer asking how a TLE becomes an altitude. These are real-time mean elements. They are not an SGP4 ephemeris and not a measured height.
 
 ## 2. What you're seeing
-Nothing on the dashboard plots altitude. The health stat, **Minutes since last good ingest**, still describes the 5-minute space-weather feeds. A `gp-*` source is written to `ingest_log` and then ignored by that query, because a healthy orbit poll is two hours old and would otherwise paint the 5-minute stat red.
+On **Orbit decay**, perigee is the top chart and the change in perigee is the chart under it. The health stat on **Solar wind**, **Minutes since last good ingest**, still describes the 5-minute space-weather feeds. A `gp-*` source is written to `ingest_log` and then ignored by that query, because a healthy orbit poll is two hours old and would otherwise paint the 5-minute stat red.
 
-The stored altitudes are kilometers above Earth's equatorial radius. For a nearly circular orbit, perigee and apogee are close. Interesting later, when a chart exists: a jump up on the station is a reboost, and a steady drop on Swift is drag. Swift was still in orbit on the 2026-10-25 catalog check, with no SATCAT decay date.
+The stored altitudes are kilometers above Earth's equatorial radius. For a nearly circular orbit, perigee and apogee are close. A jump up on the station is consistent with a reboost, and a steady drop on Swift is consistent with drag. Swift was still in orbit on the 2026-10-25 catalog check, with no SATCAT decay date.
 
 ## 3. Data source & cadence
 | Item | Value |
@@ -46,7 +46,7 @@ flowchart LR
     POLL -->|pydantic, then two-body altitude| DB[("PostgreSQL + TimescaleDB<br/>satellite_gp")]
     POLL -->|one ingest_log row per catalog number| LOG[("ingest_log")]
 ```
-CelesTrak publishes one JSON array per catalog number. The poller saves each body unchanged, validates the object, computes perigee and apogee, and upserts on `(epoch, norad_cat_id)`. The same run writes one `ingest_log` row per catalog number it attempted. Grafana's health query skips sources whose names start with `gp-`. This path has no altitude panel, no continuous aggregate, no FastAPI route, and no React page. Space-Track is not in the diagram: `gp_history` needs an account and this issue leaves that backfill optional.
+CelesTrak publishes one JSON array per catalog number. The poller saves each body unchanged, validates the object, computes perigee and apogee, and upserts on `(epoch, norad_cat_id)`. The same run writes one `ingest_log` row per catalog number it attempted. Grafana's health query skips sources whose names start with `gp-`. The **Orbit decay** dashboard reads `satellite_gp` and `planetary_kp_3h`. This path has no continuous aggregate, no FastAPI route, and no React page. Space-Track is not in the diagram: `gp_history` needs an account and this issue leaves that backfill optional.
 
 ## 5. Tech used and why
 | Layer | Technology | Why (one line) | Decision |
@@ -65,14 +65,14 @@ Key code: [`ingest/ti_ingest/celestrak_gp.py`](../../ingest/ti_ingest/celestrak_
 - If Postgres is down, the raw files stay on disk and that run is not upserted.
 - The health stat excludes `gp-%`. A failed orbit poll does not turn that 5-minute panel red, and it also does not turn it to `no good ingest`. Orbit health is the `gp-*` rows in `ingest_log`.
 - `0004_satellite_gp.sql` is applied when the migrate container runs again. A container that already exited successfully is not run again by a plain `docker compose up` unless the image change makes Compose recreate it.
-- Narrow window: no new chart. The dashboard link is text. No live browser check was done for this feed.
+- Narrow window: the altitude charts are full-width rows on **Orbit decay**. Five series stay on the legend below 640 px. No live browser check was done for that dashboard.
 
 ## 7. Interview talking points
 - **30-second pitch:** CelesTrak publishes a current element set per satellite as JSON. A job in the same Python process downloads five catalog numbers every two hours, saves the raw files, and upserts one row per epoch and NORAD id. The file has no altitude, so perigee and apogee are computed from mean motion and eccentricity with the two-body formula and NASA's Earth constants. That is a mean-element altitude, not an SGP4 position.
 - **Hardest problem:** The natural key has to include time because the table is a Timescale hypertable, and the same epoch must not become a second row on the next poll. `(epoch, norad_cat_id)` does both. The two-hour cadence is a separate scheduler job so a 5-minute space-weather setting cannot hammer CelesTrak.
 - **Trade-off I made:** Two-body altitude now, SGP4 later. The JSON already carries everything the simple formula needs, and the tests lock three known results. Propagating a position is a different question from "how high is perigee."
 - **How I know it works:** `tests/test_celestrak_gp.py` mocks HTTP and the database. It checks five GETs, the raw bytes, the User-Agent, a 404 that continues, a 429 that stops, a rerun that does not add a row, a database outage that keeps the files, and a 120-minute interval. The altitude asserts use literals, not a second call that would hide a bug in the formula. CI runs ruff and pytest.
-- **If I had more time / at scale:** Backfill with Space-Track `gp_history` once there is an account, then draw altitude against Kp. That chart is a later issue. SGP4 belongs there if the question becomes "where is it," not "what is the element-set altitude."
+- **If I had more time / at scale:** Backfill with Space-Track `gp_history` once there is an account, so the Orbit decay chart has more than the epochs collected since the poller started. SGP4 belongs there if the question becomes "where is it," not "what is the element-set altitude."
 - **Likely questions & my answers:**
   - Q: "Why not poll with the solar-wind interval?" A: "CelesTrak's own page says GP data is checked every two hours, and more than 50 client errors in two hours can firewall the IP. The orbit job is hardcoded to 120 minutes. `SWPC_POLL_MINUTES` stays at 5 for the space-weather files."
   - Q: "Where is the altitude in the TLE?" A: "It is not a field. Mean motion gives the semi-major axis, eccentricity splits that into perigee and apogee, and subtracting Earth's equatorial radius gives altitude. The layout is on CelesTrak's TLE format page."
