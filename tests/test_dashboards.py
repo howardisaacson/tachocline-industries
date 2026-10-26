@@ -197,11 +197,13 @@ def test_dashboard_links_to_the_solar_wind_about_page() -> None:
         "https://github.com/howardisaacson/tachocline-industries/blob/main/docs/about/goes-xray.md",
         "https://github.com/howardisaacson/tachocline-industries/blob/main/docs/about/kp-alerts.md",
         "https://github.com/howardisaacson/tachocline-industries/blob/main/docs/about/satellite-gp.md",
+        "https://github.com/howardisaacson/tachocline-industries/blob/main/docs/about/orbit-decay.md",
     ]
     assert links[0]["title"] == "About this page"
     assert links[1]["title"] == "About GOES X-ray"
     assert links[2]["title"] == "About Kp and alerts"
     assert links[3]["title"] == "About satellite GP"
+    assert links[4]["title"] == "About orbit decay"
     note = _panels_by_title()["Narrow window"]["options"]
     assert isinstance(note, dict)
     assert "docs/about/solar-wind.md" in note["content"]

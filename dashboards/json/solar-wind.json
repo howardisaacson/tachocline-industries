@@ -55,6 +55,16 @@
       "tooltip": "Purpose, TLE references, data flow, and limits for the orbit poller",
       "type": "link",
       "url": "https://github.com/howardisaacson/tachocline-industries/blob/main/docs/about/satellite-gp.md"
+    },
+    {
+      "icon": "doc",
+      "includeVars": false,
+      "keepTime": false,
+      "targetBlank": true,
+      "title": "About orbit decay",
+      "tooltip": "Perigee, its rate of change, and storm shading",
+      "type": "link",
+      "url": "https://github.com/howardisaacson/tachocline-industries/blob/main/docs/about/orbit-decay.md"
     }
   ],
   "annotations": {

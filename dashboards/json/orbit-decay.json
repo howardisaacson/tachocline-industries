@@ -1,0 +1,319 @@
+{
+  "uid": "orbit-decay",
+  "title": "Orbit decay",
+  "description": "Perigee altitude for the five tracked satellites, the change in that altitude, and 3-hour Kp (issue #35). A shaded band is a 3-hour block whose Kp is at least 5, the NOAA threshold for a minor geomagnetic storm. Altitude is the two-body perigee from CelesTrak mean elements, not an SGP4 height and not a radar measurement. The rate needs two epochs for the same satellite; the first point has no slope. Narrow window: each panel is one full-width row. Below 640 px the page is tall, five legend entries stay on the chart, and Grafana's own menu can crowd a 320 px window. This is the internal view.",
+  "tags": ["satellites", "kp", "pipeline"],
+  "timezone": "utc",
+  "editable": true,
+  "graphTooltip": 1,
+  "refresh": "5m",
+  "schemaVersion": 39,
+  "version": 1,
+  "time": {
+    "from": "now-7d",
+    "to": "now"
+  },
+  "timepicker": {},
+  "fiscalYearStartMonth": 0,
+  "links": [
+    {
+      "icon": "doc",
+      "includeVars": false,
+      "keepTime": false,
+      "targetBlank": true,
+      "title": "About this page",
+      "tooltip": "Purpose, storm shading, altitude rate, and limits",
+      "type": "link",
+      "url": "https://github.com/howardisaacson/tachocline-industries/blob/main/docs/about/orbit-decay.md"
+    },
+    {
+      "icon": "doc",
+      "includeVars": false,
+      "keepTime": false,
+      "targetBlank": true,
+      "title": "About satellite GP",
+      "tooltip": "How the element sets and the two-body altitude are produced",
+      "type": "link",
+      "url": "https://github.com/howardisaacson/tachocline-industries/blob/main/docs/about/satellite-gp.md"
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "datasource": {
+          "type": "postgres",
+          "uid": "tachocline-pg"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "red",
+        "name": "Geomagnetic storm (3-hour Kp >= 5)",
+        "target": {
+          "refId": "Anno",
+          "datasource": {
+            "type": "postgres",
+            "uid": "tachocline-pg"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  time_tag AS time,\n  time_tag + INTERVAL '3 hours' AS timeend,\n  'Kp ' || round(kp::numeric, 2)::text AS text\nFROM planetary_kp_3h\nWHERE kp >= 5\n  AND $__timeFilter(time_tag)\nORDER BY time_tag"
+        }
+      }
+    ]
+  },
+  "templating": {
+    "list": []
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "Perigee altitude",
+      "description": "Two-body perigee altitude in kilometers for ISS (25544), Landsat 8 (39084), Landsat 9 (49260), HST (20580), and Swift (28485). One point per element epoch. A jump up on the station is consistent with a reboost. A steady drop is consistent with drag. Apogee is stored in satellite_gp and is not drawn here, so the legend stays at five series. Points are drawn because the poll is every two hours; a line with no dots would hide a single epoch.",
+      "datasource": {
+        "type": "postgres",
+        "uid": "tachocline-pg"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 1,
+          "custom": {
+            "axisLabel": "km",
+            "axisCenteredZero": false,
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 0,
+            "showPoints": "always",
+            "spanNulls": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {"type": "postgres", "uid": "tachocline-pg"},
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  epoch AS \"time\",\n  perigee_altitude_km AS \"ISS (ZARYA)\"\nFROM satellite_gp\nWHERE $__timeFilter(epoch)\n  AND norad_cat_id = 25544\nORDER BY 1"
+        },
+        {
+          "refId": "B",
+          "datasource": {"type": "postgres", "uid": "tachocline-pg"},
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  epoch AS \"time\",\n  perigee_altitude_km AS \"LANDSAT 8\"\nFROM satellite_gp\nWHERE $__timeFilter(epoch)\n  AND norad_cat_id = 39084\nORDER BY 1"
+        },
+        {
+          "refId": "C",
+          "datasource": {"type": "postgres", "uid": "tachocline-pg"},
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  epoch AS \"time\",\n  perigee_altitude_km AS \"LANDSAT 9\"\nFROM satellite_gp\nWHERE $__timeFilter(epoch)\n  AND norad_cat_id = 49260\nORDER BY 1"
+        },
+        {
+          "refId": "D",
+          "datasource": {"type": "postgres", "uid": "tachocline-pg"},
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  epoch AS \"time\",\n  perigee_altitude_km AS \"HST\"\nFROM satellite_gp\nWHERE $__timeFilter(epoch)\n  AND norad_cat_id = 20580\nORDER BY 1"
+        },
+        {
+          "refId": "E",
+          "datasource": {"type": "postgres", "uid": "tachocline-pg"},
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  epoch AS \"time\",\n  perigee_altitude_km AS \"SWIFT\"\nFROM satellite_gp\nWHERE $__timeFilter(epoch)\n  AND norad_cat_id = 28485\nORDER BY 1"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Perigee change",
+      "description": "Change in two-body perigee between consecutive element epochs, in kilometers per day. The inner query computes the slope over the whole history of that catalog number. The dashboard time filter is outside that window, so the first point inside the view still uses the previous epoch when one exists. A missing previous epoch is null and is not plotted. Negative means the perigee fell. This is not an SGP4 drag acceleration.",
+      "datasource": {
+        "type": "postgres",
+        "uid": "tachocline-pg"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 2,
+          "custom": {
+            "axisLabel": "km/day",
+            "axisCenteredZero": true,
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 0,
+            "showPoints": "always",
+            "spanNulls": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {"type": "postgres", "uid": "tachocline-pg"},
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT epoch AS \"time\", km_per_day AS \"ISS (ZARYA)\"\nFROM (\n  SELECT\n    epoch,\n    (perigee_altitude_km - LAG(perigee_altitude_km) OVER (ORDER BY epoch))\n      / NULLIF(EXTRACT(EPOCH FROM (epoch - LAG(epoch) OVER (ORDER BY epoch))) / 86400.0, 0)\n      AS km_per_day\n  FROM satellite_gp\n  WHERE norad_cat_id = 25544\n) rates\nWHERE $__timeFilter(epoch)\n  AND km_per_day IS NOT NULL\nORDER BY 1"
+        },
+        {
+          "refId": "B",
+          "datasource": {"type": "postgres", "uid": "tachocline-pg"},
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT epoch AS \"time\", km_per_day AS \"LANDSAT 8\"\nFROM (\n  SELECT\n    epoch,\n    (perigee_altitude_km - LAG(perigee_altitude_km) OVER (ORDER BY epoch))\n      / NULLIF(EXTRACT(EPOCH FROM (epoch - LAG(epoch) OVER (ORDER BY epoch))) / 86400.0, 0)\n      AS km_per_day\n  FROM satellite_gp\n  WHERE norad_cat_id = 39084\n) rates\nWHERE $__timeFilter(epoch)\n  AND km_per_day IS NOT NULL\nORDER BY 1"
+        },
+        {
+          "refId": "C",
+          "datasource": {"type": "postgres", "uid": "tachocline-pg"},
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT epoch AS \"time\", km_per_day AS \"LANDSAT 9\"\nFROM (\n  SELECT\n    epoch,\n    (perigee_altitude_km - LAG(perigee_altitude_km) OVER (ORDER BY epoch))\n      / NULLIF(EXTRACT(EPOCH FROM (epoch - LAG(epoch) OVER (ORDER BY epoch))) / 86400.0, 0)\n      AS km_per_day\n  FROM satellite_gp\n  WHERE norad_cat_id = 49260\n) rates\nWHERE $__timeFilter(epoch)\n  AND km_per_day IS NOT NULL\nORDER BY 1"
+        },
+        {
+          "refId": "D",
+          "datasource": {"type": "postgres", "uid": "tachocline-pg"},
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT epoch AS \"time\", km_per_day AS \"HST\"\nFROM (\n  SELECT\n    epoch,\n    (perigee_altitude_km - LAG(perigee_altitude_km) OVER (ORDER BY epoch))\n      / NULLIF(EXTRACT(EPOCH FROM (epoch - LAG(epoch) OVER (ORDER BY epoch))) / 86400.0, 0)\n      AS km_per_day\n  FROM satellite_gp\n  WHERE norad_cat_id = 20580\n) rates\nWHERE $__timeFilter(epoch)\n  AND km_per_day IS NOT NULL\nORDER BY 1"
+        },
+        {
+          "refId": "E",
+          "datasource": {"type": "postgres", "uid": "tachocline-pg"},
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT epoch AS \"time\", km_per_day AS \"SWIFT\"\nFROM (\n  SELECT\n    epoch,\n    (perigee_altitude_km - LAG(perigee_altitude_km) OVER (ORDER BY epoch))\n      / NULLIF(EXTRACT(EPOCH FROM (epoch - LAG(epoch) OVER (ORDER BY epoch))) / 86400.0, 0)\n      AS km_per_day\n  FROM satellite_gp\n  WHERE norad_cat_id = 28485\n) rates\nWHERE $__timeFilter(epoch)\n  AND km_per_day IS NOT NULL\nORDER BY 1"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "3-hour Kp",
+      "description": "Estimated 3-hour planetary Kp from planetary_kp_3h. The horizontal line at 5 is the NOAA minor-storm threshold. Shaded bands on this dashboard are the same rows, drawn as annotations from time_tag for three hours. Real-time estimated Kp, not the definitive GFZ index.",
+      "datasource": {
+        "type": "postgres",
+        "uid": "tachocline-pg"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 16
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "min": 0,
+          "max": 9,
+          "custom": {
+            "axisLabel": "Kp",
+            "axisCenteredZero": false,
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "showPoints": "always",
+            "spanNulls": false,
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "red", "value": 5}
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {"type": "postgres", "uid": "tachocline-pg"},
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  time_tag AS \"time\",\n  kp AS \"3-hour Kp\"\nFROM planetary_kp_3h\nWHERE $__timeFilter(time_tag)\nORDER BY 1"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "text",
+      "title": "Narrow window",
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 24
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "Phone-width layout: these panels are already full-width rows, so they stack. Five satellites stay on the altitude charts; the legend is not reduced below 640 px. Grafana's menu and time picker are unchanged and can crowd a 320 px window. The rate panel is empty until a satellite has two stored epochs. See docs/about/orbit-decay.md."
+      }
+    }
+  ]
+}

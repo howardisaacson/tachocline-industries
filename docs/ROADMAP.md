@@ -22,7 +22,7 @@ Phased milestones. Each phase ends with something demoable, its About pages writ
 - [x] GOES X-ray flux (flares): poller, `goes_xray_flux` hypertable, log-scale panel on the Solar wind dashboard (issue #31)
 - [x] Kp and SWPC alerts: 1-minute and 3-hour Kp plus alerts.json, Bz/Kp panel on the Solar wind dashboard (issue #32)
 - [x] CelesTrak GP data for a **chosen set of satellites tracked over time**. The starter set is ISS, Landsat 8, Landsat 9, HST, and Swift ([tracked-satellites.md](research/tracked-satellites.md), issue #33). History and a two-body altitude from mean motion are stored by the 2-hour poller (issue #34, [About page](about/satellite-gp.md)). Issue #33 stays open until a tracked object has a decay date. **[H6] [H11]**
-- [ ] Join space weather ↔ satellite altitude-decay rate on a dashboard
+- [x] Join space weather ↔ satellite altitude-decay rate on a dashboard. Perigee, kilometers per day, and 3-hour Kp with storm bands are the **Orbit decay** dashboard (issue #35, [About page](about/orbit-decay.md)). A rate appears after a satellite has two epochs.
 - [ ] FastAPI read-only endpoints, [ADR 0006](decisions/0006-fastapi-for-backend-api.md)
 
 ## Phase 3: Public website
