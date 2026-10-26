@@ -1,0 +1,40 @@
+# TimescaleDB login for Grafana (issue #28, ADR 0007).
+# Provisioning means Grafana reads this file when it starts and creates
+# the datasource itself. Nobody clicks through the UI, and the setup
+# is the same on every machine that runs Compose.
+# https://grafana.com/docs/grafana/latest/administration/provisioning/
+#
+# The login is the read-only role from db/migrations/0001_solar_wind.sql.
+# That role has GRANT SELECT and nothing else. $__env copies the value
+# from the container environment, so the password is not in this file.
+# https://grafana.com/docs/grafana/latest/datasources/postgres/configure/
+apiVersion: 1
+
+datasources:
+  - name: Tachocline
+    uid: tachocline-pg
+    type: postgres
+    access: proxy
+    url: db:5432
+    user: $__env{TI_READONLY_USER}
+    isDefault: true
+    editable: false
+    secureJsonData:
+      password: $__env{TI_READONLY_PASSWORD}
+    jsonData:
+      database: $__env{POSTGRES_DB}
+      # The database is only on the Compose network. Timescale in this
+      # stack does not serve TLS. The role is still SELECT-only.
+      sslmode: disable
+      # Grafana's version code is the major version times 100.
+      # 1700 is PostgreSQL 17 (the published table stops at 15).
+      postgresVersion: 1700
+      # Turns the $__timeGroup macro into time_bucket(). The solar-wind
+      # panels call time_bucket() in their SQL so the function is visible
+      # in git, not only after Grafana expands a macro.
+      timescaledb: true
+      # SWPC rows are one minute apart. Do not bucket any finer.
+      timeInterval: 1m
+      maxOpenConns: 5
+      maxIdleConns: 2
+      connMaxLifetime: 14400

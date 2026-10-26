@@ -1,0 +1,18 @@
+# Loads the JSON files in dashboards/json. updateIntervalSeconds is
+# above 10 so Grafana polls the directory. A Docker bind mount often
+# does not deliver filesystem watch events, which is what Grafana uses
+# when this number is 10 or less.
+# https://grafana.com/docs/grafana/latest/administration/provisioning/#dashboards
+apiVersion: 1
+
+providers:
+  - name: Tachocline
+    orgId: 1
+    folder: ""
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: false
+    options:
+      path: /etc/grafana/dashboards
+      foldersFromFilesStructure: false
