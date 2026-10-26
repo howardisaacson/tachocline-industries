@@ -40,7 +40,7 @@ flowchart LR
     DB --> GRAF["Grafana panel<br/>GOES X-ray flux"]
     LOG --> GRAF
 ```
-SWPC publishes the JSON file. The poller saves the body unchanged, validates every object, and upserts into `goes_xray_flux`. The same run writes one `ingest_log` row with source `xrays-6-hour`. Grafana reads the table with the SELECT-only role. The solar-wind job is separate: a failure on one feed does not skip the other. This path has no continuous aggregate, no FastAPI route, and no React page.
+SWPC publishes the JSON file. The poller saves the body unchanged, validates every object, and upserts into `goes_xray_flux`. The same run writes one `ingest_log` row with source `xrays-6-hour`. Grafana reads the table with the SELECT-only role. The solar-wind job is separate: a failure on one feed does not skip the other. This path has no continuous aggregate and no React page. `GET /api/goes-xray` reads the same table ([API](api.md)).
 
 ## 5. Tech used and why
 | Layer | Technology | Why (one line) | Decision |
