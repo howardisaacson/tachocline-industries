@@ -21,7 +21,7 @@ Phased milestones. Each phase ends with something demoable, its About pages writ
 ## Phase 2: Space-weather context + satellites
 - [x] GOES X-ray flux (flares): poller, `goes_xray_flux` hypertable, log-scale panel on the Solar wind dashboard (issue #31)
 - [x] Kp and SWPC alerts: 1-minute and 3-hour Kp plus alerts.json, Bz/Kp panel on the Solar wind dashboard (issue #32)
-- [ ] CelesTrak GP data for a **chosen set of satellites tracked over time**. The starter set is ISS, Landsat 8, and Landsat 9 ([tracked-satellites.md](research/tracked-satellites.md), issue #33). Store that history with altitude derived from mean motion **[H6] [H11]**
+- [ ] CelesTrak GP data for a **chosen set of satellites tracked over time**. The starter set is ISS, Landsat 8, Landsat 9, HST, and Swift ([tracked-satellites.md](research/tracked-satellites.md), issue #33). Store that history with altitude derived from mean motion **[H6] [H11]**
 - [ ] Join space weather ↔ satellite altitude-decay rate on a dashboard
 - [ ] FastAPI read-only endpoints, [ADR 0006](decisions/0006-fastapi-for-backend-api.md)
 

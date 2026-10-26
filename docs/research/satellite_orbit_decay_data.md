@@ -38,7 +38,7 @@ The effect is largest for low, light satellites, especially right after launch.
 - **May 2024 "Gannon" storm:** a G5 (Kp 9) storm on 10–11 May 2024, the strongest since 2003. NOAA advisory: https://www.swpc.noaa.gov/news/media-advisory-noaa-forecasts-severe-solar-storm-media-availability-scheduled-friday-may-10 ✅. Recap: https://www.spaceweatherlive.com/en/news/view/545/20240514-historic-g5-geomagnetic-storm.html ✅. Widely reported effects included thousands of satellites making orbit-maintenance maneuvers at the same time, and catalog tracking being degraded for a while (Parker & Linares, 2024). **[I didn't fetch a source for the satellite effects; treat as unverified until you add a citation.]**
 
 ## 5. Proposed TI feature: "Drag Watch"
-- **Satellites to track:** The first set we will actually poll is smaller than this sketch: ISS, Landsat 8, and Landsat 9. Names, NORAD ids, and the reason Landsat 7 is left out are in [tracked-satellites.md](tracked-satellites.md). The bullets below are the later Drag Watch sample, not the starter set.
+- **Satellites to track:** The first set we will actually poll is ISS, Landsat 8, Landsat 9, HST, and Swift. Names, NORAD ids, and what was left out are in [tracked-satellites.md](tracked-satellites.md). The bullets below are the later Drag Watch sample, not the starter set.
   - ISS (NORAD 25544): reboosts show up as altitude jumps, so the pipeline has to detect them.
   - Hubble (20580): no propulsion, so its decay is clean and easy to read.
   - Tiangong (48274)
