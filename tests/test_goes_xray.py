@@ -14,6 +14,7 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 from pydantic import ValidationError
 
 from ti_ingest.__main__ import (
+    CELESTRAK_JOB_ID,
     GOES_JOB_ID,
     JOB_ID,
     KP_JOB_ID,
@@ -320,5 +321,10 @@ def test_scheduler_registers_xray_beside_solar_wind() -> None:
     assert job.id == GOES_JOB_ID
     assert job.max_instances == 1
     assert job.coalesce is True
-    both = build_scheduler(5, lambda: None, lambda: None, lambda: None)
-    assert {item.id for item in both.get_jobs()} == {JOB_ID, GOES_JOB_ID, KP_JOB_ID}
+    both = build_scheduler(5, lambda: None, lambda: None, lambda: None, lambda: None)
+    assert {item.id for item in both.get_jobs()} == {
+        JOB_ID,
+        GOES_JOB_ID,
+        KP_JOB_ID,
+        CELESTRAK_JOB_ID,
+    }

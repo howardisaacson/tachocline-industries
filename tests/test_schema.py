@@ -111,6 +111,33 @@ def test_kp_alerts_migration_adds_hypertables_and_grants() -> None:
         assert f"GRANT SELECT ON TABLE {table}" in sql
 
 
+def test_satellite_gp_migration_adds_a_hypertable_and_a_grant() -> None:
+    """Issue #34. Earlier migrations are unchanged. The new file does not create a role."""
+    sql = (ROOT / "db" / "migrations" / "0004_satellite_gp.sql").read_text(
+        encoding="utf-8"
+    )
+    unchanged = (ROOT / "db" / "migrations" / "0003_kp_alerts.sql").read_text(
+        encoding="utf-8"
+    )
+    assert "satellite_gp" not in unchanged
+    assert "\nBEGIN" not in sql
+    assert "\nCOMMIT" not in sql
+    assert "CREATE ROLE" not in sql
+    assert "CREATE EXTENSION" not in sql
+    assert "CREATE TABLE satellite_gp" in sql
+    assert "PRIMARY KEY (epoch, norad_cat_id)" in sql
+    assert "create_hypertable(\n    'satellite_gp'," in sql
+    assert "create_hypertable(\n    'ingest_log'" not in sql
+    assert "GRANT SELECT ON TABLE satellite_gp" in sql
+    grant = sql.split("GRANT SELECT ON TABLE", 1)[1]
+    assert "satellite_gp" in grant
+    assert "schema_migrations" not in grant
+    assert "change-me" not in sql
+    assert "perigee_altitude_km" in sql
+    assert "apogee_altitude_km" in sql
+    assert "double precision" in sql
+
+
 def test_readonly_role_does_not_embed_a_password() -> None:
     assert "CREATE ROLE" in SOLAR
     assert "GRANT SELECT ON TABLE" in SOLAR

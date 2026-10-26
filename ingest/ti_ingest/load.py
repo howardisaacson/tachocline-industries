@@ -21,6 +21,9 @@ The Kp and alerts job is its own tick. It logs
 ``planetary_k_index_1m``, ``noaa-planetary-k-index``, and ``alerts``.
 Kp conflicts on ``time_tag``. Alerts conflict on
 ``(issue_datetime, product_id)``.
+The CelesTrak job is its own tick, every two hours. It logs one
+``gp-<norad_cat_id>`` source per catalog number and conflicts on
+``(epoch, norad_cat_id)``.
 ``error`` is set when the file was not loaded. Rows that fail validation
 increment ``rows_rejected`` and leave ``error`` empty: the file was
 readable, and the count is the signal.
@@ -40,8 +43,10 @@ from typing import Protocol, Self
 
 from pydantic import ValidationError
 
+from ti_ingest.celestrak_gp import CATALOG_NUMBERS
 from ti_ingest.models import (
     AlertRow,
+    GpRow,
     Kp1mRow,
     Kp3hRow,
     MagRow,
@@ -129,6 +134,28 @@ ON CONFLICT (issue_datetime, product_id) DO UPDATE SET
     message = EXCLUDED.message
 """.strip()
 
+GP_UPSERT = """
+INSERT INTO satellite_gp (
+    epoch, norad_cat_id, object_name, object_id,
+    mean_motion, eccentricity, inclination, ra_of_asc_node,
+    arg_of_pericenter, mean_anomaly, bstar, mean_motion_dot,
+    perigee_altitude_km, apogee_altitude_km
+) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+ON CONFLICT (epoch, norad_cat_id) DO UPDATE SET
+    object_name = EXCLUDED.object_name,
+    object_id = EXCLUDED.object_id,
+    mean_motion = EXCLUDED.mean_motion,
+    eccentricity = EXCLUDED.eccentricity,
+    inclination = EXCLUDED.inclination,
+    ra_of_asc_node = EXCLUDED.ra_of_asc_node,
+    arg_of_pericenter = EXCLUDED.arg_of_pericenter,
+    mean_anomaly = EXCLUDED.mean_anomaly,
+    bstar = EXCLUDED.bstar,
+    mean_motion_dot = EXCLUDED.mean_motion_dot,
+    perigee_altitude_km = EXCLUDED.perigee_altitude_km,
+    apogee_altitude_km = EXCLUDED.apogee_altitude_km
+""".strip()
+
 _UPSERTS: dict[str, tuple[type[StoredRow], str]] = {
     "rtsw_wind_1m": (WindRow, WIND_UPSERT),
     "rtsw_mag_1m": (MagRow, MAG_UPSERT),
@@ -137,6 +164,8 @@ _UPSERTS: dict[str, tuple[type[StoredRow], str]] = {
     "noaa-planetary-k-index": (Kp3hRow, KP_3H_UPSERT),
     "alerts": (AlertRow, ALERT_UPSERT),
 }
+# One feed name per catalog number, all using the same INSERT.
+_UPSERTS.update({f"gp-{catnr}": (GpRow, GP_UPSERT) for catnr in CATALOG_NUMBERS})
 
 _ERROR_LIMIT = 500
 

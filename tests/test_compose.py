@@ -64,6 +64,7 @@ def test_issue_25_migrations_and_readonly_env() -> None:
         "0001_solar_wind.sql",
         "0002_goes_xray_flux.sql",
         "0003_kp_alerts.sql",
+        "0004_satellite_gp.sql",
     ]
     assert "TI_READONLY_USER:" in COMPOSE
     assert "TI_READONLY_PASSWORD:" in COMPOSE

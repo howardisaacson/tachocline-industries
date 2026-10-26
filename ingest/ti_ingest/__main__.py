@@ -1,8 +1,9 @@
-"""Long-running ingest process: solar wind, GOES X-ray, and Kp.
+"""Long-running ingest process: solar wind, GOES X-ray, Kp, and orbits.
 
 Solar wind is issues #26 and #27. GOES X-ray flux is issue #31. Kp and
-SWPC alerts are issue #32. All three are interval jobs on one scheduler,
-in this one process (ADR 0008).
+SWPC alerts are issue #32. CelesTrak GP is issue #34. All four are
+interval jobs on one scheduler, in this one process (ADR 0008). The
+orbit job is every two hours. The other three share ``SWPC_POLL_MINUTES``.
 
 APScheduler's ``BlockingScheduler`` is the process. ``start()`` does not
 return until the scheduler shuts down. Docker stops the container with
@@ -27,6 +28,9 @@ import httpx
 from apscheduler.job import Job
 from apscheduler.schedulers.blocking import BlockingScheduler
 
+from ti_ingest.celestrak_gp import POLL_MINUTES as CELESTRAK_POLL_MINUTES
+from ti_ingest.celestrak_gp import poll_celestrak_gp
+from ti_ingest.celestrak_gp import startup_line as celestrak_startup_line
 from ti_ingest.db import connect
 from ti_ingest.goes_xray import poll_goes_xray
 from ti_ingest.goes_xray import startup_line as goes_startup_line
@@ -41,6 +45,7 @@ logger = logging.getLogger("ti_ingest")
 JOB_ID = "swpc_rtsw"
 GOES_JOB_ID = "goes_xray"
 KP_JOB_ID = "kp_alerts"
+CELESTRAK_JOB_ID = "celestrak_gp"
 # A start that is a few seconds late still runs once. Later than this,
 # the run is skipped instead of firing a backlog. coalesce does the same
 # if several intervals were missed while the process was down.
@@ -135,16 +140,40 @@ def add_kp_job(
     )
 
 
+def add_celestrak_job(
+    scheduler: BlockingScheduler,
+    job: Callable[[], None],
+) -> Job:
+    """Register the GP interval. Two hours, not ``SWPC_POLL_MINUTES``.
+
+    CelesTrak updates GP data on that cadence. A shorter interval would
+    repeat the same download. There is no environment variable for it.
+    """
+    return scheduler.add_job(
+        job,
+        "interval",
+        minutes=CELESTRAK_POLL_MINUTES,
+        id=CELESTRAK_JOB_ID,
+        name="CelesTrak GP for the starter satellite set",
+        next_run_time=datetime.now(UTC),
+        max_instances=1,
+        coalesce=True,
+        misfire_grace_time=MISFIRE_GRACE_SECONDS,
+    )
+
+
 def build_scheduler(
     poll_minutes: int,
     swpc_job: Callable[[], None],
     goes_job: Callable[[], None],
     kp_job: Callable[[], None],
+    celestrak_job: Callable[[], None],
 ) -> BlockingScheduler:
     scheduler = BlockingScheduler(timezone=UTC)
     add_swpc_job(scheduler, poll_minutes, swpc_job)
     add_goes_job(scheduler, poll_minutes, goes_job)
     add_kp_job(scheduler, poll_minutes, kp_job)
+    add_celestrak_job(scheduler, celestrak_job)
     return scheduler
 
 
@@ -283,6 +312,50 @@ def make_kp_job(
     return job
 
 
+def execute_celestrak_job(
+    settings: SwpcSettings,
+    database: DatabaseSettings,
+    *,
+    transport: httpx.BaseTransport | None = None,
+    connect_fn: Callable[[DatabaseSettings], DBConnection] = connect,
+    now: datetime | None = None,
+) -> None:
+    """One GP run. Land the raw files first, then open Postgres.
+
+    A database outage keeps the raw files and returns. It does not raise,
+    so the scheduler waits two hours. This job does not fetch SWPC files.
+    """
+    started = now if now is not None else datetime.now(UTC)
+    with make_client(settings.user_agent, transport=transport) as client:
+        fetches = poll_celestrak_gp(client, settings.raw_dir, now=started)
+    try:
+        conn = connect_fn(database)
+    except Exception:
+        logger.exception(
+            "Postgres is unavailable; raw CelesTrak GP files were kept and not upserted"
+        )
+        return
+    try:
+        for fetch in fetches:
+            try:
+                store_fetch(conn, fetch, started_at=started)
+            except Exception:
+                logger.exception("CelesTrak store failed for %s", fetch.product)
+    finally:
+        conn.close()
+
+
+def make_celestrak_job(
+    settings: SwpcSettings, database: DatabaseSettings
+) -> Callable[[], None]:
+    """One GP run. The HTTP client closes before the next interval."""
+
+    def job() -> None:
+        execute_celestrak_job(settings, database)
+
+    return job
+
+
 def main() -> None:
     logging.basicConfig(
         level=logging.INFO,
@@ -293,11 +366,13 @@ def main() -> None:
     logger.info("%s", startup_message(str(settings.raw_dir), settings.poll_minutes))
     logger.info("%s", goes_startup_line(str(settings.raw_dir), settings.poll_minutes))
     logger.info("%s", kp_startup_line(str(settings.raw_dir), settings.poll_minutes))
+    logger.info("%s", celestrak_startup_line(str(settings.raw_dir)))
     scheduler = build_scheduler(
         settings.poll_minutes,
         make_job(settings, database),
         make_goes_job(settings, database),
         make_kp_job(settings, database),
+        make_celestrak_job(settings, database),
     )
 
     def handle_stop(signum: int, _frame: object) -> None:

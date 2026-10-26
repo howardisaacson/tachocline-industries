@@ -63,6 +63,7 @@ Bonus (not satellite-native but related): `https://api.wheretheiss.at/v1/satelli
 - `https://celestrak.org/NORAD/elements/gp.php?GROUP=stations&FORMAT=json` (verified)
 - `https://celestrak.org/NORAD/elements/gp.php?CATNR=25544&FORMAT=tle` (verified, ISS TLE)
 - ⚠️ **Rate policy ([docs](https://celestrak.org/NORAD/documentation/gp-data-formats.php)):** data refreshes every 2 h, so poll no more often. `GROUP=active` and `starlink` enforce one download per update. More than 50 HTTP 301/403/404 errors in 2 h gets your IP firewalled. Always use `.org`, not `.com`. Default format became CSV in May 2026, so pass `FORMAT=json`.
+- Issue #34 polls the five starter-set catalog numbers (ISS 25544, Landsat 8 39084, Landsat 9 49260, HST 20580, Swift 28485) at `gp.php?CATNR=<id>&FORMAT=json` every 2 hours. It does not use `GROUP=active`. TLE layout and the altitude constants are linked from [tracked-satellites.md](tracked-satellites.md).
 - Why: shows polite polling (conditional fetch, backoff, stopping on errors). You can propagate with SGP4 (`sgp4` / `skyfield` Python libraries) to plot live ground tracks and compute passes over Berkeley.
 
 **6. Space-Track.org**: the authoritative source of the same GP data plus decay and conjunction data. You need a free account and must use session-cookie login. Verified that it returns 401 without login. Use CelesTrak first.
