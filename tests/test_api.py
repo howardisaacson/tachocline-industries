@@ -12,7 +12,18 @@ import pytest
 from fastapi.testclient import TestClient
 
 from ti_api.main import app, get_connection, utc_now
-from ti_api.queries import HEALTH_SQL, INGEST_LOG_SQL, SOLAR_WIND_SQL, SOURCES_SQL
+from ti_api.queries import (
+    ALERTS_SQL,
+    GOES_SQL,
+    HEALTH_SQL,
+    INGEST_LOG_SQL,
+    KP_1M_SQL,
+    KP_3H_SQL,
+    MAG_SQL,
+    PERIGEE_SQL,
+    SOLAR_WIND_SQL,
+    SOURCES_SQL,
+)
 
 NOW = datetime(2026, 10, 26, 5, 0, tzinfo=UTC)
 MINUTE = datetime(2026, 10, 26, 4, 0, tzinfo=UTC)
@@ -77,7 +88,18 @@ def client():
 
 
 def test_queries_are_selects_with_placeholders() -> None:
-    for sql in (HEALTH_SQL, SOLAR_WIND_SQL, SOURCES_SQL, INGEST_LOG_SQL):
+    for sql in (
+        HEALTH_SQL,
+        SOLAR_WIND_SQL,
+        SOURCES_SQL,
+        INGEST_LOG_SQL,
+        MAG_SQL,
+        GOES_SQL,
+        KP_1M_SQL,
+        KP_3H_SQL,
+        ALERTS_SQL,
+        PERIGEE_SQL,
+    ):
         assert sql.startswith("SELECT")
         assert _WRITE_SQL.search(sql) is None
     assert sql_placeholders(SOLAR_WIND_SQL) == 3
@@ -203,7 +225,110 @@ def test_sources_and_ingest_log_pass_the_limit(client: TestClient) -> None:
     assert too_many.status_code == 422
 
 
-def test_openapi_lists_the_four_routes(client: TestClient) -> None:
+def test_new_series_share_the_window_and_return_rows(client: TestClient) -> None:
+    refused = client.get(
+        "/api/mag",
+        params={"from": "2026-10-01T00:00:00Z", "to": "2026-10-18T00:00:00Z"},
+    )
+    assert refused.status_code == 422
+    assert client.conn.calls == []  # type: ignore[attr-defined]
+
+    client.conn.rows = [  # type: ignore[attr-defined]
+        {
+            "time_tag": MINUTE,
+            "source": "ACE",
+            "active": True,
+            "bt": 5.0,
+            "bx_gse": 1.0,
+            "by_gse": 2.0,
+            "bz_gse": -3.0,
+            "bx_gsm": 1.0,
+            "by_gsm": 2.0,
+            "bz_gsm": -4.0,
+        }
+    ]
+    mag = client.get("/api/mag")
+    assert mag.status_code == 200
+    assert mag.json()["processing_level"] == "real-time"
+    assert mag.json()["rows"][0]["bz_gsm"] == -4.0
+    assert client.conn.calls[-1][0] == MAG_SQL  # type: ignore[attr-defined]
+
+    client.conn.rows = [  # type: ignore[attr-defined]
+        {
+            "time_tag": MINUTE,
+            "satellite": 18,
+            "energy": "0.1-0.8nm",
+            "flux": 1.2e-6,
+            "observed_flux": 1.3e-6,
+            "electron_correction": 0.1e-6,
+            "electron_contamination": False,
+        }
+    ]
+    goes = client.get(
+        "/api/goes-xray",
+        params={
+            "from": "2026-10-26T00:00:00Z",
+            "to": "2026-10-26T05:00:00Z",
+            "energy": "0.1-0.8nm",
+        },
+    )
+    assert goes.status_code == 200
+    assert goes.json()["rows"][0]["energy"] == "0.1-0.8nm"
+    assert client.conn.calls[-1][0] == GOES_SQL  # type: ignore[attr-defined]
+    assert client.conn.calls[-1][1][2:] == ("0.1-0.8nm", "0.1-0.8nm", 500)  # type: ignore[attr-defined]
+
+    client.conn.rows = [  # type: ignore[attr-defined]
+        {"time_tag": MINUTE, "kp_index": 5, "estimated_kp": 5.0, "kp": "5Z"}
+    ]
+    one_minute = client.get("/api/kp-1m")
+    assert one_minute.status_code == 200
+    assert one_minute.json()["rows"][0]["estimated_kp"] == 5.0
+    assert client.conn.calls[-1][0] == KP_1M_SQL  # type: ignore[attr-defined]
+
+    client.conn.rows = [  # type: ignore[attr-defined]
+        {"time_tag": MINUTE, "kp": 5.33, "a_running": 32, "station_count": 8}
+    ]
+    three_hour = client.get("/api/kp-3h")
+    assert three_hour.status_code == 200
+    assert three_hour.json()["rows"][0]["kp"] == 5.33
+    assert client.conn.calls[-1][0] == KP_3H_SQL  # type: ignore[attr-defined]
+
+    client.conn.rows = [  # type: ignore[attr-defined]
+        {
+            "issue_datetime": MINUTE,
+            "product_id": "K04A",
+            "message": "Space Weather Message Code: ALTK04",
+        }
+    ]
+    alerts = client.get("/api/alerts")
+    assert alerts.status_code == 200
+    assert alerts.json()["limit"] == 50
+    assert alerts.json()["rows"][0]["product_id"] == "K04A"
+    assert client.conn.calls[-1][0] == ALERTS_SQL  # type: ignore[attr-defined]
+
+    client.conn.rows = [  # type: ignore[attr-defined]
+        {
+            "epoch": MINUTE,
+            "norad_cat_id": 25544,
+            "object_name": "ISS (ZARYA)",
+            "object_id": "1998-067A",
+            "perigee_altitude_km": 414.8,
+            "apogee_altitude_km": 424.2,
+        }
+    ]
+    perigee = client.get("/api/satellite-perigee", params={"norad_cat_id": 25544})
+    assert perigee.status_code == 200
+    body = perigee.json()
+    assert body["altitude"].startswith("two-body")
+    assert body["rows"][0]["perigee_altitude_km"] == 414.8
+    assert client.conn.calls[-1][0] == PERIGEE_SQL  # type: ignore[attr-defined]
+    assert client.conn.calls[-1][1][2:4] == (25544, 25544)  # type: ignore[attr-defined]
+
+    missing = client.get("/api/satellite-perigee", params={"norad_cat_id": 0})
+    assert missing.status_code == 422
+
+
+def test_openapi_lists_the_read_routes(client: TestClient) -> None:
     docs = client.get("/docs")
     assert docs.status_code == 200
     assert "text/html" in docs.headers["content-type"]
@@ -215,6 +340,12 @@ def test_openapi_lists_the_four_routes(client: TestClient) -> None:
         "/api/solar-wind",
         "/api/sources",
         "/api/ingest-log",
+        "/api/mag",
+        "/api/goes-xray",
+        "/api/kp-1m",
+        "/api/kp-3h",
+        "/api/alerts",
+        "/api/satellite-perigee",
     }
     for path in paths:
         assert list(paths[path]) == ["get"]

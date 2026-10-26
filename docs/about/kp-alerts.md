@@ -41,7 +41,7 @@ flowchart LR
     DB --> GRAF["Grafana panels<br/>Bz and Kp, SWPC alerts"]
     LOG --> GRAF
 ```
-SWPC publishes the three JSON files. The poller saves each body unchanged, validates every object, and upserts. Kp uses `time_tag` as the key. An alert uses `(issue_datetime, product_id)`. The same run writes one `ingest_log` row per file it attempted. Grafana reads the tables with the SELECT-only role. Bz is not fetched again here; the panel queries `rtsw_mag_1m`, which the solar-wind job already fills. This path has no continuous aggregate, no FastAPI route, and no React page.
+SWPC publishes the three JSON files. The poller saves each body unchanged, validates every object, and upserts. Kp uses `time_tag` as the key. An alert uses `(issue_datetime, product_id)`. The same run writes one `ingest_log` row per file it attempted. Grafana reads the tables with the SELECT-only role. Bz is not fetched again here; the panel queries `rtsw_mag_1m`, which the solar-wind job already fills. This path has no continuous aggregate and no React page. `GET /api/kp-1m`, `GET /api/kp-3h`, and `GET /api/alerts` read the same tables ([API](api.md)).
 
 ## 5. Tech used and why
 | Layer | Technology | Why (one line) | Decision |

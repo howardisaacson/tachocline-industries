@@ -46,7 +46,7 @@ flowchart LR
     POLL -->|pydantic, then two-body altitude| DB[("PostgreSQL + TimescaleDB<br/>satellite_gp")]
     POLL -->|one ingest_log row per catalog number| LOG[("ingest_log")]
 ```
-CelesTrak publishes one JSON array per catalog number. The poller saves each body unchanged, validates the object, computes perigee and apogee, and upserts on `(epoch, norad_cat_id)`. The same run writes one `ingest_log` row per catalog number it attempted. Grafana's health query skips sources whose names start with `gp-`. The **Orbit decay** dashboard reads `satellite_gp` and `planetary_kp_3h`. This path has no continuous aggregate, no FastAPI route, and no React page. Space-Track is not in the diagram: `gp_history` needs an account and this issue leaves that backfill optional.
+CelesTrak publishes one JSON array per catalog number. The poller saves each body unchanged, validates the object, computes perigee and apogee, and upserts on `(epoch, norad_cat_id)`. The same run writes one `ingest_log` row per catalog number it attempted. Grafana's health query skips sources whose names start with `gp-`. The **Orbit decay** dashboard reads `satellite_gp` and `planetary_kp_3h`. This path has no continuous aggregate and no React page. `GET /api/satellite-perigee` returns the two altitudes ([API](api.md)). Space-Track is not in the diagram: `gp_history` needs an account and this issue leaves that backfill optional.
 
 ## 5. Tech used and why
 | Layer | Technology | Why (one line) | Decision |

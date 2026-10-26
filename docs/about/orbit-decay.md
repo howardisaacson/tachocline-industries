@@ -42,7 +42,7 @@ flowchart LR
     BAND --> RATE
     BAND --> KPANEL
 ```
-The orbit poller and the Kp poller fill the two tables. This dashboard does not fetch anything. Perigee is the column already stored. The rate is computed in the panel query: subtract the previous perigee from this one, and divide by the number of days between the epochs. The window function runs on that satellite's full history, and the dashboard time range is applied afterward, so a point just inside the window can still see the epoch just before it. The shade is a Grafana annotation, which is a time region drawn on top of the panels. This page has no continuous aggregate, no FastAPI route, and no React page.
+The orbit poller and the Kp poller fill the two tables. This dashboard does not fetch anything. Perigee is the column already stored. The rate is computed in the panel query: subtract the previous perigee from this one, and divide by the number of days between the epochs. The window function runs on that satellite's full history, and the dashboard time range is applied afterward, so a point just inside the window can still see the epoch just before it. The shade is a Grafana annotation, which is a time region drawn on top of the panels. This page has no continuous aggregate and no React page. `GET /api/satellite-perigee` and `GET /api/kp-3h` read the same tables ([API](api.md)). The rate stays in the dashboard query.
 
 ## 5. Tech used and why
 | Layer | Technology | Why (one line) | Decision |

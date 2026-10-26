@@ -23,7 +23,7 @@ Phased milestones. Each phase ends with something demoable, its About pages writ
 - [x] Kp and SWPC alerts: 1-minute and 3-hour Kp plus alerts.json, Bz/Kp panel on the Solar wind dashboard (issue #32)
 - [x] CelesTrak GP data for a **chosen set of satellites tracked over time**. The starter set is ISS, Landsat 8, Landsat 9, HST, and Swift ([tracked-satellites.md](research/tracked-satellites.md), issue #33). History and a two-body altitude from mean motion are stored by the 2-hour poller (issue #34, [About page](about/satellite-gp.md)). Issue #33 stays open until a tracked object has a decay date. **[H6] [H11]**
 - [x] Join space weather ↔ satellite altitude-decay rate on a dashboard. Perigee, kilometers per day, and 3-hour Kp with storm bands are the **Orbit decay** dashboard (issue #35, [About page](about/orbit-decay.md)). A rate appears after a satellite has two epochs.
-- [x] FastAPI read-only endpoints: `/api/health`, `/api/solar-wind`, `/api/sources`, `/api/ingest-log`, OpenAPI at `/docs` (issue #36, [ADR 0006](decisions/0006-fastapi-for-backend-api.md), [About page](about/api.md)). GOES, Kp, alerts, and satellite GP are not routes yet.
+- [x] FastAPI read-only endpoints: `/api/health`, `/api/solar-wind`, `/api/mag`, `/api/goes-xray`, `/api/kp-1m`, `/api/kp-3h`, `/api/alerts`, `/api/satellite-perigee`, `/api/sources`, `/api/ingest-log`, OpenAPI at `/docs` (issue #36, [ADR 0006](decisions/0006-fastapi-for-backend-api.md), [About page](about/api.md)).
 
 ## Phase 3: Public website
 - [ ] `docs/research/design_survey.md`: 5 design-renowned + 5 scientific sites, mobile and desktop **[H4]**, [ADR 0013](decisions/0013-design-by-studying-existing-sites.md)
