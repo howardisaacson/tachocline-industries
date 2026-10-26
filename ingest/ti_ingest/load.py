@@ -17,6 +17,10 @@ name (``rtsw_wind_1m``), so one scheduled tick writes two log rows when
 both files are fetched. A 429 that skips mag does not invent a mag row.
 The GOES X-ray job is its own tick and logs ``xrays-6-hour``. The
 conflict key for that table is ``(time_tag, satellite, energy)``.
+The Kp and alerts job is its own tick. It logs
+``planetary_k_index_1m``, ``noaa-planetary-k-index``, and ``alerts``.
+Kp conflicts on ``time_tag``. Alerts conflict on
+``(issue_datetime, product_id)``.
 ``error`` is set when the file was not loaded. Rows that fail validation
 increment ``rows_rejected`` and leave ``error`` empty: the file was
 readable, and the count is the signal.
@@ -36,7 +40,15 @@ from typing import Protocol, Self
 
 from pydantic import ValidationError
 
-from ti_ingest.models import MagRow, StoredRow, WindRow, XrayRow
+from ti_ingest.models import (
+    AlertRow,
+    Kp1mRow,
+    Kp3hRow,
+    MagRow,
+    StoredRow,
+    WindRow,
+    XrayRow,
+)
 from ti_ingest.swpc import FetchResult
 
 logger = logging.getLogger(__name__)
@@ -89,10 +101,41 @@ ON CONFLICT (time_tag, satellite, energy) DO UPDATE SET
     electron_contamination = EXCLUDED.electron_contamination
 """.strip()
 
+KP_1M_UPSERT = """
+INSERT INTO planetary_kp_1m (
+    time_tag, kp_index, estimated_kp, kp
+) VALUES (%s, %s, %s, %s)
+ON CONFLICT (time_tag) DO UPDATE SET
+    kp_index = EXCLUDED.kp_index,
+    estimated_kp = EXCLUDED.estimated_kp,
+    kp = EXCLUDED.kp
+""".strip()
+
+KP_3H_UPSERT = """
+INSERT INTO planetary_kp_3h (
+    time_tag, kp, a_running, station_count
+) VALUES (%s, %s, %s, %s)
+ON CONFLICT (time_tag) DO UPDATE SET
+    kp = EXCLUDED.kp,
+    a_running = EXCLUDED.a_running,
+    station_count = EXCLUDED.station_count
+""".strip()
+
+ALERT_UPSERT = """
+INSERT INTO swpc_alert (
+    issue_datetime, product_id, message
+) VALUES (%s, %s, %s)
+ON CONFLICT (issue_datetime, product_id) DO UPDATE SET
+    message = EXCLUDED.message
+""".strip()
+
 _UPSERTS: dict[str, tuple[type[StoredRow], str]] = {
     "rtsw_wind_1m": (WindRow, WIND_UPSERT),
     "rtsw_mag_1m": (MagRow, MAG_UPSERT),
     "xrays-6-hour": (XrayRow, XRAY_UPSERT),
+    "planetary_k_index_1m": (Kp1mRow, KP_1M_UPSERT),
+    "noaa-planetary-k-index": (Kp3hRow, KP_3H_UPSERT),
+    "alerts": (AlertRow, ALERT_UPSERT),
 }
 
 _ERROR_LIMIT = 500

@@ -1,7 +1,7 @@
 {
   "uid": "solar-wind",
   "title": "Solar wind",
-  "description": "Internal mission control for NOAA SWPC real-time solar wind (ADR 0007) and GOES X-ray flux (issue #31). Speed, density, and Bz use rows where active is true. X-ray flux is the 0.1-0.8 nm channel on a log axis, with flare-class bands. Pipeline health reads ingest_log, not the measurement tables. Narrow window: each panel is one full-width row, so a phone-width browser stacks them. Grafana still draws its own menu and time picker, and these charts do not switch to a larger mobile axis. Below 640 px the page is tall, and that menu can crowd a 320 px window. This is the internal view; the public page is a later React app.",
+  "description": "Internal mission control for NOAA SWPC real-time solar wind (ADR 0007), GOES X-ray flux (issue #31), and Kp plus alerts (issue #32). Speed, density, and Bz use rows where active is true. The panel under Bz draws that same Bz with estimated Kp on a second axis. X-ray flux is the 0.1-0.8 nm channel on a log axis, with flare-class bands. Pipeline health reads ingest_log, not the measurement tables. Narrow window: each panel is one full-width row, so a phone-width browser stacks them. Grafana still draws its own menu and time picker, and these charts do not switch to a larger mobile axis. Below 640 px the page is tall, and that menu can crowd a 320 px window. This is the internal view; the public page is a later React app.",
   "tags": ["solar-wind", "pipeline"],
   "timezone": "utc",
   "editable": true,
@@ -35,6 +35,16 @@
       "tooltip": "Purpose, data source, data flow, and limits for the X-ray panel",
       "type": "link",
       "url": "https://github.com/howardisaacson/tachocline-industries/blob/main/docs/about/goes-xray.md"
+    },
+    {
+      "icon": "doc",
+      "includeVars": false,
+      "keepTime": false,
+      "targetBlank": true,
+      "title": "About Kp and alerts",
+      "tooltip": "Purpose, data source, data flow, and limits for Kp and SWPC alerts",
+      "type": "link",
+      "url": "https://github.com/howardisaacson/tachocline-industries/blob/main/docs/about/kp-alerts.md"
     }
   ],
   "annotations": {
@@ -226,6 +236,205 @@
       ]
     },
     {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Bz and Kp",
+      "description": "Sits under the Bz panel so the two traces share a glance. Left axis: the same active-spacecraft Bz, nanotesla. Right axis: estimated Kp, from 0 to 9. The orange line is the 1-minute estimated Kp. The purple step is NOAA's estimated 3-hour planetary Kp. Kp 5 is a minor storm on the NOAA scale; Kp 9 is the top of that scale. Southward (negative) Bz is a driver people watch before Kp rises. These Kp values are real-time estimates, not the definitive GFZ index and not a forecast. About: docs/about/kp-alerts.md.",
+      "datasource": {
+        "type": "postgres",
+        "uid": "tachocline-pg"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 24
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "custom": {
+            "axisLabel": "nT",
+            "axisCenteredZero": false,
+            "axisPlacement": "left",
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 0,
+            "showPoints": "never",
+            "spanNulls": false,
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "estimated Kp"
+            },
+            "properties": [
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              },
+              {
+                "id": "custom.axisLabel",
+                "value": "Kp"
+              },
+              {
+                "id": "min",
+                "value": 0
+              },
+              {
+                "id": "max",
+                "value": 9
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "3-hour Kp"
+            },
+            "properties": [
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              },
+              {
+                "id": "custom.axisLabel",
+                "value": "Kp"
+              },
+              {
+                "id": "custom.lineInterpolation",
+                "value": "stepAfter"
+              },
+              {
+                "id": "min",
+                "value": 0
+              },
+              {
+                "id": "max",
+                "value": 9
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "purple"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "tachocline-pg"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  time_bucket('1 minute', time_tag) AS \"time\",\n  avg(bz_gsm) AS \"Bz\"\nFROM rtsw_mag_1m\nWHERE $__timeFilter(time_tag)\n  AND active\nGROUP BY 1\nORDER BY 1"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "postgres",
+            "uid": "tachocline-pg"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  time_bucket('1 minute', time_tag) AS \"time\",\n  avg(estimated_kp) AS \"estimated Kp\"\nFROM planetary_kp_1m\nWHERE $__timeFilter(time_tag)\nGROUP BY 1\nORDER BY 1"
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "postgres",
+            "uid": "tachocline-pg"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  time_tag AS \"time\",\n  kp AS \"3-hour Kp\"\nFROM planetary_kp_3h\nWHERE $__timeFilter(time_tag)\nORDER BY 1"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "type": "table",
+      "title": "SWPC alerts",
+      "description": "Recent rows from swpc_alert, the real-time alerts.json feed. The message column is the first 180 characters. The full text stays in the table. This is SWPC's issued text, not a measurement and not a model. About: docs/about/kp-alerts.md.",
+      "datasource": {
+        "type": "postgres",
+        "uid": "tachocline-pg"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 32
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false,
+          "reducer": ["sum"],
+          "countRows": false,
+          "fields": ""
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "tachocline-pg"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  issue_datetime AS \"issued\",\n  product_id AS \"product\",\n  left(message, 180) AS \"message\"\nFROM swpc_alert\nWHERE $__timeFilter(issue_datetime)\nORDER BY issue_datetime DESC\nLIMIT 8"
+        }
+      ]
+    },
+    {
       "id": 6,
       "type": "timeseries",
       "title": "GOES X-ray flux",
@@ -238,7 +447,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 24
+        "y": 40
       },
       "fieldConfig": {
         "defaults": {
@@ -321,7 +530,7 @@
       "id": 4,
       "type": "stat",
       "title": "Minutes since last good ingest",
-      "description": "Reads ingest_log only. A good run has error null: the file was loaded. Rows that failed validation increment rows_rejected and still leave error null, so they count as good. The number is the age of the oldest feed in ingest_log (wind, mag, and xrays-6-hour). If any feed that has a log row has never succeeded, the panel says 'no good ingest' instead of hiding that feed behind the other one. The poll is every SWPC_POLL_MINUTES (5). Yellow means 15 minutes, red means 30.",
+      "description": "Reads ingest_log only. A good run has error null: the file was loaded. Rows that failed validation increment rows_rejected and still leave error null, so they count as good. The number is the age of the oldest feed in ingest_log (wind, mag, xrays-6-hour, planetary_k_index_1m, noaa-planetary-k-index, and alerts). If any feed that has a log row has never succeeded, the panel says 'no good ingest' instead of hiding that feed behind the other one. The poll is every SWPC_POLL_MINUTES (5). Yellow means 15 minutes, red means 30.",
       "datasource": {
         "type": "postgres",
         "uid": "tachocline-pg"
@@ -330,7 +539,7 @@
         "h": 6,
         "w": 24,
         "x": 0,
-        "y": 32
+        "y": 48
       },
       "fieldConfig": {
         "defaults": {
@@ -396,11 +605,11 @@
         "h": 4,
         "w": 24,
         "x": 0,
-        "y": 38
+        "y": 54
       },
       "options": {
         "mode": "markdown",
-        "content": "Each chart is one full-width row, so a narrow window stacks speed, density, Bz, X-ray flux, and the health stat instead of squeezing them side by side. Grafana keeps its own menu and time picker. These charts do not grow a simplified mobile axis. Below 640 px the page is tall, and the menu can crowd a 320 px window. This view was laid out on the 24-column grid; it is not a mobile-first page. About this page: [docs/about/solar-wind.md](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/about/solar-wind.md). X-ray panel: [docs/about/goes-xray.md](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/about/goes-xray.md)."
+        "content": "Each chart is one full-width row, so a narrow window stacks speed, density, Bz, the Bz and Kp panel, alerts, X-ray flux, and the health stat instead of squeezing them side by side. Grafana keeps its own menu and time picker. These charts do not grow a simplified mobile axis. Below 640 px the page is tall, and the menu can crowd a 320 px window. This view was laid out on the 24-column grid; it is not a mobile-first page. About this page: [docs/about/solar-wind.md](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/about/solar-wind.md). X-ray panel: [docs/about/goes-xray.md](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/about/goes-xray.md). Kp and alerts: [docs/about/kp-alerts.md](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/about/kp-alerts.md)."
       }
     }
   ]

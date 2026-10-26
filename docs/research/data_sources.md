@@ -47,9 +47,9 @@ Bonus (not satellite-native but related): `https://api.wheretheiss.at/v1/satelli
 - Why: a log-scale time series that maps directly to flare classes (A/B/C/M/X). Good for threshold alerting and flare-event detection jobs.
 
 **3. Kp index, alerts, aurora**: ☀️ geomagnetic response
-- `https://services.swpc.noaa.gov/json/planetary_k_index_1m.json` (verified, 1-min estimated Kp)
-- `https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json` (verified, 3-hourly, new object format)
-- `https://services.swpc.noaa.gov/products/alerts.json` (verified; today it carries a **G1 storm watch for Oct 19–20**)
+- `https://services.swpc.noaa.gov/json/planetary_k_index_1m.json` (verified, 1-min estimated Kp). Checked again 2026-10-25: keys are `time_tag`, `kp_index`, `estimated_kp`, and `kp`. Issue #32 polls this file.
+- `https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json` (verified, 3-hourly, new object format). Checked again 2026-10-25: keys are `time_tag`, `Kp`, `a_running`, and `station_count`. The [planetary K-index page](https://www.spaceweather.gov/products/planetary-k-index) links this URL and calls the index estimated. Issue #32 polls this file.
+- `https://services.swpc.noaa.gov/products/alerts.json` (verified; on 2026-10-18 it carried a **G1 storm watch for Oct 19–20**). Checked again 2026-10-25: keys are `product_id`, `issue_datetime`, and `message`. The [alerts page](https://www.spaceweather.gov/products/alerts-watches-and-warnings) links this URL. Issue #32 polls this file.
 - `https://services.swpc.noaa.gov/json/ovation_aurora_latest.json` (verified, global aurora probability grid of about 900 KB)
 - `https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json` (verified, monthly sunspot number back to 1749, good for a long-history panel)
 - Why: lets you join cause (solar wind) to effect (Kp). The aurora grid is a geospatial dataset.

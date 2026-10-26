@@ -80,6 +80,37 @@ def test_goes_xray_migration_adds_a_table_and_a_grant() -> None:
     assert "double precision" in sql
 
 
+def test_kp_alerts_migration_adds_hypertables_and_grants() -> None:
+    """Issue #32. 0001 and 0002 are unchanged. The new file does not create a role."""
+    sql = (ROOT / "db" / "migrations" / "0003_kp_alerts.sql").read_text(
+        encoding="utf-8"
+    )
+    unchanged = (ROOT / "db" / "migrations" / "0002_goes_xray_flux.sql").read_text(
+        encoding="utf-8"
+    )
+    assert "planetary_kp_1m" not in unchanged
+    assert "\nBEGIN" not in sql
+    assert "\nCOMMIT" not in sql
+    assert "CREATE ROLE" not in sql
+    assert "CREATE EXTENSION" not in sql
+    assert "CREATE TABLE planetary_kp_1m" in sql
+    assert "CREATE TABLE planetary_kp_3h" in sql
+    assert "CREATE TABLE swpc_alert" in sql
+    assert "PRIMARY KEY (time_tag)" in sql
+    assert "PRIMARY KEY (issue_datetime, product_id)" in sql
+    assert "create_hypertable(\n    'planetary_kp_1m'," in sql
+    assert "create_hypertable(\n    'planetary_kp_3h'," in sql
+    assert "create_hypertable(\n    'swpc_alert'," in sql
+    assert "create_hypertable(\n    'ingest_log'" not in sql
+    assert sql.count("GRANT SELECT ON TABLE") == 3
+    grant = sql.split("GRANT SELECT ON TABLE", 1)[1]
+    assert "schema_migrations" not in grant
+    assert "change-me" not in sql
+    assert "double precision" in sql
+    for table in ("planetary_kp_1m", "planetary_kp_3h", "swpc_alert"):
+        assert f"GRANT SELECT ON TABLE {table}" in sql
+
+
 def test_readonly_role_does_not_embed_a_password() -> None:
     assert "CREATE ROLE" in SOLAR
     assert "GRANT SELECT ON TABLE" in SOLAR
