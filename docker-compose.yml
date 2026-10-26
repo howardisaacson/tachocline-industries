@@ -86,7 +86,8 @@ services:
       RAW_DATA_DIR: ${RAW_DATA_DIR:?RAW_DATA_DIR is required in .env}
     # Landing zone from ADR 0004, not database storage. The directory is
     # git-ignored except for data/raw/.gitkeep. The poller writes
-    # swpc_rtsw/<date>/ here, then reads those files and upserts them.
+    # swpc_rtsw/<date>/ and goes_xray/<date>/ here, then reads those
+    # files and upserts them.
     # POSTGRES_HOST is the Compose service name, not a path on the laptop.
     volumes:
       - ./data/raw:/data/raw

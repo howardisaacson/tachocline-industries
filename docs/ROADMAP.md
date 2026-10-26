@@ -19,7 +19,8 @@ Phased milestones. Each phase ends with something demoable, its About pages writ
 - [x] About page: [`docs/about/solar-wind.md`](about/solar-wind.md) (issue #30), linked from the Grafana dashboard. A live narrow-window browser check of that dashboard is still open (issue #28).
 
 ## Phase 2: Space-weather context + satellites
-- [ ] GOES X-ray flux (flares), Kp, SWPC alerts
+- [x] GOES X-ray flux (flares): poller, `goes_xray_flux` hypertable, log-scale panel on the Solar wind dashboard (issue #31)
+- [ ] Kp and SWPC alerts (issue #32)
 - [ ] CelesTrak GP data for a **chosen set of satellites tracked over time** (e.g., ISS, a Starlink shell, a few cubesats), stored as history with altitude derived from mean motion **[H6] [H11]**
 - [ ] Join space weather ↔ satellite altitude-decay rate on a dashboard
 - [ ] FastAPI read-only endpoints, [ADR 0006](decisions/0006-fastapi-for-backend-api.md)

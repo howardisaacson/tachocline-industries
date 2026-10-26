@@ -66,6 +66,7 @@ def test_panels_are_full_width_rows() -> None:
         "Proton speed",
         "Proton density",
         "Bz (GSM)",
+        "GOES X-ray flux",
         "Minutes since last good ingest",
         "Narrow window",
     ]
@@ -101,6 +102,32 @@ def test_measurement_queries_are_select_time_buckets_for_the_active_source() -> 
         assert "ingest_log" not in sql
 
 
+def test_xray_panel_is_a_log_scale_of_the_long_channel() -> None:
+    """Flare class is the 0.1-0.8 nm flux. The axis is log10, with class bands."""
+    panel = _panels_by_title()["GOES X-ray flux"]
+    sql = _sql(panel)
+    assert sql.startswith("SELECT")
+    assert "FROM goes_xray_flux" in sql
+    assert "time_bucket('1 minute', time_tag)" in sql
+    assert "avg(flux)" in sql
+    assert "energy = '0.1-0.8nm'" in sql
+    assert "flux > 0" in sql
+    assert "solar_wind" not in sql
+    assert "active" not in sql
+    assert _WRITE_SQL.search(sql) is None
+    custom = panel["fieldConfig"]["defaults"]["custom"]
+    assert isinstance(custom, dict)
+    scale = custom["scaleDistribution"]
+    assert isinstance(scale, dict)
+    assert scale["type"] == "log"
+    assert scale["log"] == 10
+    assert custom["thresholdsStyle"]["mode"] == "area"
+    steps = panel["fieldConfig"]["defaults"]["thresholds"]["steps"]
+    assert isinstance(steps, list)
+    values = [step["value"] for step in steps]
+    assert values == [None, 1e-8, 1e-7, 1e-6, 1e-5, 1e-4]
+
+
 def test_pipeline_health_reads_ingest_log_only() -> None:
     sql = _sql(_panels_by_title()["Minutes since last good ingest"])
     assert sql.startswith("SELECT")
@@ -120,9 +147,11 @@ def test_dashboard_links_to_the_solar_wind_about_page() -> None:
     assert isinstance(links, list)
     urls = [link["url"] for link in links]
     assert urls == [
-        "https://github.com/howardisaacson/tachocline-industries/blob/main/docs/about/solar-wind.md"
+        "https://github.com/howardisaacson/tachocline-industries/blob/main/docs/about/solar-wind.md",
+        "https://github.com/howardisaacson/tachocline-industries/blob/main/docs/about/goes-xray.md",
     ]
     assert links[0]["title"] == "About this page"
+    assert links[1]["title"] == "About GOES X-ray"
     note = _panels_by_title()["Narrow window"]["options"]
     assert isinstance(note, dict)
     assert "docs/about/solar-wind.md" in note["content"]

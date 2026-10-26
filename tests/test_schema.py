@@ -59,6 +59,27 @@ def test_hypertables_use_the_documented_natural_key() -> None:
         assert column in SOLAR
 
 
+def test_goes_xray_migration_adds_a_table_and_a_grant() -> None:
+    """Issue #31. 0001 is unchanged. The new file does not create a role."""
+    sql = (ROOT / "db" / "migrations" / "0002_goes_xray_flux.sql").read_text(
+        encoding="utf-8"
+    )
+    assert "\nBEGIN" not in sql
+    assert "\nCOMMIT" not in sql
+    assert "CREATE TABLE goes_xray_flux" in sql
+    assert "PRIMARY KEY (time_tag, satellite, energy)" in sql
+    assert "create_hypertable(\n    'goes_xray_flux'," in sql
+    assert "CREATE ROLE" not in sql
+    assert "CREATE EXTENSION" not in sql
+    assert "GRANT SELECT ON TABLE goes_xray_flux" in sql
+    grant = sql.split("GRANT SELECT ON TABLE", 1)[1]
+    assert "goes_xray_flux" in grant
+    assert "schema_migrations" not in grant
+    assert "change-me" not in sql
+    assert "electron_contaminaton" in sql
+    assert "double precision" in sql
+
+
 def test_readonly_role_does_not_embed_a_password() -> None:
     assert "CREATE ROLE" in SOLAR
     assert "GRANT SELECT ON TABLE" in SOLAR
