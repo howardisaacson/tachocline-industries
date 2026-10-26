@@ -1,5 +1,5 @@
 # Image shared by the migrate and ingest services (ADR 0014).
-# migrate applies SQL. ingest runs the SWPC poller (issue #26).
+# migrate applies SQL. ingest fetches SWPC files and upserts them.
 FROM python:3.12-slim-bookworm
 
 # Logs appear immediately instead of waiting for a full buffer.

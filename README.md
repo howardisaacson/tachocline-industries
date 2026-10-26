@@ -16,8 +16,8 @@ Tachocline Industries (TI) is a portfolio project by **Howard Isaacson** (astron
 - ✅ ADR process accepted ([0001](docs/decisions/0001-record-architecture-decisions.md)); ADRs 0002–0018 **Proposed**, awaiting review
 - ✅ Local Compose stack: TimescaleDB, a one-shot `migrate`, the SWPC `ingest` poller, and Grafana. No dashboard yet (issue #28).
 - ✅ First SQL migration: `solar_wind` and `rtsw_mag_1m` hypertables, `ingest_log`, and a read-only role (issue #25). [ADR 0019](docs/decisions/0019-apply-sql-migrations-in-order.md) (how `migrate` applies SQL) is **Proposed**.
-- ✅ SWPC poller writes `rtsw_wind_1m` and `rtsw_mag_1m` into `data/raw/swpc_rtsw/<date>/` (issue #26). It does not validate or upsert yet.
-- ⏳ Next: validate and upsert (issue #27), then the Grafana dashboard (issue #28). See the [roadmap](docs/ROADMAP.md).
+- ✅ SWPC poller writes `rtsw_wind_1m` and `rtsw_mag_1m` into `data/raw/swpc_rtsw/<date>/`, validates each row, and upserts `solar_wind` and `rtsw_mag_1m` on `(time_tag, source)`. One `ingest_log` row is written per file attempted (issues #26 and #27).
+- ⏳ Next: Grafana datasource and dashboard (issue #28). See the [roadmap](docs/ROADMAP.md).
 
 ## Planned stack (all Proposed)
 Python pollers (APScheduler) → PostgreSQL + TimescaleDB → FastAPI → Grafana now, React later, run locally with Docker Compose. See [AGENTS.md](AGENTS.md#stack-summary) for the table with ADR links.
@@ -48,7 +48,7 @@ docker compose up --build
 
 - Grafana: `http://127.0.0.1:3000` (user and password are `GF_SECURITY_ADMIN_USER` and `GF_SECURITY_ADMIN_PASSWORD` in `.env`). No dashboard is loaded yet (issue #28).
 - Postgres: `127.0.0.1` and `POSTGRES_PORT` from `.env`. The data directory is the Docker named volume `pgdata`, not a folder in this repo.
-- `ingest` fetches the two SWPC files on startup and then every `SWPC_POLL_MINUTES` (issue #26). Raw JSON lands in `data/raw/swpc_rtsw/`, which git ignores. Nothing is written to Postgres yet (issue #27). `migrate` applies `db/migrations/0001_solar_wind.sql`, then exits. Copy `TI_READONLY_USER` and `TI_READONLY_PASSWORD` from `.env.example` into `.env` before the first migrate. Those two values are local-dev only.
+- `ingest` fetches the two SWPC files on startup and then every `SWPC_POLL_MINUTES`. Raw JSON lands in `data/raw/swpc_rtsw/`, which git ignores. Valid rows are upserted into `solar_wind` and `rtsw_mag_1m`. `migrate` applies `db/migrations/0001_solar_wind.sql`, then exits. Copy `TI_READONLY_USER` and `TI_READONLY_PASSWORD` from `.env.example` into `.env` before the first migrate. Those two values are local-dev only.
 - After adding a SQL file, run `docker compose up --force-recreate migrate`. A one-shot container that already exited successfully is not run again by a plain `docker compose up`.
 
 ## Data credits

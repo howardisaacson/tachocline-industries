@@ -4,3 +4,9 @@
 # specifies the 3.x line.
 httpx==0.28.1
 APScheduler==3.11.3
+pydantic==2.14.1
+# psycopg talks to Postgres. The binary extra bundles libpq so the test
+# job does not need a system libpq of its own. The image still installs
+# postgresql-client because migrate runs psql.
+# https://www.psycopg.org/psycopg3/
+psycopg[binary]==3.3.6

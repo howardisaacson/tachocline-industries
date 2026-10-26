@@ -13,7 +13,7 @@ Phased milestones. Each phase ends with something demoable, its About pages writ
 ## Phase 1: First feed end to end (solar wind)
 - [x] `docker-compose.yml`: `db` (TimescaleDB), `migrate`, `ingest`, `grafana`, [ADR 0002](decisions/0002-build-locally-first-with-docker-compose.md), [0014](decisions/0014-when-to-use-more-than-one-docker-container.md) **[H10]**
 - [x] First migration: `solar_wind` and `rtsw_mag_1m` hypertables, `ingest_log`, read-only role (issue #25), [ADR 0005](decisions/0005-postgresql-timescaledb-for-time-series-storage.md)
-- [ ] SWPC `rtsw_wind_1m` + `rtsw_mag_1m`: raw landing zone (issue #26) → validate, upsert, `ingest_log` (issue #27), [ADR 0003](decisions/0003-first-data-source-noaa-swpc-real-time-solar-wind.md), [0004](decisions/0004-python-scheduled-pollers-with-raw-landing-zone.md)
+- [x] SWPC `rtsw_wind_1m` + `rtsw_mag_1m`: raw landing zone (issue #26) → validate, upsert, `ingest_log` (issue #27), [ADR 0003](decisions/0003-first-data-source-noaa-swpc-real-time-solar-wind.md), [0004](decisions/0004-python-scheduled-pollers-with-raw-landing-zone.md)
 - [ ] Grafana dashboard: speed, density, Bz, plus pipeline health; checked in a narrow window too **[H5]**
 - [x] GitHub Actions: ruff + pytest (`.github/workflows/ci.yml`)
 - [ ] About page: `docs/about/solar-wind.md`

@@ -4,7 +4,7 @@ A poller asks for a URL on a schedule. This one asks for two files
 (ADR 0003): plasma (``rtsw_wind_1m``) and magnetic field
 (``rtsw_mag_1m``). Each response is saved exactly as received, before
 any parsing. That folder is the raw landing zone (ADR 0004): bronze in
-the medallion pattern. Issue #27 validates the JSON and upserts it.
+the medallion pattern. ``ti_ingest.load`` validates the JSON and upserts it.
 
 One run makes one GET per file. A 4xx response is logged and not
 retried: repeating a "not found" or "slow down" does not help, and it
@@ -45,7 +45,7 @@ class SwpcProduct:
     """One SWPC JSON file.
 
     ``name`` is the file (``rtsw_wind_1m``), not the spacecraft id inside
-    it. Several spacecraft share one file. Issue #27 splits the rows.
+    it. Several spacecraft share one file. ``ti_ingest.load`` splits the rows.
     """
 
     name: str

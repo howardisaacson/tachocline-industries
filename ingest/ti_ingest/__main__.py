@@ -1,12 +1,13 @@
-"""Long-running ingest process: the SWPC poller (issue #26).
+"""Long-running ingest process: the SWPC poller (issues #26 and #27).
 
 APScheduler's ``BlockingScheduler`` is the process. ``start()`` does not
 return until the scheduler shuts down. Docker stops the container with
 SIGTERM; that signal asks the scheduler to stop. An in-flight GET is
 not cancelled and is not retried. The next container start fetches again.
 
-This process does not validate rows or write to Postgres (issue #27).
-Compose still passes database settings so #27 can use them later.
+Each run lands the raw JSON, validates it, upserts Postgres, and writes
+``ingest_log``. Fetch and load stay separate from the scheduler so a
+later orchestrator can call the same functions (ADR 0004).
 
 Interval jobs: https://apscheduler.readthedocs.io/en/3.x/userguide.html
 """
@@ -18,9 +19,13 @@ import signal
 from collections.abc import Callable
 from datetime import UTC, datetime
 
+import httpx
 from apscheduler.job import Job
 from apscheduler.schedulers.blocking import BlockingScheduler
 
+from ti_ingest.db import connect
+from ti_ingest.load import DBConnection, store_fetch
+from ti_ingest.migrate import DatabaseSettings
 from ti_ingest.swpc import SwpcSettings, make_client, poll_swpc
 
 logger = logging.getLogger("ti_ingest")
@@ -33,12 +38,12 @@ MISFIRE_GRACE_SECONDS = 60
 
 
 def startup_message(raw_dir: str, poll_minutes: int) -> str:
-    """One line for the container log: what is scheduled, and what is not."""
+    """One line for the container log: what this process will do."""
     return (
         f"SWPC poller scheduled every {poll_minutes} min for "
         f"rtsw_wind_1m and rtsw_mag_1m. "
         f"raw_dir={raw_dir}/swpc_rtsw. "
-        "Responses are saved raw; Postgres upsert is issue #27."
+        "Each file is validated and upserted on (time_tag, source)."
     )
 
 
@@ -75,16 +80,46 @@ def build_scheduler(poll_minutes: int, job: Callable[[], None]) -> BlockingSched
     return scheduler
 
 
-def make_job(settings: SwpcSettings) -> Callable[[], None]:
-    """One scheduled run. The client closes before the five-minute wait.
+def execute_swpc_job(
+    settings: SwpcSettings,
+    database: DatabaseSettings,
+    *,
+    transport: httpx.BaseTransport | None = None,
+    connect_fn: Callable[[DatabaseSettings], DBConnection] = connect,
+    now: datetime | None = None,
+) -> None:
+    """One scheduled run. Land raw files first, then open Postgres.
 
-    ``poll_swpc`` logs HTTP failures and returns. It does not raise, so
-    the scheduler waits for the interval instead of trying again at once.
+    If the database is down, the raw files stay on disk and this function
+    returns. It does not raise: the scheduler waits for the next interval
+    instead of retrying immediately. ``transport`` and ``connect_fn`` are
+    how tests substitute the network and the database.
     """
+    started = now if now is not None else datetime.now(UTC)
+    with make_client(settings.user_agent, transport=transport) as client:
+        fetches = poll_swpc(client, settings.raw_dir, now=started)
+    try:
+        conn = connect_fn(database)
+    except Exception:
+        logger.exception(
+            "Postgres is unavailable; raw SWPC files were kept and not upserted"
+        )
+        return
+    try:
+        for fetch in fetches:
+            try:
+                store_fetch(conn, fetch, started_at=started)
+            except Exception:
+                logger.exception("SWPC store failed for %s", fetch.product)
+    finally:
+        conn.close()
+
+
+def make_job(settings: SwpcSettings, database: DatabaseSettings) -> Callable[[], None]:
+    """One scheduled run. The HTTP client closes before the next interval."""
 
     def job() -> None:
-        with make_client(settings.user_agent) as client:
-            poll_swpc(client, settings.raw_dir)
+        execute_swpc_job(settings, database)
 
     return job
 
@@ -95,8 +130,9 @@ def main() -> None:
         format="%(asctime)s %(levelname)s %(name)s %(message)s",
     )
     settings = SwpcSettings.from_env()
+    database = DatabaseSettings.from_env()
     logger.info("%s", startup_message(str(settings.raw_dir), settings.poll_minutes))
-    scheduler = build_scheduler(settings.poll_minutes, make_job(settings))
+    scheduler = build_scheduler(settings.poll_minutes, make_job(settings, database))
 
     def handle_stop(signum: int, _frame: object) -> None:
         logger.info("Received signal %s; stopping", signum)
