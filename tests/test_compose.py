@@ -11,9 +11,14 @@ COMPOSE = (ROOT / "docker-compose.yml").read_text(encoding="utf-8")
 
 
 def test_issue_24_services_are_present() -> None:
-    for service in ("\n  db:\n", "\n  migrate:\n", "\n  ingest:\n", "\n  grafana:\n"):
+    for service in (
+        "\n  db:\n",
+        "\n  migrate:\n",
+        "\n  ingest:\n",
+        "\n  api:\n",
+        "\n  grafana:\n",
+    ):
         assert service in COMPOSE
-    assert "\n  api:\n" not in COMPOSE
     assert "timescale/timescaledb:2.31.0-pg17-oss" in COMPOSE
     assert "grafana/grafana:13.2.4" in COMPOSE
 
@@ -33,6 +38,7 @@ def test_startup_order_and_localhost_ports() -> None:
     assert 'restart: "no"' in COMPOSE
     assert "127.0.0.1:${POSTGRES_PORT:" in COMPOSE
     assert "127.0.0.1:${GRAFANA_PORT:" in COMPOSE
+    assert "127.0.0.1:${API_PORT:-8000}:8000" in COMPOSE
     assert "pg_isready" in COMPOSE
 
 
@@ -56,6 +62,17 @@ def test_grafana_mounts_provisioning_and_not_the_admin_password() -> None:
     )
     assert "./dashboards/json:/etc/grafana/dashboards:ro" in grafana
     assert "condition: service_completed_successfully" in grafana
+
+
+def test_api_service_uses_the_readonly_role() -> None:
+    """Issue #36. The API container must not receive the admin password."""
+    api = COMPOSE.split("\n  api:\n", 1)[1].split("\n  grafana:\n", 1)[0]
+    assert "POSTGRES_USER: ${TI_READONLY_USER:" in api
+    assert "POSTGRES_PASSWORD: ${TI_READONLY_PASSWORD:" in api
+    assert "${POSTGRES_PASSWORD:" not in api
+    assert "context: ./api" in api
+    assert "tachocline-api:0.1" in api
+    assert "condition: service_completed_successfully" in api
 
 
 def test_issue_25_migrations_and_readonly_env() -> None:

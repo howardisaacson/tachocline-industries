@@ -10,8 +10,8 @@ target-version = "py312"
 extend-exclude = ["tools/gh-setup"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["ti_ingest"]
+known-first-party = ["ti_ingest", "ti_api"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["ingest"]
+pythonpath = ["ingest", "api"]

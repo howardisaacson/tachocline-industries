@@ -1,10 +1,12 @@
 # Dev tools for local checks and GitHub Actions. Not imported by the site.
 # Pinned so CI installs the same versions that were run locally.
 #
-# The next line pulls in the poller's libraries
-# (httpx, APScheduler, pydantic, psycopg).
-# The test job installs this file only. The Docker image installs
-# ingest/requirements.txt on its own; versions are pinned there.
+# The next lines pull in the poller's libraries and the API's libraries.
+# The test job installs this file only. Each image installs its own
+# requirements file; versions are pinned there.
 -r ingest/requirements.txt
+-r api/requirements.txt
 ruff==0.17.2
 pytest==9.1.1
+# FastAPI 0.162's TestClient asks for httpx2. The API image does not need it.
+httpx2==2.16.0

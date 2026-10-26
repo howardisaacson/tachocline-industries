@@ -45,7 +45,7 @@ flowchart LR
     DB --> GRAF["Grafana dashboard<br/>Solar wind"]
     LOG --> GRAF
 ```
-SWPC publishes the two JSON files. The poller saves each body unchanged, validates every row, and upserts plasma into `solar_wind` and the magnetic field into `rtsw_mag_1m`. The same run writes `ingest_log`. Grafana reads those tables with a SELECT-only role. This repo has no continuous aggregate, no FastAPI route, and no React page on this path. The X-ray panel on this dashboard is a separate job; its flow is in [GOES X-ray](goes-xray.md). The Kp and alert panels are another job; their flow is in [Kp and alerts](kp-alerts.md). Perigee and storm bands are a separate dashboard, [Orbit decay](orbit-decay.md).
+SWPC publishes the two JSON files. The poller saves each body unchanged, validates every row, and upserts plasma into `solar_wind` and the magnetic field into `rtsw_mag_1m`. The same run writes `ingest_log`. Grafana reads those tables with a SELECT-only role. This repo has no continuous aggregate and no React page on this path. The read API is a separate service ([API](api.md)) and currently exposes solar-wind minutes, not the magnetic-field table. The X-ray panel on this dashboard is a separate job; its flow is in [GOES X-ray](goes-xray.md). The Kp and alert panels are another job; their flow is in [Kp and alerts](kp-alerts.md). Perigee and storm bands are a separate dashboard, [Orbit decay](orbit-decay.md).
 
 ## 5. Tech used and why
 | Layer | Technology | Why (one line) | Decision |

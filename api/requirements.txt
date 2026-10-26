@@ -1,0 +1,9 @@
+# Runtime libraries for the API image (issue #36, ADR 0006).
+# Dev tools stay in requirements-dev.txt. Versions are pinned so the
+# image and CI install the same releases.
+fastapi==0.162.0
+uvicorn==0.54.0
+pydantic==2.14.1
+# The binary extra bundles libpq. The API does not shell out to psql.
+# https://www.psycopg.org/psycopg3/
+psycopg[binary]==3.3.6
