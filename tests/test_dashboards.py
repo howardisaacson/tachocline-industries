@@ -177,6 +177,7 @@ def test_pipeline_health_reads_ingest_log_only() -> None:
     sql = _sql(_panels_by_title()["Minutes since last good ingest"])
     assert sql.startswith("SELECT")
     assert "FROM ingest_log" in sql
+    assert sql.count("source NOT LIKE 'gp-%'") == 2
     assert "error IS NULL" in sql
     assert "solar_wind" not in sql
     assert "rtsw_mag_1m" not in sql
@@ -195,10 +196,12 @@ def test_dashboard_links_to_the_solar_wind_about_page() -> None:
         "https://github.com/howardisaacson/tachocline-industries/blob/main/docs/about/solar-wind.md",
         "https://github.com/howardisaacson/tachocline-industries/blob/main/docs/about/goes-xray.md",
         "https://github.com/howardisaacson/tachocline-industries/blob/main/docs/about/kp-alerts.md",
+        "https://github.com/howardisaacson/tachocline-industries/blob/main/docs/about/satellite-gp.md",
     ]
     assert links[0]["title"] == "About this page"
     assert links[1]["title"] == "About GOES X-ray"
     assert links[2]["title"] == "About Kp and alerts"
+    assert links[3]["title"] == "About satellite GP"
     note = _panels_by_title()["Narrow window"]["options"]
     assert isinstance(note, dict)
     assert "docs/about/solar-wind.md" in note["content"]

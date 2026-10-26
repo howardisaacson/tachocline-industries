@@ -1,4 +1,4 @@
-"""Pydantic models for SWPC solar-wind, GOES X-ray, Kp, and alert rows.
+"""Pydantic models for SWPC solar-wind, GOES X-ray, Kp, alert, and GP rows.
 
 A pydantic model is a class that declares the fields of one record.
 ``model_validate`` checks a dictionary from the JSON file. It returns
@@ -20,7 +20,9 @@ suffix, for example ``2026-10-25T21:10:00``. The GOES X-ray file appends
 fractional seconds, for example ``2026-10-25 09:27:50.723``. A naive
 value is stored as UTC. The X-ray columns are in
 ``db/migrations/0002_goes_xray_flux.sql``. The Kp and alert columns are
-in ``db/migrations/0003_kp_alerts.sql``.
+in ``db/migrations/0003_kp_alerts.sql``. A CelesTrak GP ``EPOCH`` is the
+same kind of naive UTC clock. Those columns, plus the derived altitudes,
+are in ``db/migrations/0004_satellite_gp.sql``.
 """
 
 from __future__ import annotations
@@ -28,7 +30,16 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from typing import Annotated
 
-from pydantic import AliasChoices, BaseModel, ConfigDict, Field, field_validator
+from pydantic import (
+    AliasChoices,
+    BaseModel,
+    ConfigDict,
+    Field,
+    field_validator,
+    model_validator,
+)
+
+from ti_ingest.elements import altitudes_km
 
 
 def _as_utc(value: datetime) -> datetime:
@@ -265,3 +276,67 @@ class AlertRow(StoredRow):
 
     def as_params(self) -> tuple[object, ...]:
         return (self.issue_datetime, self.product_id, self.message)
+
+
+class GpRow(StoredRow):
+    """One CelesTrak GP record (issue #34).
+
+    JSON keys are the OMM names (``EPOCH``, ``NORAD_CAT_ID``, …).
+    Altitude is not in the file. ``as_params`` appends the two derived
+    kilometers. A missing required key is a schema change and is rejected.
+    ``extra="ignore"`` keeps unused keys in the raw file.
+    """
+
+    model_config = ConfigDict(extra="ignore", populate_by_name=True)
+
+    epoch: datetime = Field(validation_alias="EPOCH")
+    norad_cat_id: Annotated[
+        int, Field(strict=True, gt=0, validation_alias="NORAD_CAT_ID")
+    ]
+    object_name: Annotated[str, Field(strict=True, validation_alias="OBJECT_NAME")]
+    object_id: Annotated[str, Field(strict=True, validation_alias="OBJECT_ID")]
+    mean_motion: Annotated[float, Field(gt=0, validation_alias="MEAN_MOTION")]
+    eccentricity: Annotated[float, Field(ge=0, lt=1, validation_alias="ECCENTRICITY")]
+    inclination: float | None = Field(validation_alias="INCLINATION")
+    ra_of_asc_node: float | None = Field(validation_alias="RA_OF_ASC_NODE")
+    arg_of_pericenter: float | None = Field(validation_alias="ARG_OF_PERICENTER")
+    mean_anomaly: float | None = Field(validation_alias="MEAN_ANOMALY")
+    bstar: float | None = Field(validation_alias="BSTAR")
+    mean_motion_dot: float | None = Field(validation_alias="MEAN_MOTION_DOT")
+
+    @field_validator("epoch")
+    @classmethod
+    def epoch_as_utc(cls, value: datetime) -> datetime:
+        return _as_utc(value)
+
+    @field_validator("object_name", "object_id")
+    @classmethod
+    def text_not_blank(cls, value: str) -> str:
+        stripped = value.strip()
+        if not stripped:
+            raise ValueError("text is blank")
+        return stripped
+
+    @model_validator(mode="after")
+    def elements_can_make_an_ellipse(self) -> GpRow:
+        altitudes_km(self.mean_motion, self.eccentricity)
+        return self
+
+    def as_params(self) -> tuple[object, ...]:
+        perigee_km, apogee_km = altitudes_km(self.mean_motion, self.eccentricity)
+        return (
+            self.epoch,
+            self.norad_cat_id,
+            self.object_name,
+            self.object_id,
+            self.mean_motion,
+            self.eccentricity,
+            self.inclination,
+            self.ra_of_asc_node,
+            self.arg_of_pericenter,
+            self.mean_anomaly,
+            self.bstar,
+            self.mean_motion_dot,
+            perigee_km,
+            apogee_km,
+        )
