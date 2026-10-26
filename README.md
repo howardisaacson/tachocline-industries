@@ -14,10 +14,11 @@ Tachocline Industries (TI) is a portfolio project by **Howard Isaacson** (astron
 ## Current status (2026-10-25)
 - ✅ Data-source research: [docs/research/data_sources.md](docs/research/data_sources.md)
 - ✅ ADR process accepted ([0001](docs/decisions/0001-record-architecture-decisions.md)); ADRs 0002–0018 **Proposed**, awaiting review
-- ✅ Local Compose stack: TimescaleDB, a one-shot `migrate`, the SWPC `ingest` poller, and Grafana. No dashboard yet (issue #28).
+- ✅ Local Compose stack: TimescaleDB, a one-shot `migrate`, the SWPC `ingest` poller, and Grafana.
 - ✅ First SQL migration: `solar_wind` and `rtsw_mag_1m` hypertables, `ingest_log`, and a read-only role (issue #25). [ADR 0019](docs/decisions/0019-apply-sql-migrations-in-order.md) (how `migrate` applies SQL) is **Proposed**.
 - ✅ SWPC poller writes `rtsw_wind_1m` and `rtsw_mag_1m` into `data/raw/swpc_rtsw/<date>/`, validates each row, and upserts `solar_wind` and `rtsw_mag_1m` on `(time_tag, source)`. One `ingest_log` row is written per file attempted (issues #26 and #27).
-- ⏳ Next: Grafana datasource and dashboard (issue #28). See the [roadmap](docs/ROADMAP.md).
+- ✅ Grafana dashboard **Solar wind**, provisioned from [`dashboards/`](dashboards/json/solar-wind.json) (issue #28): proton speed, density, Bz for the active spacecraft, and minutes since the last good `ingest_log` row. The datasource logs in as `TI_READONLY_USER` (SELECT only). A live look in a narrow browser window is still open; the limit is written on the dashboard.
+- ⏳ Next: About page `docs/about/solar-wind.md` (issue #30). See the [roadmap](docs/ROADMAP.md).
 
 ## Planned stack (all Proposed)
 Python pollers (APScheduler) → PostgreSQL + TimescaleDB → FastAPI → Grafana now, React later, run locally with Docker Compose. See [AGENTS.md](AGENTS.md#stack-summary) for the table with ADR links.
@@ -46,7 +47,7 @@ cp .env.example .env
 docker compose up --build
 ```
 
-- Grafana: `http://127.0.0.1:3000` (user and password are `GF_SECURITY_ADMIN_USER` and `GF_SECURITY_ADMIN_PASSWORD` in `.env`). No dashboard is loaded yet (issue #28).
+- Grafana: `http://127.0.0.1:3000` (user and password are `GF_SECURITY_ADMIN_USER` and `GF_SECURITY_ADMIN_PASSWORD` in `.env`). The **Solar wind** dashboard is loaded from `dashboards/`. After this file changes, recreate the container so it sees the new mounts and environment: `docker compose up -d grafana`. Edits to the dashboard JSON are picked up within 30 seconds. On a phone-width window the panels stack (each is a full-width row). Grafana's own menu and time picker stay, and the charts do not switch to a simplified axis, so below 640 px the page is tall and the menu can crowd a 320 px window.
 - Postgres: `127.0.0.1` and `POSTGRES_PORT` from `.env`. The data directory is the Docker named volume `pgdata`, not a folder in this repo.
 - `ingest` fetches the two SWPC files on startup and then every `SWPC_POLL_MINUTES`. Raw JSON lands in `data/raw/swpc_rtsw/`, which git ignores. Valid rows are upserted into `solar_wind` and `rtsw_mag_1m`. `migrate` applies `db/migrations/0001_solar_wind.sql`, then exits. Copy `TI_READONLY_USER` and `TI_READONLY_PASSWORD` from `.env.example` into `.env` before the first migrate. Those two values are local-dev only.
 - After adding a SQL file, run `docker compose up --force-recreate migrate`. A one-shot container that already exited successfully is not run again by a plain `docker compose up`.

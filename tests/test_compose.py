@@ -38,7 +38,24 @@ def test_startup_order_and_localhost_ports() -> None:
 
 def test_compose_file_has_no_password_literal() -> None:
     assert "change-me" not in COMPOSE
-    assert "dashboards/" not in COMPOSE
+
+
+def test_grafana_mounts_provisioning_and_not_the_admin_password() -> None:
+    grafana = COMPOSE.split("\n  grafana:\n", 1)[1].split("\nvolumes:\n", 1)[0]
+    assert "TI_READONLY_USER:" in grafana
+    assert "TI_READONLY_PASSWORD:" in grafana
+    assert "POSTGRES_DB:" in grafana
+    assert "POSTGRES_PASSWORD:" not in grafana
+    assert (
+        "./dashboards/provisioning/datasources:/etc/grafana/provisioning/datasources:ro"
+        in grafana
+    )
+    assert (
+        "./dashboards/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro"
+        in grafana
+    )
+    assert "./dashboards/json:/etc/grafana/dashboards:ro" in grafana
+    assert "condition: service_completed_successfully" in grafana
 
 
 def test_issue_25_migrations_and_readonly_env() -> None:

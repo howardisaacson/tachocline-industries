@@ -5,8 +5,9 @@
 # hostname `db`, not localhost.
 #
 # File order is not startup order. depends_on is. `db` must pass its
-# healthcheck; `migrate` must exit 0; then `ingest` starts. Grafana only
-# waits for the database: it has no dashboard yet (issue #28).
+# healthcheck; `migrate` must exit 0; then `ingest` starts. Grafana
+# also waits for migrate, because the read-only role is created there
+# (issue #28).
 #
 # There is no `api` service here. ADR 0014 lists one for later; issue #24
 # does not.
@@ -104,13 +105,27 @@ services:
       # Fixed local defaults, not secrets. No anonymous browsing, no open signup.
       GF_AUTH_ANONYMOUS_ENABLED: "false"
       GF_USERS_ALLOW_SIGN_UP: "false"
+      # Datasource login (issue #28). The YAML under dashboards/ reads
+      # these with $__env. The password is not copied into that file.
+      # POSTGRES_PASSWORD is the admin password and is not passed here.
+      TI_READONLY_USER: ${TI_READONLY_USER:?TI_READONLY_USER is required in .env}
+      TI_READONLY_PASSWORD: ${TI_READONLY_PASSWORD:?TI_READONLY_PASSWORD is required in .env}
+      POSTGRES_DB: ${POSTGRES_DB:?POSTGRES_DB is required in .env}
     volumes:
       - grafana_data:/var/lib/grafana
+      # These mounts replace Grafana's empty provisioning dirs. The
+      # parent /etc/grafana/provisioning directory stays the image's,
+      # so alerting and plugins are left alone.
+      - ./dashboards/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./dashboards/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./dashboards/json:/etc/grafana/dashboards:ro
     ports:
       - "127.0.0.1:${GRAFANA_PORT:?GRAFANA_PORT is required in .env}:3000"
     depends_on:
       db:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     restart: unless-stopped
 
 volumes:
