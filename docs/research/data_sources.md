@@ -42,7 +42,7 @@ Bonus (not satellite-native but related): `https://api.wheretheiss.at/v1/satelli
 - Why it shows DE skill: only a rolling 24 h window is served, so you need incremental, idempotent upserts keyed on `(time_tag, source)`. You also have to resolve which spacecraft is "active", handle gaps and nulls, and backfill history from NCEI. Bz turning south plus high speed is how storms get predicted, which makes for a good dashboard story.
 
 **2. GOES X-ray flux / particle flux**: ☀️ solar flares in real time
-- `https://services.swpc.noaa.gov/json/goes/primary/xrays-6-hour.json` (verified; 1-min `time_tag`, two energy bands 0.05–0.4 nm and 0.1–0.8 nm, `satellite: 18`). Also available as `-1-day`, `-3-day` and `-7-day` (not individually tested).
+- `https://services.swpc.noaa.gov/json/goes/primary/xrays-6-hour.json` (verified; 1-min `time_tag`, two energy bands 0.05–0.4 nm and 0.1–0.8 nm, `satellite: 18`). Also available as `-1-day`, `-3-day` and `-7-day` (not individually tested). Checked again 2026-10-25: keys are `time_tag` (with a `Z` suffix), `satellite`, `energy`, `flux`, `observed_flux`, `electron_correction`, and `electron_contaminaton` (that spelling is upstream). Issue #31 polls this 6-hour file only. The longer windows and the proton file are not polled.
 - `https://services.swpc.noaa.gov/json/goes/primary/integral-protons-6-hour.json` (verified)
 - Why: a log-scale time series that maps directly to flare classes (A/B/C/M/X). Good for threshold alerting and flare-event detection jobs.
 

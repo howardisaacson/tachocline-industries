@@ -15,6 +15,8 @@ One ``ingest_log`` row is written per file this run actually attempted.
 Wind and mag are separate feeds, and ``ingest_log.source`` is the feed
 name (``rtsw_wind_1m``), so one scheduled tick writes two log rows when
 both files are fetched. A 429 that skips mag does not invent a mag row.
+The GOES X-ray job is its own tick and logs ``xrays-6-hour``. The
+conflict key for that table is ``(time_tag, satellite, energy)``.
 ``error`` is set when the file was not loaded. Rows that fail validation
 increment ``rows_rejected`` and leave ``error`` empty: the file was
 readable, and the count is the signal.
@@ -34,7 +36,7 @@ from typing import Protocol, Self
 
 from pydantic import ValidationError
 
-from ti_ingest.models import MagRow, SwpcRow, WindRow
+from ti_ingest.models import MagRow, StoredRow, WindRow, XrayRow
 from ti_ingest.swpc import FetchResult
 
 logger = logging.getLogger(__name__)
@@ -75,9 +77,22 @@ INSERT INTO ingest_log (
 ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
 """.strip()
 
-_UPSERTS: dict[str, tuple[type[SwpcRow], str]] = {
+XRAY_UPSERT = """
+INSERT INTO goes_xray_flux (
+    time_tag, satellite, energy,
+    flux, observed_flux, electron_correction, electron_contamination
+) VALUES (%s, %s, %s, %s, %s, %s, %s)
+ON CONFLICT (time_tag, satellite, energy) DO UPDATE SET
+    flux = EXCLUDED.flux,
+    observed_flux = EXCLUDED.observed_flux,
+    electron_correction = EXCLUDED.electron_correction,
+    electron_contamination = EXCLUDED.electron_contamination
+""".strip()
+
+_UPSERTS: dict[str, tuple[type[StoredRow], str]] = {
     "rtsw_wind_1m": (WindRow, WIND_UPSERT),
     "rtsw_mag_1m": (MagRow, MAG_UPSERT),
+    "xrays-6-hour": (XrayRow, XRAY_UPSERT),
 }
 
 _ERROR_LIMIT = 500
@@ -114,12 +129,12 @@ class ParsedFile:
     """``parse_error`` is set only when the file itself could not be read."""
 
     received: int
-    rows: tuple[SwpcRow, ...]
+    rows: tuple[StoredRow, ...]
     rejected: int
     parse_error: str | None
 
 
-def parse_body(product: str, model: type[SwpcRow], body: bytes) -> ParsedFile:
+def parse_body(product: str, model: type[StoredRow], body: bytes) -> ParsedFile:
     """Split one raw file into valid rows and a reject count.
 
     Does not touch the database. The bytes are the landed file, unchanged.
@@ -131,7 +146,7 @@ def parse_body(product: str, model: type[SwpcRow], body: bytes) -> ParsedFile:
     if not isinstance(payload, list):
         return ParsedFile(0, (), 0, "SWPC body is not a JSON array")
 
-    rows: list[SwpcRow] = []
+    rows: list[StoredRow] = []
     reasons: set[str] = set()
     for item in payload:
         try:

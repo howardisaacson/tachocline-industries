@@ -1,7 +1,7 @@
 {
   "uid": "solar-wind",
   "title": "Solar wind",
-  "description": "Internal mission control for NOAA SWPC real-time solar wind (ADR 0007). Speed, density, and Bz use rows where active is true. Pipeline health reads ingest_log, not the measurement tables. Narrow window: each panel is one full-width row, so a phone-width browser stacks them. Grafana still draws its own menu and time picker, and these charts do not switch to a larger mobile axis. Below 640 px the page is tall, and that menu can crowd a 320 px window. This is the internal view; the public page is a later React app.",
+  "description": "Internal mission control for NOAA SWPC real-time solar wind (ADR 0007) and GOES X-ray flux (issue #31). Speed, density, and Bz use rows where active is true. X-ray flux is the 0.1-0.8 nm channel on a log axis, with flare-class bands. Pipeline health reads ingest_log, not the measurement tables. Narrow window: each panel is one full-width row, so a phone-width browser stacks them. Grafana still draws its own menu and time picker, and these charts do not switch to a larger mobile axis. Below 640 px the page is tall, and that menu can crowd a 320 px window. This is the internal view; the public page is a later React app.",
   "tags": ["solar-wind", "pipeline"],
   "timezone": "utc",
   "editable": true,
@@ -25,6 +25,16 @@
       "tooltip": "Purpose, data source, data flow, and limits for this dashboard",
       "type": "link",
       "url": "https://github.com/howardisaacson/tachocline-industries/blob/main/docs/about/solar-wind.md"
+    },
+    {
+      "icon": "doc",
+      "includeVars": false,
+      "keepTime": false,
+      "targetBlank": true,
+      "title": "About GOES X-ray",
+      "tooltip": "Purpose, data source, data flow, and limits for the X-ray panel",
+      "type": "link",
+      "url": "https://github.com/howardisaacson/tachocline-industries/blob/main/docs/about/goes-xray.md"
     }
   ],
   "annotations": {
@@ -216,10 +226,102 @@
       ]
     },
     {
+      "id": 6,
+      "type": "timeseries",
+      "title": "GOES X-ray flux",
+      "description": "Electron-corrected 0.1-0.8 nm flux from goes_xray_flux, watts per square metre, on a log10 axis. That long channel is the one NOAA uses for flare class. Bands: A from 1e-8, B from 1e-7, C from 1e-6, M from 1e-5, X from 1e-4. The short channel is stored and is not drawn. A zero or null flux is left out so the log axis stays defined. This is the measured flux, not an SWPC alert. About: docs/about/goes-xray.md.",
+      "datasource": {
+        "type": "postgres",
+        "uid": "tachocline-pg"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 24
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "min": 1e-9,
+          "custom": {
+            "axisLabel": "W/m2",
+            "axisCenteredZero": false,
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "showPoints": "never",
+            "spanNulls": false,
+            "scaleDistribution": {
+              "type": "log",
+              "log": 10
+            },
+            "thresholdsStyle": {
+              "mode": "area"
+            }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e8e8e",
+                "value": null
+              },
+              {
+                "color": "blue",
+                "value": 1e-8
+              },
+              {
+                "color": "green",
+                "value": 1e-7
+              },
+              {
+                "color": "yellow",
+                "value": 1e-6
+              },
+              {
+                "color": "orange",
+                "value": 1e-5
+              },
+              {
+                "color": "red",
+                "value": 1e-4
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "tachocline-pg"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  time_bucket('1 minute', time_tag) AS \"time\",\n  avg(flux) AS \"W/m2\"\nFROM goes_xray_flux\nWHERE $__timeFilter(time_tag)\n  AND energy = '0.1-0.8nm'\n  AND flux > 0\nGROUP BY 1\nORDER BY 1"
+        }
+      ]
+    },
+    {
       "id": 4,
       "type": "stat",
       "title": "Minutes since last good ingest",
-      "description": "Reads ingest_log only. A good run has error null: the file was loaded. Rows that failed validation increment rows_rejected and still leave error null, so they count as good. The number is the age of the older feed (wind or mag). If any feed that has a log row has never succeeded, the panel says 'no good ingest' instead of hiding that feed behind the other one. The poll is every SWPC_POLL_MINUTES (5). Yellow means 15 minutes, red means 30.",
+      "description": "Reads ingest_log only. A good run has error null: the file was loaded. Rows that failed validation increment rows_rejected and still leave error null, so they count as good. The number is the age of the oldest feed in ingest_log (wind, mag, and xrays-6-hour). If any feed that has a log row has never succeeded, the panel says 'no good ingest' instead of hiding that feed behind the other one. The poll is every SWPC_POLL_MINUTES (5). Yellow means 15 minutes, red means 30.",
       "datasource": {
         "type": "postgres",
         "uid": "tachocline-pg"
@@ -228,7 +330,7 @@
         "h": 6,
         "w": 24,
         "x": 0,
-        "y": 24
+        "y": 32
       },
       "fieldConfig": {
         "defaults": {
@@ -294,11 +396,11 @@
         "h": 4,
         "w": 24,
         "x": 0,
-        "y": 30
+        "y": 38
       },
       "options": {
         "mode": "markdown",
-        "content": "Each chart is one full-width row, so a narrow window stacks speed, density, Bz, and the health stat instead of squeezing them side by side. Grafana keeps its own menu and time picker. These charts do not grow a simplified mobile axis. Below 640 px the page is tall, and the menu can crowd a 320 px window. This view was laid out on the 24-column grid; it is not a mobile-first page. About this page: [docs/about/solar-wind.md](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/about/solar-wind.md)."
+        "content": "Each chart is one full-width row, so a narrow window stacks speed, density, Bz, X-ray flux, and the health stat instead of squeezing them side by side. Grafana keeps its own menu and time picker. These charts do not grow a simplified mobile axis. Below 640 px the page is tall, and the menu can crowd a 320 px window. This view was laid out on the 24-column grid; it is not a mobile-first page. About this page: [docs/about/solar-wind.md](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/about/solar-wind.md). X-ray panel: [docs/about/goes-xray.md](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/about/goes-xray.md)."
       }
     }
   ]

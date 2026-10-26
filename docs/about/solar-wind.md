@@ -15,7 +15,8 @@ The default window is the last 24 hours, in UTC. Each measurement panel uses row
 - **Proton speed:** proton speed from `solar_wind` · units: km/s · a typical slow wind is a few hundred km/s · interesting when a fast stream is roughly 500 km/s or more.
 - **Proton density:** proton density from `solar_wind` · units: protons/cm³ · dense slow wind is often several protons/cm³; fast wind is thinner.
 - **Bz (GSM):** north–south magnetic field from `rtsw_mag_1m.bz_gsm` · units: nT · the axis is centered on zero; the line is red below zero and green at or above zero · interesting when Bz is negative (southward), which lets solar-wind energy into Earth's magnetosphere. This is the measured component, not a storm index.
-- **Minutes since last good ingest:** age of the older of the two feeds (`rtsw_wind_1m` and `rtsw_mag_1m`) in `ingest_log`, not a solar-wind measurement. A good run has `error` null. Green is under 15 minutes, yellow from 15, red from 30. If a feed has never had a good run, the panel says `no good ingest`.
+- **GOES X-ray flux:** the 0.1–0.8 nm channel on a log axis, with flare-class bands. It is a second feed on this dashboard (issue #31). The write-up is [GOES X-ray](goes-xray.md).
+- **Minutes since last good ingest:** age of the oldest feed in `ingest_log`. That set is wind, mag, and `xrays-6-hour` once the X-ray poller has written a row. A good run has `error` null. Green is under 15 minutes, yellow from 15, red from 30. If a feed that has a log row has never had a good run, the panel says `no good ingest`.
 - **Narrow window:** a note, not data. It records the phone-width limit below.
 
 ## 3. Data source & cadence
@@ -42,7 +43,7 @@ flowchart LR
     DB --> GRAF["Grafana dashboard<br/>Solar wind"]
     LOG --> GRAF
 ```
-SWPC publishes the two JSON files. The poller saves each body unchanged, validates every row, and upserts plasma into `solar_wind` and the magnetic field into `rtsw_mag_1m`. The same run writes `ingest_log`. Grafana reads those tables with a SELECT-only role. This repo has no continuous aggregate, no FastAPI route, and no React page on this path.
+SWPC publishes the two JSON files. The poller saves each body unchanged, validates every row, and upserts plasma into `solar_wind` and the magnetic field into `rtsw_mag_1m`. The same run writes `ingest_log`. Grafana reads those tables with a SELECT-only role. This repo has no continuous aggregate, no FastAPI route, and no React page on this path. The X-ray panel on this dashboard is a separate job; its flow is in [GOES X-ray](goes-xray.md).
 
 ## 5. Tech used and why
 | Layer | Technology | Why (one line) | Decision |
@@ -61,7 +62,7 @@ Key code: [`ingest/ti_ingest/swpc.py`](../../ingest/ti_ingest/swpc.py), [`ingest
 - The old `products/solar-wind/plasma-7-day.json` endpoints are gone ([ADR 0003](../decisions/0003-first-data-source-noaa-swpc-real-time-solar-wind.md)). A missing required key is a rejected row (`rows_rejected`). An HTTP 4xx is logged and not retried; HTTP 429 stops the rest of that run. The next try is the next scheduled poll.
 - A validation reject still leaves `ingest_log.error` null, so the health panel can stay green while some rows were dropped. `error` is set when the file was not loaded.
 - If Postgres is down, the raw files stay on disk and that run is not upserted.
-- Narrow window: each panel is one full-width row, so speed, density, Bz, and the health stat stack. Grafana's own menu and time picker stay. Below 640 px the page is tall, and that menu can crowd a 320 px window. No browser check was done in the dashboard pull request. The limit is written on the dashboard and in [the roadmap](../ROADMAP.md).
+- Narrow window: each panel is one full-width row, so speed, density, Bz, X-ray flux, and the health stat stack. Grafana's own menu and time picker stay. Below 640 px the page is tall, and that menu can crowd a 320 px window. No browser check was done in the dashboard pull request. The limit is written on the dashboard and in [the roadmap](../ROADMAP.md).
 - [ADR 0005](../decisions/0005-postgresql-timescaledb-for-time-series-storage.md) describes continuous aggregates. They are not in `0001_solar_wind.sql`, so this dashboard queries the 1-minute hypertables.
 - Next: check the dashboard in a real narrow browser window; decide whether a later migration should store quality flags; add a raw-file retention rule when disk growth matters.
 

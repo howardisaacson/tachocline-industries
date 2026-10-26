@@ -60,6 +60,6 @@ def test_grafana_mounts_provisioning_and_not_the_admin_password() -> None:
 
 def test_issue_25_migrations_and_readonly_env() -> None:
     names = sorted(path.name for path in (ROOT / "db" / "migrations").glob("*.sql"))
-    assert names == ["0001_solar_wind.sql"]
+    assert names == ["0001_solar_wind.sql", "0002_goes_xray_flux.sql"]
     assert "TI_READONLY_USER:" in COMPOSE
     assert "TI_READONLY_PASSWORD:" in COMPOSE

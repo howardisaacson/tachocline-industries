@@ -1,4 +1,7 @@
-"""Long-running ingest process: the SWPC poller (issues #26 and #27).
+"""Long-running ingest process: solar wind and GOES X-ray.
+
+Solar wind is issues #26 and #27. GOES X-ray flux is issue #31. Both
+are interval jobs on one scheduler, in this one process (ADR 0008).
 
 APScheduler's ``BlockingScheduler`` is the process. ``start()`` does not
 return until the scheduler shuts down. Docker stops the container with
@@ -24,6 +27,7 @@ from apscheduler.job import Job
 from apscheduler.schedulers.blocking import BlockingScheduler
 
 from ti_ingest.db import connect
+from ti_ingest.goes_xray import poll_goes_xray, startup_line
 from ti_ingest.load import DBConnection, store_fetch
 from ti_ingest.migrate import DatabaseSettings
 from ti_ingest.swpc import SwpcSettings, make_client, poll_swpc
@@ -31,6 +35,7 @@ from ti_ingest.swpc import SwpcSettings, make_client, poll_swpc
 logger = logging.getLogger("ti_ingest")
 
 JOB_ID = "swpc_rtsw"
+GOES_JOB_ID = "goes_xray"
 # A start that is a few seconds late still runs once. Later than this,
 # the run is skipped instead of firing a backlog. coalesce does the same
 # if several intervals were missed while the process was down.
@@ -74,9 +79,40 @@ def add_swpc_job(
     )
 
 
-def build_scheduler(poll_minutes: int, job: Callable[[], None]) -> BlockingScheduler:
+def add_goes_job(
+    scheduler: BlockingScheduler,
+    poll_minutes: int,
+    job: Callable[[], None],
+) -> Job:
+    """Register the X-ray interval. Same cadence as solar wind.
+
+    There is no second environment variable. Both jobs read
+    ``SWPC_POLL_MINUTES``. A different cadence later would be a new
+    variable, not a change to this default.
+    """
+    if poll_minutes < 1:
+        raise ValueError("poll_minutes must be at least 1")
+    return scheduler.add_job(
+        job,
+        "interval",
+        minutes=poll_minutes,
+        id=GOES_JOB_ID,
+        name="GOES primary xrays-6-hour",
+        next_run_time=datetime.now(UTC),
+        max_instances=1,
+        coalesce=True,
+        misfire_grace_time=MISFIRE_GRACE_SECONDS,
+    )
+
+
+def build_scheduler(
+    poll_minutes: int,
+    swpc_job: Callable[[], None],
+    goes_job: Callable[[], None],
+) -> BlockingScheduler:
     scheduler = BlockingScheduler(timezone=UTC)
-    add_swpc_job(scheduler, poll_minutes, job)
+    add_swpc_job(scheduler, poll_minutes, swpc_job)
+    add_goes_job(scheduler, poll_minutes, goes_job)
     return scheduler
 
 
@@ -115,11 +151,57 @@ def execute_swpc_job(
         conn.close()
 
 
+def execute_goes_job(
+    settings: SwpcSettings,
+    database: DatabaseSettings,
+    *,
+    transport: httpx.BaseTransport | None = None,
+    connect_fn: Callable[[DatabaseSettings], DBConnection] = connect,
+    now: datetime | None = None,
+) -> None:
+    """One X-ray run. Land the raw file first, then open Postgres.
+
+    A database outage keeps the raw file and returns. It does not raise,
+    so the scheduler waits for the next interval. This job does not fetch
+    solar wind, and the solar-wind job does not fetch X-rays. A 429 on
+    one feed does not skip the other.
+    """
+    started = now if now is not None else datetime.now(UTC)
+    with make_client(settings.user_agent, transport=transport) as client:
+        fetches = poll_goes_xray(client, settings.raw_dir, now=started)
+    try:
+        conn = connect_fn(database)
+    except Exception:
+        logger.exception(
+            "Postgres is unavailable; raw GOES X-ray file was kept and not upserted"
+        )
+        return
+    try:
+        for fetch in fetches:
+            try:
+                store_fetch(conn, fetch, started_at=started)
+            except Exception:
+                logger.exception("GOES X-ray store failed for %s", fetch.product)
+    finally:
+        conn.close()
+
+
 def make_job(settings: SwpcSettings, database: DatabaseSettings) -> Callable[[], None]:
-    """One scheduled run. The HTTP client closes before the next interval."""
+    """One solar-wind run. The HTTP client closes before the next interval."""
 
     def job() -> None:
         execute_swpc_job(settings, database)
+
+    return job
+
+
+def make_goes_job(
+    settings: SwpcSettings, database: DatabaseSettings
+) -> Callable[[], None]:
+    """One X-ray run. The HTTP client closes before the next interval."""
+
+    def job() -> None:
+        execute_goes_job(settings, database)
 
     return job
 
@@ -132,7 +214,12 @@ def main() -> None:
     settings = SwpcSettings.from_env()
     database = DatabaseSettings.from_env()
     logger.info("%s", startup_message(str(settings.raw_dir), settings.poll_minutes))
-    scheduler = build_scheduler(settings.poll_minutes, make_job(settings, database))
+    logger.info("%s", startup_line(str(settings.raw_dir), settings.poll_minutes))
+    scheduler = build_scheduler(
+        settings.poll_minutes,
+        make_job(settings, database),
+        make_goes_job(settings, database),
+    )
 
     def handle_stop(signum: int, _frame: object) -> None:
         logger.info("Received signal %s; stopping", signum)

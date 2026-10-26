@@ -125,24 +125,38 @@ def make_client(
     )
 
 
-def landing_path(raw_dir: Path, when: datetime, product: str) -> Path:
-    """``<raw_dir>/swpc_rtsw/<YYYY-MM-DD>/<timestamp>_<product>.json``.
+def landing_path(
+    raw_dir: Path,
+    when: datetime,
+    product: str,
+    *,
+    source_dir: str = SOURCE_DIR,
+) -> Path:
+    """``<raw_dir>/<source_dir>/<YYYY-MM-DD>/<timestamp>_<product>.json``.
 
-    The clock is UTC so the folder date and the filename agree. Wind and
-    mag share the directory from issue #26; the product name is in the
-    file so the second write does not replace the first.
+    The clock is UTC so the folder date and the filename agree. The
+    default directory is ``swpc_rtsw`` (issue #26). The GOES X-ray poller
+    passes ``goes_xray``. The product name is in the file so two writes
+    in the same minute do not replace each other.
     """
     if when.tzinfo is None:
         raise ValueError("landing timestamps must be timezone-aware")
     utc = when.astimezone(UTC)
-    directory = raw_dir / SOURCE_DIR / utc.strftime("%Y-%m-%d")
+    directory = raw_dir / source_dir / utc.strftime("%Y-%m-%d")
     filename = f"{utc.strftime('%Y%m%dT%H%M%SZ')}_{product}.json"
     return directory / filename
 
 
-def write_raw(raw_dir: Path, when: datetime, product: str, body: bytes) -> Path:
+def write_raw(
+    raw_dir: Path,
+    when: datetime,
+    product: str,
+    body: bytes,
+    *,
+    source_dir: str = SOURCE_DIR,
+) -> Path:
     """Save ``body`` unchanged. A crash mid-write leaves a ``.partial`` file."""
-    path = landing_path(raw_dir, when, product)
+    path = landing_path(raw_dir, when, product, source_dir=source_dir)
     path.parent.mkdir(parents=True, exist_ok=True)
     partial = path.with_suffix(path.suffix + ".partial")
     partial.write_bytes(body)
