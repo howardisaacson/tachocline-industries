@@ -18,7 +18,8 @@ Tachocline Industries (TI) is a portfolio project by **Howard Isaacson** (astron
 - ✅ First SQL migration: `solar_wind` and `rtsw_mag_1m` hypertables, `ingest_log`, and a read-only role (issue #25). [ADR 0019](docs/decisions/0019-apply-sql-migrations-in-order.md) (how `migrate` applies SQL) is **Proposed**.
 - ✅ SWPC poller writes `rtsw_wind_1m` and `rtsw_mag_1m` into `data/raw/swpc_rtsw/<date>/`, validates each row, and upserts `solar_wind` and `rtsw_mag_1m` on `(time_tag, source)`. One `ingest_log` row is written per file attempted (issues #26 and #27).
 - ✅ Grafana dashboard **Solar wind**, provisioned from [`dashboards/`](dashboards/json/solar-wind.json) (issue #28): proton speed, density, Bz for the active spacecraft, and minutes since the last good `ingest_log` row. The datasource logs in as `TI_READONLY_USER` (SELECT only). A live look in a narrow browser window is still open; the limit is written on the dashboard.
-- ⏳ Next: About page `docs/about/solar-wind.md` (issue #30). See the [roadmap](docs/ROADMAP.md).
+- ✅ About page for the solar-wind dashboard: [docs/about/solar-wind.md](docs/about/solar-wind.md) (issue #30), linked from the Grafana dashboard.
+- ⏳ Next: a live browser check of that dashboard in a narrow window is still open (issue #28). See the [roadmap](docs/ROADMAP.md).
 
 ## Planned stack (all Proposed)
 Python pollers (APScheduler) → PostgreSQL + TimescaleDB → FastAPI → Grafana now, React later, run locally with Docker Compose. See [AGENTS.md](AGENTS.md#stack-summary) for the table with ADR links.

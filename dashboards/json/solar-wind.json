@@ -15,7 +15,18 @@
   },
   "timepicker": {},
   "fiscalYearStartMonth": 0,
-  "links": [],
+  "links": [
+    {
+      "icon": "doc",
+      "includeVars": false,
+      "keepTime": false,
+      "targetBlank": true,
+      "title": "About this page",
+      "tooltip": "Purpose, data source, data flow, and limits for this dashboard",
+      "type": "link",
+      "url": "https://github.com/howardisaacson/tachocline-industries/blob/main/docs/about/solar-wind.md"
+    }
+  ],
   "annotations": {
     "list": []
   },
@@ -278,7 +289,7 @@
         "type": "datasource",
         "uid": "-- Grafana --"
       },
-      "description": "Limitation for a phone-width browser, recorded here because this dashboard is internal Grafana (ADR 0012). The About page is a separate issue.",
+      "description": "Limitation for a phone-width browser, recorded here because this dashboard is internal Grafana (ADR 0012). The About page is docs/about/solar-wind.md.",
       "gridPos": {
         "h": 4,
         "w": 24,
@@ -287,7 +298,7 @@
       },
       "options": {
         "mode": "markdown",
-        "content": "Each chart is one full-width row, so a narrow window stacks speed, density, Bz, and the health stat instead of squeezing them side by side. Grafana keeps its own menu and time picker. These charts do not grow a simplified mobile axis. Below 640 px the page is tall, and the menu can crowd a 320 px window. This view was laid out on the 24-column grid; it is not a mobile-first page."
+        "content": "Each chart is one full-width row, so a narrow window stacks speed, density, Bz, and the health stat instead of squeezing them side by side. Grafana keeps its own menu and time picker. These charts do not grow a simplified mobile axis. Below 640 px the page is tall, and the menu can crowd a 320 px window. This view was laid out on the 24-column grid; it is not a mobile-first page. About this page: [docs/about/solar-wind.md](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/about/solar-wind.md)."
       }
     }
   ]
