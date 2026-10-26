@@ -1,7 +1,8 @@
-"""Long-running ingest process: solar wind and GOES X-ray.
+"""Long-running ingest process: solar wind, GOES X-ray, and Kp.
 
-Solar wind is issues #26 and #27. GOES X-ray flux is issue #31. Both
-are interval jobs on one scheduler, in this one process (ADR 0008).
+Solar wind is issues #26 and #27. GOES X-ray flux is issue #31. Kp and
+SWPC alerts are issue #32. All three are interval jobs on one scheduler,
+in this one process (ADR 0008).
 
 APScheduler's ``BlockingScheduler`` is the process. ``start()`` does not
 return until the scheduler shuts down. Docker stops the container with
@@ -27,7 +28,10 @@ from apscheduler.job import Job
 from apscheduler.schedulers.blocking import BlockingScheduler
 
 from ti_ingest.db import connect
-from ti_ingest.goes_xray import poll_goes_xray, startup_line
+from ti_ingest.goes_xray import poll_goes_xray
+from ti_ingest.goes_xray import startup_line as goes_startup_line
+from ti_ingest.kp_alerts import poll_kp_alerts
+from ti_ingest.kp_alerts import startup_line as kp_startup_line
 from ti_ingest.load import DBConnection, store_fetch
 from ti_ingest.migrate import DatabaseSettings
 from ti_ingest.swpc import SwpcSettings, make_client, poll_swpc
@@ -36,6 +40,7 @@ logger = logging.getLogger("ti_ingest")
 
 JOB_ID = "swpc_rtsw"
 GOES_JOB_ID = "goes_xray"
+KP_JOB_ID = "kp_alerts"
 # A start that is a few seconds late still runs once. Later than this,
 # the run is skipped instead of firing a backlog. coalesce does the same
 # if several intervals were missed while the process was down.
@@ -105,14 +110,41 @@ def add_goes_job(
     )
 
 
+def add_kp_job(
+    scheduler: BlockingScheduler,
+    poll_minutes: int,
+    job: Callable[[], None],
+) -> Job:
+    """Register the Kp and alerts interval. Same cadence as solar wind.
+
+    There is no second environment variable. This job reads
+    ``SWPC_POLL_MINUTES``, the same number as solar wind and GOES X-ray.
+    """
+    if poll_minutes < 1:
+        raise ValueError("poll_minutes must be at least 1")
+    return scheduler.add_job(
+        job,
+        "interval",
+        minutes=poll_minutes,
+        id=KP_JOB_ID,
+        name="SWPC Kp and alerts",
+        next_run_time=datetime.now(UTC),
+        max_instances=1,
+        coalesce=True,
+        misfire_grace_time=MISFIRE_GRACE_SECONDS,
+    )
+
+
 def build_scheduler(
     poll_minutes: int,
     swpc_job: Callable[[], None],
     goes_job: Callable[[], None],
+    kp_job: Callable[[], None],
 ) -> BlockingScheduler:
     scheduler = BlockingScheduler(timezone=UTC)
     add_swpc_job(scheduler, poll_minutes, swpc_job)
     add_goes_job(scheduler, poll_minutes, goes_job)
+    add_kp_job(scheduler, poll_minutes, kp_job)
     return scheduler
 
 
@@ -206,6 +238,51 @@ def make_goes_job(
     return job
 
 
+def execute_kp_job(
+    settings: SwpcSettings,
+    database: DatabaseSettings,
+    *,
+    transport: httpx.BaseTransport | None = None,
+    connect_fn: Callable[[DatabaseSettings], DBConnection] = connect,
+    now: datetime | None = None,
+) -> None:
+    """One Kp and alerts run. Land the raw files first, then open Postgres.
+
+    A database outage keeps the raw files and returns. It does not raise,
+    so the scheduler waits for the next interval. This job does not fetch
+    solar wind or X-rays. A 429 here does not cancel those other jobs.
+    """
+    started = now if now is not None else datetime.now(UTC)
+    with make_client(settings.user_agent, transport=transport) as client:
+        fetches = poll_kp_alerts(client, settings.raw_dir, now=started)
+    try:
+        conn = connect_fn(database)
+    except Exception:
+        logger.exception(
+            "Postgres is unavailable; raw Kp and alert files were kept and not upserted"
+        )
+        return
+    try:
+        for fetch in fetches:
+            try:
+                store_fetch(conn, fetch, started_at=started)
+            except Exception:
+                logger.exception("Kp/alerts store failed for %s", fetch.product)
+    finally:
+        conn.close()
+
+
+def make_kp_job(
+    settings: SwpcSettings, database: DatabaseSettings
+) -> Callable[[], None]:
+    """One Kp and alerts run. The HTTP client closes before the next interval."""
+
+    def job() -> None:
+        execute_kp_job(settings, database)
+
+    return job
+
+
 def main() -> None:
     logging.basicConfig(
         level=logging.INFO,
@@ -214,11 +291,13 @@ def main() -> None:
     settings = SwpcSettings.from_env()
     database = DatabaseSettings.from_env()
     logger.info("%s", startup_message(str(settings.raw_dir), settings.poll_minutes))
-    logger.info("%s", startup_line(str(settings.raw_dir), settings.poll_minutes))
+    logger.info("%s", goes_startup_line(str(settings.raw_dir), settings.poll_minutes))
+    logger.info("%s", kp_startup_line(str(settings.raw_dir), settings.poll_minutes))
     scheduler = build_scheduler(
         settings.poll_minutes,
         make_job(settings, database),
         make_goes_job(settings, database),
+        make_kp_job(settings, database),
     )
 
     def handle_stop(signum: int, _frame: object) -> None:

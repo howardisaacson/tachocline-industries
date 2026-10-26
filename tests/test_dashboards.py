@@ -66,6 +66,8 @@ def test_panels_are_full_width_rows() -> None:
         "Proton speed",
         "Proton density",
         "Bz (GSM)",
+        "Bz and Kp",
+        "SWPC alerts",
         "GOES X-ray flux",
         "Minutes since last good ingest",
         "Narrow window",
@@ -128,6 +130,49 @@ def test_xray_panel_is_a_log_scale_of_the_long_channel() -> None:
     assert values == [None, 1e-8, 1e-7, 1e-6, 1e-5, 1e-4]
 
 
+def test_bz_and_kp_panel_shares_one_time_axis() -> None:
+    """The correlation panel is the next row after Bz, full width, two Kp series."""
+    panels = DASHBOARD["panels"]
+    assert isinstance(panels, list)
+    titles = [panel["title"] for panel in panels]
+    bz_at = titles.index("Bz (GSM)")
+    kp = panels[bz_at + 1]
+    assert kp["title"] == "Bz and Kp"
+    assert (
+        kp["gridPos"]["y"]
+        == panels[bz_at]["gridPos"]["y"] + panels[bz_at]["gridPos"]["h"]
+    )
+    targets = kp["targets"]
+    assert isinstance(targets, list)
+    sql = [target["rawSql"] for target in targets]
+    assert len(sql) == 3
+    assert 'avg(bz_gsm) AS "Bz"' in sql[0]
+    assert "FROM rtsw_mag_1m" in sql[0]
+    assert "AND active" in sql[0]
+    assert 'avg(estimated_kp) AS "estimated Kp"' in sql[1]
+    assert "FROM planetary_kp_1m" in sql[1]
+    assert 'kp AS "3-hour Kp"' in sql[2]
+    assert "FROM planetary_kp_3h" in sql[2]
+    for statement in sql:
+        assert statement.startswith("SELECT")
+        assert _WRITE_SQL.search(statement) is None
+    overrides = kp["fieldConfig"]["overrides"]
+    assert isinstance(overrides, list)
+    placements = {
+        item["matcher"]["options"]: prop["value"]
+        for item in overrides
+        for prop in item["properties"]
+        if prop["id"] == "custom.axisPlacement"
+    }
+    assert placements == {"estimated Kp": "right", "3-hour Kp": "right"}
+    assert kp["options"]["tooltip"]["mode"] == "multi"
+    alerts = _panels_by_title()["SWPC alerts"]
+    alert_sql = _sql(alerts)
+    assert "FROM swpc_alert" in alert_sql
+    assert "left(message, 180)" in alert_sql
+    assert _WRITE_SQL.search(alert_sql) is None
+
+
 def test_pipeline_health_reads_ingest_log_only() -> None:
     sql = _sql(_panels_by_title()["Minutes since last good ingest"])
     assert sql.startswith("SELECT")
@@ -149,9 +194,11 @@ def test_dashboard_links_to_the_solar_wind_about_page() -> None:
     assert urls == [
         "https://github.com/howardisaacson/tachocline-industries/blob/main/docs/about/solar-wind.md",
         "https://github.com/howardisaacson/tachocline-industries/blob/main/docs/about/goes-xray.md",
+        "https://github.com/howardisaacson/tachocline-industries/blob/main/docs/about/kp-alerts.md",
     ]
     assert links[0]["title"] == "About this page"
     assert links[1]["title"] == "About GOES X-ray"
+    assert links[2]["title"] == "About Kp and alerts"
     note = _panels_by_title()["Narrow window"]["options"]
     assert isinstance(note, dict)
     assert "docs/about/solar-wind.md" in note["content"]
