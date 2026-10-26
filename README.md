@@ -49,6 +49,7 @@ cp .env.example .env
 docker compose up --build
 ```
 
+- API: `http://127.0.0.1:8000/docs` (host port `API_PORT`, default 8000). Read-only. The container logs in as `TI_READONLY_USER`. See [docs/about/api.md](docs/about/api.md).
 - Grafana: `http://127.0.0.1:3000` (user and password are `GF_SECURITY_ADMIN_USER` and `GF_SECURITY_ADMIN_PASSWORD` in `.env`). The **Solar wind** dashboard is loaded from `dashboards/`. After this file changes, recreate the container so it sees the new mounts and environment: `docker compose up -d grafana`. Edits to the dashboard JSON are picked up within 30 seconds. On a phone-width window the panels stack (each is a full-width row). Grafana's own menu and time picker stay, and the charts do not switch to a simplified axis, so below 640 px the page is tall and the menu can crowd a 320 px window.
 - Postgres: `127.0.0.1` and `POSTGRES_PORT` from `.env`. The data directory is the Docker named volume `pgdata`, not a folder in this repo.
 - `ingest` fetches the two solar-wind files and `xrays-6-hour.json` on startup and then every `SWPC_POLL_MINUTES`. Raw JSON lands in `data/raw/swpc_rtsw/` and `data/raw/goes_xray/`, which git ignores. Valid rows are upserted into `solar_wind`, `rtsw_mag_1m`, and `goes_xray_flux`. `migrate` applies the numbered files in `db/migrations/`, then exits. Copy `TI_READONLY_USER` and `TI_READONLY_PASSWORD` from `.env.example` into `.env` before the first migrate. Those two values are local-dev only.

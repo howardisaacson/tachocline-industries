@@ -9,8 +9,8 @@
 # also waits for migrate, because the read-only role is created there
 # (issue #28).
 #
-# There is no `api` service here. ADR 0014 lists one for later; issue #24
-# does not.
+# `api` is the read-only HTTP service (issue #36, ADR 0006). It logs in
+# as TI_READONLY_USER. It does not run migrations or fetch files.
 #
 # https://docs.docker.com/compose/how-tos/startup-order/
 
@@ -91,6 +91,28 @@ services:
     # POSTGRES_HOST is the Compose service name, not a path on the laptop.
     volumes:
       - ./data/raw:/data/raw
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  api:
+    image: tachocline-api:0.1
+    build:
+      context: ./api
+    environment:
+      # The read-only role, not the admin login. The variable names match
+      # what ti_api.db reads. The admin password is not passed in.
+      POSTGRES_USER: ${TI_READONLY_USER:?TI_READONLY_USER is required in .env}
+      POSTGRES_PASSWORD: ${TI_READONLY_PASSWORD:?TI_READONLY_PASSWORD is required in .env}
+      POSTGRES_DB: ${POSTGRES_DB:?POSTGRES_DB is required in .env}
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
+    ports:
+      # API_PORT is optional. A .env written before issue #36 still publishes 8000.
+      - "127.0.0.1:${API_PORT:-8000}:8000"
     depends_on:
       db:
         condition: service_healthy
