@@ -90,5 +90,6 @@ What becomes easier? What becomes harder? What new risks or follow-up work does 
 | [0018](0018-plan-work-with-github-issues-milestones-projects.md) | Plan work with GitHub Issues, Milestones, and Projects | Proposed |
 | [0019](0019-apply-sql-migrations-in-order.md) | Apply schema changes as ordered SQL files | Proposed |
 | [0020](0020-radial-time-plots-for-space-weather.md) | Show space weather as radial time plots, not time-on-x line charts | Proposed |
+| [0021](0021-react-vite-page-with-svg-radial-plots.md) | Serve the first public page with Vite, and draw the radial plots in SVG | Proposed |
 
 Tooling (optional): [adr-tools](https://github.com/npryce/adr-tools) is a small CLI that creates numbered ADR files. Copying the template by hand works just as well.

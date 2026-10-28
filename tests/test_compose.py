@@ -75,6 +75,15 @@ def test_api_service_uses_the_readonly_role() -> None:
     assert "condition: service_completed_successfully" in api
 
 
+def test_web_service_publishes_localhost_only() -> None:
+    """The public page is its own image and does not receive a database password."""
+    web = COMPOSE.split("\n  web:\n", 1)[1].split("\nvolumes:\n", 1)[0]
+    assert "context: ./web" in web
+    assert "tachocline-web:0.1" in web
+    assert "127.0.0.1:${WEB_PORT:-8080}:80" in web
+    assert "POSTGRES_" not in web
+
+
 def test_issue_25_migrations_and_readonly_env() -> None:
     names = sorted(path.name for path in (ROOT / "db" / "migrations").glob("*.sql"))
     assert names == [

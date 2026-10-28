@@ -12,6 +12,9 @@
 # `api` is the read-only HTTP service (issue #36, ADR 0006). It logs in
 # as TI_READONLY_USER. It does not run migrations or fetch files.
 #
+# `web` is the public page (ADR 0021). nginx serves the built React
+# files and proxies /api to the api container.
+#
 # https://docs.docker.com/compose/how-tos/startup-order/
 
 name: tachocline
@@ -149,6 +152,17 @@ services:
         condition: service_healthy
       migrate:
         condition: service_completed_successfully
+    restart: unless-stopped
+
+  web:
+    image: tachocline-web:0.1
+    build:
+      context: ./web
+    ports:
+      # WEB_PORT is optional. A .env written before the page still publishes 8080.
+      - "127.0.0.1:${WEB_PORT:-8080}:80"
+    depends_on:
+      - api
     restart: unless-stopped
 
 volumes:

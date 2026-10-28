@@ -26,12 +26,12 @@ Phased milestones. Each phase ends with something demoable, its About pages writ
 - [x] FastAPI read-only endpoints: `/api/health`, `/api/solar-wind`, `/api/mag`, `/api/goes-xray`, `/api/kp-1m`, `/api/kp-3h`, `/api/alerts`, `/api/satellite-perigee`, `/api/sources`, `/api/ingest-log`, OpenAPI at `/docs` (issue #36, [ADR 0006](decisions/0006-fastapi-for-backend-api.md), [About page](about/api.md)).
 
 ## Phase 3: Public website
-- [ ] `docs/research/design_survey.md`: 5 design-renowned + 5 scientific sites, mobile and desktop **[H4]**, [ADR 0013](decisions/0013-design-by-studying-existing-sites.md)
-- [ ] Design brief using the TI graphic **[H3]**
-- [ ] Frontend design follows the SpaceX-style brief in [design_survey.md](research/design_survey.md); main visual is **radial Kp plots** (day, month, year; 11-year plot deferred until a Kp backfill), [ADR 0020](decisions/0020-radial-time-plots-for-space-weather.md)
-- [ ] React + Plotly.js frontend reading only from the API, [ADR 0007](decisions/0007-grafana-now-react-later-for-frontend.md)
-- [ ] Mobile-first breakpoints and Playwright viewport tests for every page **[H5]**, [ADR 0012](decisions/0012-responsive-design-mobile-and-desktop.md)
-- [ ] About link on every page, [ADR 0009](decisions/0009-about-this-page-for-every-section.md)
+- [x] Design survey: SpaceX-style brief plus space and science references ([design_survey.md](research/design_survey.md), issue #37), [ADR 0013](decisions/0013-design-by-studying-existing-sites.md)
+- [ ] Design brief using the TI graphic **[H3]** (the first page uses a CSS sun until `assets/brand/` has the graphic)
+- [x] First public page: radial Kp plots (day, month, year; 11-year plot deferred until a Kp backfill), [ADR 0020](decisions/0020-radial-time-plots-for-space-weather.md), [ADR 0021](decisions/0021-react-vite-page-with-svg-radial-plots.md)
+- [ ] Rest of the React site (satellite, data, and workflow pages). Plotly.js waits for a later line-chart view, [ADR 0007](decisions/0007-grafana-now-react-later-for-frontend.md)
+- [ ] Mobile-first breakpoints and Playwright viewport tests for every page **[H5]**. The space-weather page is covered at 320, 375, 390, 1280, and 1440 px. [ADR 0012](decisions/0012-responsive-design-mobile-and-desktop.md)
+- [ ] About link on every page. The space-weather page links to its About doc. [ADR 0009](decisions/0009-about-this-page-for-every-section.md)
 - [ ] **"How the science is done" page** built from [data-science-workflow.md](data-science-workflow.md), with its own About page, [ADR 0016](decisions/0016-data-science-workflow-as-first-class-feature.md)
 - [ ] **First AI agent: space-weather briefing** (SWPC alerts + current indices → short cited briefing, labelled AI-generated, eval set in CI), [ADR 0017](decisions/0017-where-ai-agents-fit.md), [ai-agents.md](ai-agents.md)
 - [ ] TI **MCP server** wrapping the read-only API (may slip to Phase 4)

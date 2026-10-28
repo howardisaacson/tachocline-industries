@@ -10,7 +10,9 @@ https://fastapi.tiangolo.com/tutorial/
 The database login is the read-only role. Every statement is a SELECT
 in ``ti_api.queries``. A request that asks for more than seven days, or
 for a ``limit`` outside the declared bounds, is rejected before a query
-runs.
+runs. ``GET /api/kp-3h`` is the exception: the year ring needs one call
+covering 365 days of 3-hour rows, so that route allows 400 days and
+3300 rows. Minute-level routes stay at seven days.
 """
 
 from __future__ import annotations
@@ -46,6 +48,11 @@ DEFAULT_LOG_LIMIT = 50
 MAX_SOURCE_LIMIT = 100
 DEFAULT_RANGE = timedelta(hours=6)
 MAX_RANGE = timedelta(days=7)
+# One year of 3-hour Kp is 365 * 8 = 2920 rows. 400 days and 3300 rows
+# cover that ring, including a lap that starts on 1 January, without
+# opening the same window on the 1-minute tables.
+MAX_KP3H_RANGE = timedelta(days=400)
+MAX_KP3H_LIMIT = 3300
 
 app = FastAPI(
     title="Tachocline Industries",
@@ -268,13 +275,17 @@ def _window(
     time_from: datetime | None,
     time_to: datetime | None,
     now: datetime,
+    max_range: timedelta = MAX_RANGE,
 ) -> tuple[datetime, datetime]:
     end = _aware(time_to, "to") if time_to is not None else now.astimezone(UTC)
     start = _aware(time_from, "from") if time_from is not None else end - DEFAULT_RANGE
     if start >= end:
         raise HTTPException(status_code=422, detail="from must be earlier than to")
-    if end - start > MAX_RANGE:
-        raise HTTPException(status_code=422, detail="time range must be 7 days or less")
+    if end - start > max_range:
+        days = max_range.days
+        raise HTTPException(
+            status_code=422, detail=f"time range must be {days} days or less"
+        )
     return start, end
 
 
@@ -388,10 +399,14 @@ def kp_3h(
     now: Annotated[datetime, Depends(utc_now)],
     time_from: Annotated[datetime | None, Query(alias="from")] = None,
     time_to: Annotated[datetime | None, Query(alias="to")] = None,
-    limit: Annotated[int, Query(ge=1, le=MAX_SOLAR_LIMIT)] = DEFAULT_SOLAR_LIMIT,
+    limit: Annotated[int, Query(ge=1, le=MAX_KP3H_LIMIT)] = DEFAULT_SOLAR_LIMIT,
 ) -> Kp3hPage:
-    """Real-time estimated 3-hour Kp. ``time_tag`` is the block start."""
-    start, end = _window(time_from, time_to, now)
+    """Real-time estimated 3-hour Kp. ``time_tag`` is the block start.
+
+    The window may be 400 days so the public year ring can load in one
+    call. ``limit`` stops at 3300. The default is still 500 rows.
+    """
+    start, end = _window(time_from, time_to, now, MAX_KP3H_RANGE)
     rows = _query(conn, KP_3H_SQL, (start, end, limit))
     return Kp3hPage(
         time_from=start,

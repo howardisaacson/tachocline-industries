@@ -328,6 +328,34 @@ def test_new_series_share_the_window_and_return_rows(client: TestClient) -> None
     assert missing.status_code == 422
 
 
+def test_kp_3h_allows_a_year_and_rejects_a_longer_range(client: TestClient) -> None:
+    """The year ring is 365 days of 3-hour rows. Minute routes stay at 7 days."""
+    year = client.get(
+        "/api/kp-3h",
+        params={
+            "from": "2025-10-27T00:00:00Z",
+            "to": "2026-10-27T00:00:00Z",
+            "limit": 3300,
+        },
+    )
+    assert year.status_code == 200
+    assert client.conn.calls[-1][0] == KP_3H_SQL  # type: ignore[attr-defined]
+    assert client.conn.calls[-1][1][2] == 3300  # type: ignore[attr-defined]
+
+    too_long = client.get(
+        "/api/kp-3h",
+        params={"from": "2024-01-01T00:00:00Z", "to": "2026-01-01T00:00:00Z"},
+    )
+    assert too_long.status_code == 422
+    too_many = client.get("/api/kp-3h", params={"limit": 3301})
+    assert too_many.status_code == 422
+    minute = client.get(
+        "/api/kp-1m",
+        params={"from": "2026-10-01T00:00:00Z", "to": "2026-10-18T00:00:00Z"},
+    )
+    assert minute.status_code == 422
+
+
 def test_openapi_lists_the_read_routes(client: TestClient) -> None:
     docs = client.get("/docs")
     assert docs.status_code == 200
