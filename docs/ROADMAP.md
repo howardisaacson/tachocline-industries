@@ -28,6 +28,7 @@ Phased milestones. Each phase ends with something demoable, its About pages writ
 ## Phase 3: Public website
 - [ ] `docs/research/design_survey.md`: 5 design-renowned + 5 scientific sites, mobile and desktop **[H4]**, [ADR 0013](decisions/0013-design-by-studying-existing-sites.md)
 - [ ] Design brief using the TI graphic **[H3]**
+- [ ] Frontend design follows the SpaceX-style brief in [design_survey.md](research/design_survey.md); main visual is **radial Kp plots** (day, month, year; 11-year plot deferred until a Kp backfill), [ADR 0020](decisions/0020-radial-time-plots-for-space-weather.md)
 - [ ] React + Plotly.js frontend reading only from the API, [ADR 0007](decisions/0007-grafana-now-react-later-for-frontend.md)
 - [ ] Mobile-first breakpoints and Playwright viewport tests for every page **[H5]**, [ADR 0012](decisions/0012-responsive-design-mobile-and-desktop.md)
 - [ ] About link on every page, [ADR 0009](decisions/0009-about-this-page-for-every-section.md)
