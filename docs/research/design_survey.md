@@ -48,6 +48,17 @@ _Updated 2026-10-27 for issue [#37](https://github.com/howardisaacson/tachocline
 5. **Dark gradient overlays and a fixed transparent header** as above.
 6. **Source and download links** under every chart, so readers can see where the data came from.
 
+### Main data visual: four radial Kp plots (decided 2026-10-27, [ADR 0020](../decisions/0020-radial-time-plots-for-space-weather.md))
+SpaceWeatherLive already plots activity with time on the x-axis and the value on the y-axis, so TI will not copy that. The main visual is **four radial plots**, one each for **a day, a month, a year and 11 years**:
+- Angle is time. Zero is at the top (12 o'clock) and time runs clockwise.
+- Distance from the center is the activity indicator. The first indicator is the **Kp index**.
+- The radius auto-scales: the largest value in the window sits at the circle's edge. The scale rings and the maximum are always labeled.
+- Radar-sweep behavior: a bright "now" head moves clockwise, the trace stays until the head overwrites it, and older data fades.
+- Layout: 2×2 on wide screens (1024 px and up), one column on mobile (below 640 px). Each plot has a tap or hover readout, a data table, a CSV download and an "About this page" link.
+- Open point: confirm that each lap starts on a fixed UTC boundary (see ADR 0020), so that overwriting makes sense.
+
+On the SpaceX-style tiles this works as the hero: the radial plots sit over the dark background, and the header status chip shows the live Kp value.
+
 ### Tech stack note
 spacex.com is built with Angular, served through Cloudflare, with a Strapi CMS for content. TI uses React (ADR 0007), so borrow the patterns and not the stack. Never reuse SpaceX's font files, images or video.
 
