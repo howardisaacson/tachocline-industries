@@ -46,7 +46,7 @@ _Updated 2026-10-27 for issue [#37](https://github.com/howardisaacson/tachocline
 3. **Spec tables:** Roboto Mono, uppercase, thin dividers, for satellite orbit data, flare lists and data-source details.
 4. **Tile stack on the homepage:** one tile each for Space Weather, Satellite Drag Watch, Data Pipeline, Research, and Data Science Workflow.
 5. **Dark gradient overlays and a fixed transparent header** as above.
-6. **Source and download links** under every chart (ADR 0009 and the Open Data idea from the earlier survey).
+6. **Source and download links** under every chart, so readers can see where the data came from.
 
 ### Tech stack note
 spacex.com is built with Angular, served through Cloudflare, with a Strapi CMS for content. TI uses React (ADR 0007), so borrow the patterns and not the stack. Never reuse SpaceX's font files, images or video.
