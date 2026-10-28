@@ -1,86 +1,92 @@
 # Tachocline Industries: Design Survey
-_Compiled 2026-10-20. URL status codes checked with curl that day. ✅ = 200 OK. ⚠️ = responded but blocked or redirected to bots (403/202/301). ❌ = 404 or no response. Award claims are marked **[verified]** only where the award page itself loaded. Claims marked **[reputation, unverified]** should be checked by hand before you quote them._
 
-## A. Sites recognized for excellent design
+_Updated 2026-10-27 for issue [#37](https://github.com/howardisaacson/tachocline-industries/issues/37). Decision: the TI frontend will resemble the structure and visual language of [spacex.com](https://www.spacex.com). The earlier list of design-award sites and all award claims were removed. Space and science links are kept below as references. The links under "Space and science references" loaded when checked on 2026-10-26, except where a note says otherwise._
 
-### 1. Stripe: https://stripe.com ✅
-- **Why it's acclaimed:** It has an Awwwards profile at https://www.awwwards.com/sites/stripe ✅ **[verified page exists]**, and it's cited all over the industry as the reference for developer-focused marketing sites.
-- **Patterns:** an animated gradient "mesh" hero; a tight 12-column grid; a custom sans typeface (Söhne); code samples placed next to marketing copy; diagonal section breaks; menus that open as cards on hover, which become an accordion drawer on mobile.
-- **What TI could borrow:** an animated gradient hero shaped like solar plasma; code snippets shown beside the charts ("here's the query behind this"), which is good for showing engineering skill.
+## Part 1. SpaceX design brief (for Cursor and other coding agents)
 
-### 2. Linear: https://linear.app ✅
-- **Why it's acclaimed:** It's widely credited with starting the "Linear look": a dark theme, glowing accents and very sharp typography. **[reputation, unverified]**. The Awwwards slug I guessed returned 404, so I have no award to cite.
-- **Patterns:** a near-black background; one accent color; the Inter typeface with tight letter spacing; product screenshots with a subtle 3D tilt; elements that reveal as you scroll; a very fast, minimal nav.
-- **What TI could borrow:** a dark "observatory" theme with a single solar-orange accent; restrained motion.
+**How to use this brief:** build TI's frontend (React, per ADR 0007) so its layout and feel follow spacex.com. Follow the patterns. Do **not** copy SpaceX's images, video, text, logos or the licensed D-DIN font. Use TI's own assets and free fonts. See AGENTS.md for repo rules, and ADR 0012 for the responsive breakpoints (640 and 1024 px) already agreed. Where this brief gives SpaceX's breakpoints, treat them as reference only and keep TI's.
 
-### 3. Apple: https://www.apple.com ✅
-- **Why it's acclaimed:** It has a long run of Webby honors and a reputation for product storytelling **[reputation, unverified; Webby winners index https://www.webbyawards.com/winners/ ✅ can be searched]**.
-- **Patterns:** scroll-driven "sticky" storytelling sections; huge headlines in SF Pro; lots of white or black space; images that swap per breakpoint (art direction by screen size); a global nav that collapses to a hamburger menu.
-- **What TI could borrow:** a scroll-told story of a solar storm ("flare → CME → Kp spike → satellite drag").
+**Confidence note:** spacex.com is a JavaScript single-page app, so its HTML is an empty shell. This analysis was read from its CSS, JS bundles, HTTP headers and public CMS JSON, **not from a rendered screenshot**. Scroll behavior, video use per section, and sticky or hide-on-scroll header behavior were not confirmed. Check the live site in a browser before relying on those details.
 
-### 4. Vercel: https://vercel.com ✅
-- **Why it's acclaimed:** Its design system (Geist) is respected by developers **[reputation, unverified]**.
-- **Patterns:** a monochrome palette; the Geist Sans and Geist Mono fonts; grid-line backgrounds; live deploy and status widgets; excellent dark mode.
-- **What TI could borrow:** mono fonts for data readouts, and a "status page" layout for current space weather.
+### Visual language
+- Black everywhere. SpaceX sets `background-color: #000` with near-white text and has **no accent color**.
+- Palette is one tinted white at different opacities: `#f0f0fa` (rgba 240,240,250) at 100%, then 90/80/70/60/50/35/30/15/10% steps. Row dividers and button borders use white at 25% to 35% opacity. Secondary button fill is `#232323`.
+- Fonts SpaceX uses: D-DIN (body), D-DIN Bold (h1, h2), Roboto Mono (tables, countdowns, small labels). D-DIN is licensed. **For TI use Barlow** (free, DIN-like, on Google Fonts) and **Roboto Mono** (free).
+- Type: headings are UPPERCASE, bold, tight line height (about 95%) with a little letter spacing. h1 and h2 about 3rem. The big hero heading is about 100px on desktop and 50px on mobile. Nav links are 13px, bold, uppercase, wide tracking (about 0.09em). Small mono labels are 12px uppercase.
+- Imagery: full-bleed photo or video behind text, with dark gradient overlays (transparent to black at the bottom or sides) so text stays readable. Separate desktop and mobile images exist for each hero.
+- Buttons: 48px tall, 4px corner radius, 1px border at 35% white, transparent or near-black fill. On hover the button fills white and the text turns black, with a smooth ease-out transition of about 0.4 to 0.5 seconds.
+- Header: fixed over the content, transparent with a top-down dark gradient and a light background blur.
 
-### 5. Figma: https://www.figma.com ✅
-- **Why it's acclaimed:** Webby and Awwwards recognition is commonly cited **[reputation, unverified]**.
-- **Patterns:** bright, playful color blocks; interactive product demos embedded in the page; a strong system of reusable components.
-- **What TI could borrow:** interactive demos instead of static images.
+### Page and navigation structure
+- Header: logo on the left, nav links, and a live status chip on the right (SpaceX shows the next launch). Hovering a nav item opens a dropdown.
+- SpaceX's main nav: Vehicles, Human Spaceflight, Starlink, Company, and others; routes include `/launches`, `/vehicles/*`, `/humanspaceflight`, `/updates`, `/careers`, `/mission`.
+- Footer: small, dark, with a social icon button, a few legal and careers links, and copyright.
+- **Suggested TI mapping** (suggestion, not from SpaceX): Space Weather (live dashboard), Satellites (orbit and decay data), Data (pipeline, sources, downloads), Research, Workflow (data science workflow, ADRs), About. Keep the "About this page" link on every section (ADR 0009).
 
-Award directories for further checking: Awwwards https://www.awwwards.com/sites/stripe ✅, CSS Design Awards https://www.cssdesignawards.com ⚠️(202), Webby winners https://winners.webbyawards.com ✅.
+### Layout patterns
+- The homepage is a stack of full-viewport tiles. Each tile is a background image or video with **one heading, one sentence and one call-to-action button** (SpaceX uses "EXPLORE").
+- Text is placed in fixed slots on the tile: center, left-middle, left-bottom, right-middle and so on. Text blocks are about 520px wide at most, about 100px from the screen edge, and the content column maxes out near 1400px.
+- SpaceX tiles are at least the full screen height (`max(100svh, 941px)`). On mobile the height becomes automatic and left or right text blocks become full-width.
+- Launch pages use tables in Roboto Mono, uppercase, with thin white (25%) lines between rows, plus filter dropdowns and a pager.
+- Status chip: a small outlined pill that shows a blinking LIVE dot or a countdown. Digits roll like an odometer. Hovering opens a small blurred panel of cards.
+- Other components seen: a horizontal step timeline with dots, stats tiles, and carousels.
 
-## B. Highly rated science and science-data sites
+### Motion
+- Heading, subheading and button fade or slide in one after another on load (about 0.5 to 1 second each, with short delays).
+- Background video and carousels exist. Parallax is only confirmed on one SpaceX tracker page, so don't assume it for the homepage.
+- Keep motion restrained, and honor `prefers-reduced-motion`.
 
-### 1. NASA's Eyes: https://eyes.nasa.gov ✅
-- **Why it's acclaimed:** NASA web properties have won many Webby awards; Eyes on the Solar System is often featured **[reputation, unverified for a specific award]**.
-- **Patterns:** a full-screen WebGL 3D scene; a timeline scrubber; search for spacecraft; minimal overlay UI. It is heavy on mobile but works.
-- **What TI could borrow:** a 3D Earth with satellite orbits and a time scrubber that is synced to the Kp chart.
+### Responsive behavior
+- SpaceX's CSS breakpoints are 1500, 1350, 1279 and 961px. Below 1279px the nav becomes a full-screen black overlay opened with a hamburger button. Below 961px sections stack, the hero heading shrinks, and the footer becomes a column. The launch chip becomes a plain list on small screens.
+- TI rule (H5): every page must be specified and tested for both mobile and desktop browsers.
 
-### 2. NOAA SWPC: https://www.swpc.noaa.gov ✅
-- **Why it's acclaimed:** It is the official US space-weather authority and the most-used dashboard for the field. Its design is dated, but its information structure is the domain standard.
-- **Patterns:** a dashboard of tiles; the 1–5 G/S/R scales with color codes; image loops; "Products" pages (for example https://www.swpc.noaa.gov/products/planetary-k-index ✅).
-- **What TI could borrow:** NOAA's G/S/R scale vocabulary and colors. TI can offer a cleaner, mobile-first version of this dashboard.
+### Suggested TI components (suggestions, built from the patterns above)
+1. **Hero:** full-screen dark image of the Sun with a very large live readout such as the current Kp index and G-scale, one "EXPLORE" button.
+2. **Status chip in the header:** "LIVE · Kp 4 · G1" with a blinking dot. The hover panel shows solar wind speed, X-ray flux class and the next expected event.
+3. **Spec tables:** Roboto Mono, uppercase, thin dividers, for satellite orbit data, flare lists and data-source details.
+4. **Tile stack on the homepage:** one tile each for Space Weather, Satellite Drag Watch, Data Pipeline, Research, and Data Science Workflow.
+5. **Dark gradient overlays and a fixed transparent header** as above.
+6. **Source and download links** under every chart (ADR 0009 and the Open Data idea from the earlier survey).
 
-### 3. Our World in Data: https://ourworldindata.org ✅
-- **Why it's acclaimed:** It is widely praised by data-visualization practitioners and has received Webby recognition **[reputation, unverified]**. It is open source (the Grapher tool).
-- **Patterns:** a chart/map/table toggle on every chart; download CSV and embed buttons; a source note under every chart; clear, readable serif text.
-- **What TI could borrow:** "download this data" and "source" links on every plot. This is a strong signal of data-engineering skill.
+### Tech stack note
+spacex.com is built with Angular, served through Cloudflare, with a Strapi CMS for content. TI uses React (ADR 0007), so borrow the patterns and not the stack. Never reuse SpaceX's font files, images or video.
 
-### 4. Helioviewer: https://helioviewer.org ✅
-- **Why it's acclaimed:** It is the NASA/ESA-funded standard tool for browsing solar imagery from SDO and SOHO. It is recognized in the science community, not through design awards.
-- **Patterns:** a layered image viewer; a date picker; a public API; movie export.
-- **What TI could borrow:** embedding or calling the Helioviewer API to show the Sun on the day of each storm.
+### SpaceX links
+- Site: <https://www.spacex.com>
+- Homepage content feed (public CMS JSON): <https://content.spacex.com/api/spacex-website/homepage-tiles>
+- Third-party write-ups of its design system (these disagree with the CSS in places, for example about button shape and overlays, so treat them as secondary):
+  - <https://design.fish/design-md/spacex-com>
+  - <https://github.com/VoltAgent/awesome-design-md/blob/main/design-md/spacex/DESIGN.md>
+  - <https://github.com/beefiker/superloopy/blob/main/skills/superloopy-frontend/references/design/spacex.md>
+  - <https://opendesigner.io/design-systems/spacex>
+  - <https://www.shadcn.io/design/spacex>
+- Related space product sites worth viewing next to it: <https://starlink.com/> and its coverage map <https://starlink.com/map>.
+- Free fonts for TI: [Barlow](https://fonts.google.com/specimen/Barlow) and [Roboto Mono](https://fonts.google.com/specimen/Roboto+Mono).
 
-### 5. Quanta Magazine: https://www.quantamagazine.org ✅
-- **Why it's acclaimed:** It is known for excellent science explainers and interactives **[reputation, unverified for a specific award]**.
-- **Patterns:** an editorial layout with large illustrations; generous serif body text; inline interactives.
-- **What TI could borrow:** the editorial "explainer" format for the physics pages.
+## Part 2. Space and science references
 
-Also checked: ESA https://www.esa.int ✅, Nature https://www.nature.com ✅.
+These are worth viewing for data presentation and for data sources. No award claims are made for any of them.
 
-## Comparison table
-| Site | Theme | Typography | Data viz | Navigation | Mobile | Borrow for TI |
-|---|---|---|---|---|---|---|
-| Stripe | Light + gradient | Custom sans | Code + diagrams | Card menus | Drawer | Gradient hero, code next to charts |
-| Linear | Dark | Inter, tight | Screenshots | Minimal | Clean stacks | Dark theme, single accent |
-| Apple | B/W | SF Pro, huge | Scroll story | Global bar | Art-directed | Storm scrollytelling |
-| Vercel | Mono | Geist + Mono | Live widgets | Top bar | Good | Status-page layout |
-| Figma | Bright | Custom | Interactive demos | Mega menu | Good | Interactive demos |
-| NASA Eyes | Dark 3D | Sans | WebGL 3D | Overlay | Heavy | 3D orbits + time scrubber |
-| NOAA SWPC | Gov | Default | Tiles, loops | Dense | Weak | G/S/R scales |
-| OWID | Light | Serif + sans | Chart/map/table | Search | Excellent | Download/source on each chart |
-| Helioviewer | Dark | Sans | Image layers | Tool UI | Limited | Solar imagery API |
-| Quanta | Light editorial | Serif | Interactives | Simple | Excellent | Explainer pages |
+### Space weather and solar
+- NOAA SWPC: <https://www.swpc.noaa.gov> (official US space-weather source; its G/S/R scales are the domain vocabulary; example product page <https://www.swpc.noaa.gov/products/planetary-k-index>)
+- SpaceWeatherLive: <https://www.spaceweatherlive.com/> (live solar and aurora data; aurora oval page <https://www.spaceweatherlive.com/en/auroral-activity/auroral-oval.html>)
+- ESA Space Weather portal: <https://swe.ssa.esa.int/>
+- Helioviewer: <https://helioviewer.org> (solar imagery viewer with a public API; it redirects to a NASA-hosted address)
 
-## Three design directions for TI
-1. **"Mission Control" (dark dashboard, influenced by Linear, Vercel and SWPC).** Near-black background, a solar-orange accent and mono data readouts.
-   - Desktop: a 3-column grid of live tiles (Kp, F10.7, X-ray flux, satellites tracked).
-   - Mobile: tiles stack into one column with swipeable mini-charts, and the most urgent alert is pinned at the top.
-2. **"Storm Story" (scrollytelling, influenced by Apple and Quanta).** One long narrative following the May 2024 storm from the Sun to satellite drag to the power grid.
-   - Desktop: a sticky chart on the left while text scrolls on the right.
-   - Mobile: the chart sits full-width with text cards over it, and images are lighter.
-3. **"Open Data Lab" (influenced by OWID and Stripe).** Each chart is shown with its source, a CSV/API download, and the Python/SQL snippet that produced it.
-   - Desktop: the chart and code side by side.
-   - Mobile: chart/code/data tabs.
-   - This shows off pipeline skills the most clearly.
+### Satellites and orbits
+- Stuff in Space (maintained fork): <https://ajmas.github.io/StuffInSpace/> and source <https://github.com/ajmas/StuffInSpace> (3D view of orbiting objects from Space-Track data; the original stuffin.space did not resolve when checked)
+- CelesTrak: <https://celestrak.org/> (orbital elements <https://celestrak.org/NORAD/elements/>, conjunction reports <https://celestrak.org/SOCRATES/>)
+- Space-Track: <https://www.space-track.org/> (official catalog and API; only the login page was confirmed to load)
+- Heavens-Above: <https://www.heavens-above.com/> (satellite pass tracking; very dense layout, so useful as a "what to avoid" example)
+
+### Data visualization and storytelling
+- NASA Eyes: <https://eyes.nasa.gov> (real-time 3D with a time scrubber)
+- NASA Worldview: <https://worldview.earthdata.nasa.gov/> (layered data with a time slider)
+- Our World in Data: <https://ourworldindata.org> (source and CSV download on every chart)
+- The Pudding: <https://pudding.cool/> (data storytelling)
+- Quanta Magazine: <https://www.quantamagazine.org> (editorial science explainers)
+- Grafana Play: <https://play.grafana.org/> (live demo dashboards) and the dashboard gallery <https://grafana.com/grafana/dashboards/>
+- Planet Explorer: <https://www.planet.com/explorer/> (satellite imagery browser)
+- Information is Beautiful Awards showcase: <https://www.informationisbeautifulawards.com/> (gallery of data visualizations; used here only as a source of examples)
+
+_Not checked or not loading as of 2026-10-26: Observable (<https://observablehq.com/>, returned a bot-check error) and the New York Times graphics page (403)._
