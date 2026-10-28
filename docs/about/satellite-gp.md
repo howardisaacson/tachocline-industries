@@ -24,7 +24,7 @@ The stored altitudes are kilometers above Earth's equatorial radius. For a nearl
 | Upstream update cadence | CelesTrak checks for new GP data once every two hours ([gp-data-formats.php](https://celestrak.org/NORAD/documentation/gp-data-formats.php)). |
 | Our polling cadence | Every 120 minutes, on startup and then on that interval. The number is `POLL_MINUTES` in `celestrak_gp.py`. It does not read `SWPC_POLL_MINUTES`. |
 | End-to-end latency | Not measured here. A new element set waits for the next two-hour poll. |
-| Processing level | Real-time mean elements (OMM JSON). Perigee and apogee are derived. Space-Track `gp_history` is not fetched. |
+| Processing level | Real-time mean elements (OMM JSON). Perigee and apogee are derived. Space-Track `gp_history` adds the last 400 days when the account is set. |
 | History we keep | Whatever the poller has upserted into the Docker volume `pgdata`, from the first successful run forward. Raw copies stay under `data/raw/celestrak_gp/<YYYY-MM-DD>/`. There is no retention job and no backfill. |
 
 ### TLE and element-set references
@@ -46,7 +46,7 @@ flowchart LR
     POLL -->|pydantic, then two-body altitude| DB[("PostgreSQL + TimescaleDB<br/>satellite_gp")]
     POLL -->|one ingest_log row per catalog number| LOG[("ingest_log")]
 ```
-CelesTrak publishes one JSON array per catalog number. The poller saves each body unchanged, validates the object, computes perigee and apogee, and upserts on `(epoch, norad_cat_id)`. The same run writes one `ingest_log` row per catalog number it attempted. Grafana's health query skips sources whose names start with `gp-`. The **Orbit decay** dashboard reads `satellite_gp` and `planetary_kp_3h`. This path has no continuous aggregate and no React page. `GET /api/satellite-perigee` returns the two altitudes ([API](api.md)). Space-Track is not in the diagram: `gp_history` needs an account and this issue leaves that backfill optional.
+CelesTrak publishes one JSON array per catalog number. The poller saves each body unchanged, validates the object, computes perigee and apogee, and upserts on `(epoch, norad_cat_id)`. The same run writes one `ingest_log` row per catalog number it attempted. Grafana's health query skips sources whose names start with `gp-`. The **Orbit decay** dashboard reads `satellite_gp` and `planetary_kp_3h`. This path has no continuous aggregate. `GET /api/satellite-perigee` returns the two altitudes. `GET /api/satellite-decay` returns the change in kilometers per day ([API](api.md)). Space-Track `gp_history` is a separate daily job for the same table. It runs when `SPACETRACK_USER` and `SPACETRACK_PASSWORD` are set, and it requests the last 400 days. Empty credentials skip that job.
 
 ## 5. Tech used and why
 | Layer | Technology | Why (one line) | Decision |
@@ -59,7 +59,7 @@ CelesTrak publishes one JSON array per catalog number. The poller saves each bod
 Key code: [`ingest/ti_ingest/celestrak_gp.py`](../../ingest/ti_ingest/celestrak_gp.py), [`ingest/ti_ingest/elements.py`](../../ingest/ti_ingest/elements.py), [`ingest/ti_ingest/models.py`](../../ingest/ti_ingest/models.py) (`GpRow`), [`ingest/ti_ingest/load.py`](../../ingest/ti_ingest/load.py), [`ingest/ti_ingest/__main__.py`](../../ingest/ti_ingest/__main__.py), [`db/migrations/0004_satellite_gp.sql`](../../db/migrations/0004_satellite_gp.sql).
 
 ## 6. Known limitations
-- No new rows while the local stack is off ([ADR 0002](../decisions/0002-build-locally-first-with-docker-compose.md)). There is no Space-Track `gp_history` backfill, so a gap stays a gap. `SPACETRACK_USER` and `SPACETRACK_PASSWORD` in `.env.example` are unused.
+- No new rows while the local stack is off ([ADR 0002](../decisions/0002-build-locally-first-with-docker-compose.md)). Without `SPACETRACK_USER` and `SPACETRACK_PASSWORD`, history is only what the two-hour CelesTrak poll has collected. The Space-Track job asks for 400 days, not the whole catalog.
 - The altitude is two-body: `n` in radians per second is mean motion times `2π / 86400`, `a = (μ / n²)^(1/3)`, perigee is `a(1-e) − R`, apogee is `a(1+e) − R`. μ is 398600.0 km³/s² and R is 6378.137 km, from the NASA fact sheet. A TLE mean motion is Kozai. SGP4 converts it before propagating ([AIAA 2006-6753](https://celestrak.org/publications/AIAA/2006-6753/AIAA-2006-6753.pdf)). The difference is small beside a reboost. Do not quote these kilometers as an SGP4 state.
 - A 4xx is logged and not retried. HTTP 429 skips the catalog numbers still left in that run. The next try is two hours later. The solar-wind, GOES, and Kp jobs are separate schedule entries.
 - If Postgres is down, the raw files stay on disk and that run is not upserted.

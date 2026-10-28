@@ -6,11 +6,11 @@ import { kpRequestPaths } from "./kp.js";
 
 export async function loadKp(nowMs) {
   const paths = kpRequestPaths(nowMs);
-  const [minute, threeHour] = await Promise.all([
+  const [minute, gfz] = await Promise.all([
     readPage(paths.minute),
-    readPage(paths.threeHour),
+    readPage(paths.gfz),
   ]);
-  return { minute, threeHour };
+  return { minute, gfz };
 }
 
 async function readPage(path) {

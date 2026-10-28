@@ -44,8 +44,11 @@ from typing import Protocol, Self
 from pydantic import ValidationError
 
 from ti_ingest.celestrak_gp import CATALOG_NUMBERS
+from ti_ingest.gfz_kp import PRODUCT_NAME as GFZ_PRODUCT
+from ti_ingest.gfz_kp import parse_gfz_text
 from ti_ingest.models import (
     AlertRow,
+    GfzKpRow,
     GpRow,
     Kp1mRow,
     Kp3hRow,
@@ -54,6 +57,7 @@ from ti_ingest.models import (
     WindRow,
     XrayRow,
 )
+from ti_ingest.spacetrack_gp import product_name as gp_hist_name
 from ti_ingest.swpc import FetchResult
 
 logger = logging.getLogger(__name__)
@@ -156,6 +160,16 @@ ON CONFLICT (epoch, norad_cat_id) DO UPDATE SET
     apogee_altitude_km = EXCLUDED.apogee_altitude_km
 """.strip()
 
+GFZ_UPSERT = """
+INSERT INTO gfz_kp_3h (
+    time_tag, kp, ap, definitive
+) VALUES (%s, %s, %s, %s)
+ON CONFLICT (time_tag) DO UPDATE SET
+    kp = EXCLUDED.kp,
+    ap = EXCLUDED.ap,
+    definitive = EXCLUDED.definitive
+""".strip()
+
 _UPSERTS: dict[str, tuple[type[StoredRow], str]] = {
     "rtsw_wind_1m": (WindRow, WIND_UPSERT),
     "rtsw_mag_1m": (MagRow, MAG_UPSERT),
@@ -163,9 +177,12 @@ _UPSERTS: dict[str, tuple[type[StoredRow], str]] = {
     "planetary_k_index_1m": (Kp1mRow, KP_1M_UPSERT),
     "noaa-planetary-k-index": (Kp3hRow, KP_3H_UPSERT),
     "alerts": (AlertRow, ALERT_UPSERT),
+    GFZ_PRODUCT: (GfzKpRow, GFZ_UPSERT),
 }
 # One feed name per catalog number, all using the same INSERT.
+# gp-hist- is the Space-Track backfill of the same elements.
 _UPSERTS.update({f"gp-{catnr}": (GpRow, GP_UPSERT) for catnr in CATALOG_NUMBERS})
+_UPSERTS.update({gp_hist_name(catnr): (GpRow, GP_UPSERT) for catnr in CATALOG_NUMBERS})
 
 _ERROR_LIMIT = 500
 
@@ -211,6 +228,10 @@ def parse_body(product: str, model: type[StoredRow], body: bytes) -> ParsedFile:
 
     Does not touch the database. The bytes are the landed file, unchanged.
     """
+    if product == GFZ_PRODUCT:
+        rows, rejected, error = parse_gfz_text(body)
+        return ParsedFile(len(rows) + rejected, tuple(rows), rejected, error)
+
     try:
         payload = json.loads(body)
     except (json.JSONDecodeError, UnicodeDecodeError) as exc:

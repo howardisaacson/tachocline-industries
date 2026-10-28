@@ -14,6 +14,8 @@ from fastapi.testclient import TestClient
 from ti_api.main import app, get_connection, utc_now
 from ti_api.queries import (
     ALERTS_SQL,
+    DECAY_SQL,
+    GFZ_KP_SQL,
     GOES_SQL,
     HEALTH_SQL,
     INGEST_LOG_SQL,
@@ -98,6 +100,8 @@ def test_queries_are_selects_with_placeholders() -> None:
         KP_1M_SQL,
         KP_3H_SQL,
         ALERTS_SQL,
+        DECAY_SQL,
+        GFZ_KP_SQL,
         PERIGEE_SQL,
     ):
         assert sql.startswith("SELECT")
@@ -356,6 +360,52 @@ def test_kp_3h_allows_a_year_and_rejects_a_longer_range(client: TestClient) -> N
     assert minute.status_code == 422
 
 
+def test_gfz_window_covers_eleven_years_and_decay_looks_back(
+    client: TestClient,
+) -> None:
+    gfz = client.get(
+        "/api/kp-gfz",
+        params={
+            "from": "2015-10-27T00:00:00Z",
+            "to": "2026-10-27T00:00:00Z",
+            "limit": 40000,
+        },
+    )
+    assert gfz.status_code == 200
+    assert gfz.json()["citation"] == "10.5880/Kp.0001"
+    assert client.conn.calls[-1][0] == GFZ_KP_SQL  # type: ignore[attr-defined]
+    too_long = client.get(
+        "/api/kp-gfz",
+        params={"from": "2000-01-01T00:00:00Z", "to": "2026-01-01T00:00:00Z"},
+    )
+    assert too_long.status_code == 422
+
+    client.conn.rows = [  # type: ignore[attr-defined]
+        {
+            "epoch": MINUTE,
+            "norad_cat_id": 25544,
+            "object_name": "ISS (ZARYA)",
+            "object_id": "1998-067A",
+            "perigee_altitude_km": 414.8,
+            "km_per_day": -0.04,
+        }
+    ]
+    decay = client.get(
+        "/api/satellite-decay",
+        params={
+            "from": "2026-10-01T00:00:00Z",
+            "to": "2026-10-26T00:00:00Z",
+            "norad_cat_id": 25544,
+        },
+    )
+    assert decay.status_code == 200
+    assert decay.json()["rows"][0]["km_per_day"] == -0.04
+    assert decay.json()["rate_unit"] == "kilometers per day"
+    params = client.conn.calls[-1][1]  # type: ignore[attr-defined]
+    assert params[2] == 25544
+    assert params[0] == params[3] - timedelta(days=14)
+
+
 def test_openapi_lists_the_read_routes(client: TestClient) -> None:
     docs = client.get("/docs")
     assert docs.status_code == 200
@@ -374,6 +424,8 @@ def test_openapi_lists_the_read_routes(client: TestClient) -> None:
         "/api/kp-3h",
         "/api/alerts",
         "/api/satellite-perigee",
+        "/api/kp-gfz",
+        "/api/satellite-decay",
     }
     for path in paths:
         assert list(paths[path]) == ["get"]

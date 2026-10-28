@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { loadKp } from "./api.js";
 import {
   MONTH_MS,
+  YEAR_MS,
   gScale,
   radialBins,
   samplesFromRows,
@@ -23,18 +24,27 @@ const PLOTS = [
     id: "month",
     title: "30 days",
     lapLabel: "1st",
-    note: "3-hour Kp. The lap starts on the 1st of the month, UTC. This ring is the latest 30 days.",
+    note: "GFZ 3-hour Kp. The lap starts on the 1st of the month, UTC. This ring is the latest 30 days.",
     valueKey: "kp",
-    source: "threeHour",
+    source: "gfz",
     windowMs: MONTH_MS,
   },
   {
     id: "year",
     title: "One year",
     lapLabel: "1 Jan",
-    note: "Daily maximum of 3-hour Kp. The lap starts on 1 January UTC. Empty arc means Tachocline has not stored that day.",
+    note: "Daily maximum of GFZ 3-hour Kp. The lap starts on 1 January UTC.",
     valueKey: "kp",
-    source: "threeHour",
+    source: "gfz",
+    windowMs: YEAR_MS,
+  },
+  {
+    id: "solar",
+    title: "11 years",
+    lapLabel: "1932",
+    note: "Daily maximum of GFZ Kp across 11 years of 365 days. The lap is measured from 1 January 1932. A nowcast is still Kp, and the file replaces it later.",
+    valueKey: "kp",
+    source: "gfz",
   },
 ];
 
@@ -111,8 +121,8 @@ export function App() {
           </div>
           <p className="section-copy">
             Each ring auto-scales so the largest stored value reaches the edge.
-            Gold through red is NOAA G1 and above. The 11-year ring waits on a
-            Kp backfill.
+            Gold through red is NOAA G1 and above. The day ring is SWPC’s
+            1-minute estimate. The longer rings are GFZ Kp.
           </p>
           {state.status === "loading" ? <p className="section-copy">Loading Kp…</p> : null}
           {failures.length > 0 ? (
@@ -251,7 +261,7 @@ function failedFeeds(state) {
   if (state.status !== "ready") return [];
   const names = [];
   if (!state.pages.minute.ok) names.push("1-minute Kp");
-  if (!state.pages.threeHour.ok) names.push("3-hour Kp");
+  if (!state.pages.gfz.ok) names.push("GFZ Kp");
   return names;
 }
 

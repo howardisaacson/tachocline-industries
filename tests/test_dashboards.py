@@ -178,6 +178,7 @@ def test_pipeline_health_reads_ingest_log_only() -> None:
     assert sql.startswith("SELECT")
     assert "FROM ingest_log" in sql
     assert sql.count("source NOT LIKE 'gp-%'") == 2
+    assert sql.count("source NOT LIKE 'gfz-%'") == 2
     assert "error IS NULL" in sql
     assert "solar_wind" not in sql
     assert "rtsw_mag_1m" not in sql

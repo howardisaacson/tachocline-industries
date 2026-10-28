@@ -131,6 +131,7 @@ def landing_path(
     product: str,
     *,
     source_dir: str = SOURCE_DIR,
+    suffix: str = ".json",
 ) -> Path:
     """``<raw_dir>/<source_dir>/<YYYY-MM-DD>/<timestamp>_<product>.json``.
 
@@ -143,7 +144,7 @@ def landing_path(
         raise ValueError("landing timestamps must be timezone-aware")
     utc = when.astimezone(UTC)
     directory = raw_dir / source_dir / utc.strftime("%Y-%m-%d")
-    filename = f"{utc.strftime('%Y%m%dT%H%M%SZ')}_{product}.json"
+    filename = f"{utc.strftime('%Y%m%dT%H%M%SZ')}_{product}{suffix}"
     return directory / filename
 
 
@@ -154,9 +155,10 @@ def write_raw(
     body: bytes,
     *,
     source_dir: str = SOURCE_DIR,
+    suffix: str = ".json",
 ) -> Path:
     """Save ``body`` unchanged. A crash mid-write leaves a ``.partial`` file."""
-    path = landing_path(raw_dir, when, product, source_dir=source_dir)
+    path = landing_path(raw_dir, when, product, source_dir=source_dir, suffix=suffix)
     path.parent.mkdir(parents=True, exist_ok=True)
     partial = path.with_suffix(path.suffix + ".partial")
     partial.write_bytes(body)

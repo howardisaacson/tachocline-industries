@@ -32,12 +32,18 @@ from ti_ingest.celestrak_gp import POLL_MINUTES as CELESTRAK_POLL_MINUTES
 from ti_ingest.celestrak_gp import poll_celestrak_gp
 from ti_ingest.celestrak_gp import startup_line as celestrak_startup_line
 from ti_ingest.db import connect
+from ti_ingest.gfz_kp import POLL_MINUTES as GFZ_POLL_MINUTES
+from ti_ingest.gfz_kp import fetch_gfz
+from ti_ingest.gfz_kp import startup_line as gfz_startup_line
 from ti_ingest.goes_xray import poll_goes_xray
 from ti_ingest.goes_xray import startup_line as goes_startup_line
 from ti_ingest.kp_alerts import poll_kp_alerts
 from ti_ingest.kp_alerts import startup_line as kp_startup_line
 from ti_ingest.load import DBConnection, store_fetch
 from ti_ingest.migrate import DatabaseSettings
+from ti_ingest.spacetrack_gp import POLL_MINUTES as SPACETRACK_POLL_MINUTES
+from ti_ingest.spacetrack_gp import SpaceTrackSettings, poll_spacetrack
+from ti_ingest.spacetrack_gp import startup_line as spacetrack_startup_line
 from ti_ingest.swpc import SwpcSettings, make_client, poll_swpc
 
 logger = logging.getLogger("ti_ingest")
@@ -46,6 +52,8 @@ JOB_ID = "swpc_rtsw"
 GOES_JOB_ID = "goes_xray"
 KP_JOB_ID = "kp_alerts"
 CELESTRAK_JOB_ID = "celestrak_gp"
+GFZ_JOB_ID = "gfz_kp"
+SPACETRACK_JOB_ID = "spacetrack_gp_history"
 # A start that is a few seconds late still runs once. Later than this,
 # the run is skipped instead of firing a backlog. coalesce does the same
 # if several intervals were missed while the process was down.
@@ -162,18 +170,57 @@ def add_celestrak_job(
     )
 
 
+def add_gfz_job(scheduler: BlockingScheduler, job: Callable[[], None]) -> Job:
+    """Register the daily GFZ file. Not ``SWPC_POLL_MINUTES``.
+
+    The file is the long Kp record. Polling it every five minutes would
+    re-download the same archive. There is no environment variable.
+    """
+    return scheduler.add_job(
+        job,
+        "interval",
+        minutes=GFZ_POLL_MINUTES,
+        id=GFZ_JOB_ID,
+        name="GFZ definitive Kp since 1932",
+        next_run_time=datetime.now(UTC),
+        max_instances=1,
+        coalesce=True,
+        misfire_grace_time=MISFIRE_GRACE_SECONDS,
+    )
+
+
+def add_spacetrack_job(scheduler: BlockingScheduler, job: Callable[[], None]) -> Job:
+    """Register the daily gp_history pull. Not the two-hour CelesTrak job."""
+    return scheduler.add_job(
+        job,
+        "interval",
+        minutes=SPACETRACK_POLL_MINUTES,
+        id=SPACETRACK_JOB_ID,
+        name="Space-Track gp_history for the starter satellite set",
+        next_run_time=datetime.now(UTC),
+        max_instances=1,
+        coalesce=True,
+        misfire_grace_time=MISFIRE_GRACE_SECONDS,
+    )
+
+
 def build_scheduler(
     poll_minutes: int,
     swpc_job: Callable[[], None],
     goes_job: Callable[[], None],
     kp_job: Callable[[], None],
     celestrak_job: Callable[[], None],
+    gfz_job: Callable[[], None],
+    spacetrack_job: Callable[[], None] | None = None,
 ) -> BlockingScheduler:
     scheduler = BlockingScheduler(timezone=UTC)
     add_swpc_job(scheduler, poll_minutes, swpc_job)
     add_goes_job(scheduler, poll_minutes, goes_job)
     add_kp_job(scheduler, poll_minutes, kp_job)
     add_celestrak_job(scheduler, celestrak_job)
+    add_gfz_job(scheduler, gfz_job)
+    if spacetrack_job is not None:
+        add_spacetrack_job(scheduler, spacetrack_job)
     return scheduler
 
 
@@ -356,6 +403,89 @@ def make_celestrak_job(
     return job
 
 
+def execute_gfz_job(
+    settings: SwpcSettings,
+    database: DatabaseSettings,
+    *,
+    transport: httpx.BaseTransport | None = None,
+    connect_fn: Callable[[DatabaseSettings], DBConnection] = connect,
+    now: datetime | None = None,
+) -> None:
+    """One GFZ run. Land the text file first, then open Postgres."""
+    started = now if now is not None else datetime.now(UTC)
+    with make_client(settings.user_agent, transport=transport) as client:
+        fetch = fetch_gfz(client, settings.raw_dir, started)
+    try:
+        conn = connect_fn(database)
+    except Exception:
+        logger.exception(
+            "Postgres is unavailable; raw GFZ file was kept and not upserted"
+        )
+        return
+    try:
+        store_fetch(conn, fetch, started_at=started)
+    except Exception:
+        logger.exception("GFZ store failed")
+    finally:
+        conn.close()
+
+
+def make_gfz_job(
+    settings: SwpcSettings, database: DatabaseSettings
+) -> Callable[[], None]:
+    """One GFZ run. The HTTP client closes before the next day."""
+
+    def job() -> None:
+        execute_gfz_job(settings, database)
+
+    return job
+
+
+def execute_spacetrack_job(
+    settings: SwpcSettings,
+    database: DatabaseSettings,
+    space: SpaceTrackSettings,
+    *,
+    transport: httpx.BaseTransport | None = None,
+    connect_fn: Callable[[DatabaseSettings], DBConnection] = connect,
+    now: datetime | None = None,
+) -> None:
+    """One gp_history run. Login, land the files, then open Postgres."""
+    started = now if now is not None else datetime.now(UTC)
+    with make_client(settings.user_agent, transport=transport) as client:
+        fetches = poll_spacetrack(client, settings.raw_dir, space, started)
+    if not fetches:
+        return
+    try:
+        conn = connect_fn(database)
+    except Exception:
+        logger.exception(
+            "Postgres is unavailable; raw Space-Track files were kept and not upserted"
+        )
+        return
+    try:
+        for fetch in fetches:
+            try:
+                store_fetch(conn, fetch, started_at=started)
+            except Exception:
+                logger.exception("Space-Track store failed for %s", fetch.product)
+    finally:
+        conn.close()
+
+
+def make_spacetrack_job(
+    settings: SwpcSettings,
+    database: DatabaseSettings,
+    space: SpaceTrackSettings,
+) -> Callable[[], None]:
+    """One gp_history run. The HTTP client closes before the next day."""
+
+    def job() -> None:
+        execute_spacetrack_job(settings, database, space)
+
+    return job
+
+
 def main() -> None:
     logging.basicConfig(
         level=logging.INFO,
@@ -367,12 +497,17 @@ def main() -> None:
     logger.info("%s", goes_startup_line(str(settings.raw_dir), settings.poll_minutes))
     logger.info("%s", kp_startup_line(str(settings.raw_dir), settings.poll_minutes))
     logger.info("%s", celestrak_startup_line(str(settings.raw_dir)))
+    logger.info("%s", gfz_startup_line(str(settings.raw_dir)))
+    space = SpaceTrackSettings.from_env()
+    logger.info("%s", spacetrack_startup_line(str(settings.raw_dir), space.enabled))
     scheduler = build_scheduler(
         settings.poll_minutes,
         make_job(settings, database),
         make_goes_job(settings, database),
         make_kp_job(settings, database),
         make_celestrak_job(settings, database),
+        make_gfz_job(settings, database),
+        make_spacetrack_job(settings, database, space) if space.enabled else None,
     )
 
     def handle_stop(signum: int, _frame: object) -> None:

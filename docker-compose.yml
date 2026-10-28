@@ -87,6 +87,10 @@ services:
       INGEST_USER_AGENT: ${INGEST_USER_AGENT:?INGEST_USER_AGENT is required in .env}
       SWPC_POLL_MINUTES: ${SWPC_POLL_MINUTES:?SWPC_POLL_MINUTES is required in .env}
       RAW_DATA_DIR: ${RAW_DATA_DIR:?RAW_DATA_DIR is required in .env}
+      # Optional. Empty skips the daily gp_history job. The password is
+      # not a process argument. See ingest/ti_ingest/spacetrack_gp.py.
+      SPACETRACK_USER: ${SPACETRACK_USER:-}
+      SPACETRACK_PASSWORD: ${SPACETRACK_PASSWORD:-}
     # Landing zone from ADR 0004, not database storage. The directory is
     # git-ignored except for data/raw/.gitkeep. The poller writes
     # swpc_rtsw/<date>/, goes_xray/<date>/, swpc_kp/<date>/, and

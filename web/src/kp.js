@@ -8,13 +8,17 @@
 export const DAY_MS = 24 * 60 * 60 * 1000;
 export const MONTH_MS = 30 * DAY_MS;
 export const YEAR_MS = 365 * DAY_MS;
+export const SOLAR_CYCLE_MS = 11 * YEAR_MS;
 export const MINUTE_LIMIT = 2000;
-export const KP3H_LIMIT = 3300;
+export const GFZ_LIMIT = 40000;
+// GFZ's file starts on this UT day. The 11-year lap is measured from it.
+export const GFZ_EPOCH_MS = Date.UTC(1932, 0, 1);
 
 const PLOTS = {
   day: { periodMs: DAY_MS, binMs: 10 * 60 * 1000, aggregate: "mean" },
   month: { periodMs: MONTH_MS, binMs: 3 * 60 * 60 * 1000, aggregate: "mean" },
   year: { periodMs: YEAR_MS, binMs: DAY_MS, aggregate: "max" },
+  solar: { periodMs: SOLAR_CYCLE_MS, binMs: DAY_MS, aggregate: "max" },
 };
 
 export function lapStartMs(nowMs, plot) {
@@ -25,6 +29,7 @@ export function lapStartMs(nowMs, plot) {
   if (plot === "day") return Date.UTC(year, month, day);
   if (plot === "month") return Date.UTC(year, month, 1);
   if (plot === "year") return Date.UTC(year, 0, 1);
+  if (plot === "solar") return GFZ_EPOCH_MS;
   throw new Error(`unknown plot ${plot}`);
 }
 
@@ -38,10 +43,10 @@ export function gScale(kp) {
 export function kpRequestPaths(nowMs) {
   const end = new Date(nowMs).toISOString();
   const dayFrom = new Date(nowMs - DAY_MS).toISOString();
-  const yearFrom = new Date(nowMs - YEAR_MS).toISOString();
+  const solarFrom = new Date(nowMs - SOLAR_CYCLE_MS).toISOString();
   return {
     minute: `/api/kp-1m?from=${encodeURIComponent(dayFrom)}&to=${encodeURIComponent(end)}&limit=${MINUTE_LIMIT}`,
-    threeHour: `/api/kp-3h?from=${encodeURIComponent(yearFrom)}&to=${encodeURIComponent(end)}&limit=${KP3H_LIMIT}`,
+    gfz: `/api/kp-gfz?from=${encodeURIComponent(solarFrom)}&to=${encodeURIComponent(end)}&limit=${GFZ_LIMIT}`,
   };
 }
 
