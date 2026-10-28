@@ -4,7 +4,7 @@
 >
 > Written from [the About template](../about-this-page-template.md) ([ADR 0009](../decisions/0009-about-this-page-for-every-section.md)).
 
-The panels live on the Grafana dashboard **Solar wind** (uid `solar-wind`), in the row directly under **Bz (GSM)**. There is no separate dashboard and no website page yet ([ADR 0007](../decisions/0007-grafana-now-react-later-for-frontend.md)). After `docker compose up`, open `http://127.0.0.1:3000` and the **Solar wind** dashboard. The dashboard link **About Kp and alerts** points here: [`docs/about/kp-alerts.md`](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/about/kp-alerts.md).
+The panels live on the Grafana dashboard **Solar wind** (uid `solar-wind`), in the row directly under **Bz (GSM)**. The public page draws the same Kp as three radial clocks ([space-weather.md](space-weather.md)). After `docker compose up`, open `http://127.0.0.1:3000` and the **Solar wind** dashboard. The dashboard link **About Kp and alerts** points here: [`docs/about/kp-alerts.md`](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/about/kp-alerts.md).
 
 ## 1. Purpose
 Shows the geomagnetic response next to the solar-wind driver. Bz is the north–south magnetic field at L1. Kp is a planetary index of how disturbed Earth's magnetic field is. Alerts are the text SWPC issues when a threshold is crossed. The page is for someone watching the dashboard and for an interviewer asking how a second time series was joined to the first. The Kp traces and the alert text are real-time SWPC products. They are not the definitive GFZ Kp and they are not a forecast.

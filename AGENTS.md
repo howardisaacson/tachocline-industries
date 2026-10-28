@@ -50,7 +50,7 @@ Per [ADR 0012](docs/decisions/0012-responsive-design-mobile-and-desktop.md):
 | Storage | PostgreSQL + TimescaleDB (+ PostGIS later) | [0005](docs/decisions/0005-postgresql-timescaledb-for-time-series-storage.md) |
 | Migrations | Numbered SQL files applied in order by `psql` | [0019](docs/decisions/0019-apply-sql-migrations-in-order.md) |
 | API | FastAPI | [0006](docs/decisions/0006-fastapi-for-backend-api.md) |
-| UI | Grafana now, React + Plotly.js later | [0007](docs/decisions/0007-grafana-now-react-later-for-frontend.md) |
+| UI | Grafana now; first React page in `web/` | [0007](docs/decisions/0007-grafana-now-react-later-for-frontend.md), [0021](docs/decisions/0021-react-vite-page-with-svg-radial-plots.md) |
 | Architecture | Modular monolith, a few containers | [0008](docs/decisions/0008-modular-monolith-before-microservices.md), [0014](docs/decisions/0014-when-to-use-more-than-one-docker-container.md) |
 | Docs | About page for every section | [0009](docs/decisions/0009-about-this-page-for-every-section.md) |
 | Version control | git + GitHub + Actions | [0010](docs/decisions/0010-use-git-and-github-from-day-one.md) |
