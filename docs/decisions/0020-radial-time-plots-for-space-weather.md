@@ -1,6 +1,6 @@
 # 0020. Show space weather as radial time plots, not time-on-x line charts
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-10-27
 - **Deciders:** Howard Isaacson
 

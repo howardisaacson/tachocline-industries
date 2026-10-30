@@ -71,27 +71,28 @@ What becomes easier? What becomes harder? What new risks or follow-up work does 
 | # | Title | Status |
 |---|---|---|
 | [0001](0001-record-architecture-decisions.md) | Record architecture decisions | Accepted |
-| [0002](0002-build-locally-first-with-docker-compose.md) | Build locally first with Docker Compose | Proposed |
-| [0003](0003-first-data-source-noaa-swpc-real-time-solar-wind.md) | First data source: NOAA SWPC real-time solar wind | Proposed |
-| [0004](0004-python-scheduled-pollers-with-raw-landing-zone.md) | Python scheduled pollers with a raw landing zone | Proposed |
-| [0005](0005-postgresql-timescaledb-for-time-series-storage.md) | PostgreSQL + TimescaleDB for time-series storage | Proposed |
-| [0006](0006-fastapi-for-backend-api.md) | FastAPI for the backend API | Proposed |
-| [0007](0007-grafana-now-react-later-for-frontend.md) | Grafana now, React later for the frontend | Proposed |
-| [0008](0008-modular-monolith-before-microservices.md) | Modular monolith before microservices | Proposed |
-| [0009](0009-about-this-page-for-every-section.md) | "About this page" for every section | Proposed |
-| [0010](0010-use-git-and-github-from-day-one.md) | Use git and GitHub from day one | Proposed |
-| [0011](0011-cloud-deployment-target-deferred-with-criteria.md) | Cloud deployment target: defer, define criteria | Proposed |
-| [0012](0012-responsive-design-mobile-and-desktop.md) | Responsive design: mobile and desktop specs | Proposed |
-| [0013](0013-design-by-studying-existing-sites.md) | Design by studying existing sites | Proposed |
-| [0014](0014-when-to-use-more-than-one-docker-container.md) | When to use more than one Docker container | Proposed |
-| [0015](0015-where-rust-could-fit.md) | Where Rust could fit | Proposed |
-| [0016](0016-data-science-workflow-as-first-class-feature.md) | Treat the data science workflow as a first-class, documented feature | Proposed |
-| [0017](0017-where-ai-agents-fit.md) | Where AI agents fit in TI | Proposed |
-| [0018](0018-plan-work-with-github-issues-milestones-projects.md) | Plan work with GitHub Issues, Milestones, and Projects | Proposed |
-| [0019](0019-apply-sql-migrations-in-order.md) | Apply schema changes as ordered SQL files | Proposed |
-| [0020](0020-radial-time-plots-for-space-weather.md) | Show space weather as radial time plots, not time-on-x line charts | Proposed |
-| [0021](0021-react-vite-page-with-svg-radial-plots.md) | Serve the first public page with Vite, and draw the radial plots in SVG | Proposed |
-| [0022](0022-store-gfz-kp-apart-from-swpc-estimates.md) | Store GFZ definitive Kp apart from the SWPC estimated index | Proposed |
-| [0023](0023-backfill-gp-history-and-serve-perigee-rate.md) | Backfill GP history from Space-Track and serve the perigee rate | Proposed |
+| [0002](0002-build-locally-first-with-docker-compose.md) | Build locally first with Docker Compose | Accepted |
+| [0003](0003-first-data-source-noaa-swpc-real-time-solar-wind.md) | First data source: NOAA SWPC real-time solar wind | Accepted |
+| [0004](0004-python-scheduled-pollers-with-raw-landing-zone.md) | Python scheduled pollers with a raw landing zone | Accepted |
+| [0005](0005-postgresql-timescaledb-for-time-series-storage.md) | PostgreSQL + TimescaleDB for time-series storage | Accepted |
+| [0006](0006-fastapi-for-backend-api.md) | FastAPI for the backend API | Accepted |
+| [0007](0007-grafana-now-react-later-for-frontend.md) | Grafana now, React later for the frontend | Accepted |
+| [0008](0008-modular-monolith-before-microservices.md) | Modular monolith before microservices | Accepted |
+| [0009](0009-about-this-page-for-every-section.md) | "About this page" for every section | Accepted |
+| [0010](0010-use-git-and-github-from-day-one.md) | Use git and GitHub from day one | Accepted |
+| [0011](0011-cloud-deployment-target-deferred-with-criteria.md) | Cloud deployment target: defer, define criteria | Accepted |
+| [0012](0012-responsive-design-mobile-and-desktop.md) | Responsive design: mobile and desktop specs | Accepted |
+| [0013](0013-design-by-studying-existing-sites.md) | Design by studying existing sites | Accepted |
+| [0014](0014-when-to-use-more-than-one-docker-container.md) | When to use more than one Docker container | Accepted |
+| [0015](0015-where-rust-could-fit.md) | Where Rust could fit | Accepted |
+| [0016](0016-data-science-workflow-as-first-class-feature.md) | Treat the data science workflow as a first-class, documented feature | Accepted |
+| [0017](0017-where-ai-agents-fit.md) | Where AI agents fit in TI | Accepted |
+| [0018](0018-plan-work-with-github-issues-milestones-projects.md) | Plan work with GitHub Issues, Milestones, and Projects | Accepted |
+| [0019](0019-apply-sql-migrations-in-order.md) | Apply schema changes as ordered SQL files | Accepted |
+| [0020](0020-radial-time-plots-for-space-weather.md) | Show space weather as radial time plots, not time-on-x line charts | Accepted |
+| [0021](0021-react-vite-page-with-svg-radial-plots.md) | Serve the first public page with Vite, and draw the radial plots in SVG | Accepted |
+| [0022](0022-store-gfz-kp-apart-from-swpc-estimates.md) | Store GFZ definitive Kp apart from the SWPC estimated index | Accepted |
+| [0023](0023-backfill-gp-history-and-serve-perigee-rate.md) | Backfill GP history from Space-Track and serve the perigee rate | Accepted |
+| [0024](0024-render-about-markdown-in-react.md) | Render About markdown in the React site with a small client router | Proposed |
 
 Tooling (optional): [adr-tools](https://github.com/npryce/adr-tools) is a small CLI that creates numbered ADR files. Copying the template by hand works just as well.

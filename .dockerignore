@@ -1,0 +1,14 @@
+# Used when Compose builds `web` with context `.` (ADR 0024).
+# Keep the build context small: only web/ and docs/about/ are needed.
+**
+!web/
+!web/**
+!docs/
+!docs/about/
+!docs/about/**
+
+web/node_modules
+web/dist
+web/test-results
+web/playwright-report
+web/e2e

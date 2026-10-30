@@ -1,6 +1,6 @@
 # 0023. Backfill GP history from Space-Track and serve the perigee rate
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-10-27
 - **Deciders:** Howard Isaacson
 

@@ -3,9 +3,13 @@ import { defineConfig } from "vite";
 
 // The page and the API are different ports during `npm run dev`.
 // Proxying /api keeps the browser on one origin, so the API does not need CORS.
+// server.fs.allow lets Vite read docs/about/ outside web/ (ADR 0024).
 export default defineConfig({
   plugins: [react()],
   server: {
+    fs: {
+      allow: [".."],
+    },
     proxy: {
       "/api": "http://127.0.0.1:8000",
     },

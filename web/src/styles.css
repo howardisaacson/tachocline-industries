@@ -288,6 +288,97 @@ td {
   max-width: 40rem;
 }
 
+.status-chip-quiet {
+  border-style: dashed;
+}
+
+.status-chip-quiet a {
+  text-decoration: none;
+}
+
+.about-page {
+  padding-top: 4.5rem;
+}
+
+.about-doc {
+  max-width: 48rem;
+}
+
+.about-doc h1,
+.about-doc h2,
+.about-doc h3 {
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.about-doc h1 {
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  margin: 0.25rem 0 1rem;
+}
+
+.about-doc h2 {
+  font-size: 1.35rem;
+  margin: 2rem 0 0.75rem;
+  border-top: 1px solid rgba(240, 240, 250, 0.25);
+  padding-top: 1rem;
+}
+
+.about-doc h3 {
+  font-size: 1.05rem;
+  margin: 1.25rem 0 0.5rem;
+}
+
+.about-doc p,
+.about-doc li {
+  max-width: 42rem;
+  color: rgba(240, 240, 250, 0.88);
+}
+
+.about-doc blockquote {
+  margin: 1rem 0;
+  padding: 0.75rem 1rem;
+  border-left: 2px solid rgba(240, 240, 250, 0.35);
+  color: rgba(240, 240, 250, 0.75);
+}
+
+.about-doc code {
+  font-family: "Roboto Mono", ui-monospace, monospace;
+  font-size: 0.9em;
+}
+
+.about-doc pre {
+  overflow-x: auto;
+  padding: 0.9rem 1rem;
+  border: 1px solid rgba(240, 240, 250, 0.25);
+  font-family: "Roboto Mono", ui-monospace, monospace;
+  font-size: 12px;
+}
+
+.about-doc table {
+  display: block;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
+.about-index {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0 0;
+}
+
+.about-index li {
+  border-top: 1px solid rgba(240, 240, 250, 0.25);
+}
+
+.about-index a {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  text-decoration: none;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
 .site-footer {
   padding: 2rem 1.25rem 3rem;
   font-size: 12px;
