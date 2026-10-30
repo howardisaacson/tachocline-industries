@@ -62,7 +62,7 @@ Per [ADR 0012](docs/decisions/0012-responsive-design-mobile-and-desktop.md):
 | AI agents | Small, read-only, evaluated agents; build with AGENTS.md | [0017](docs/decisions/0017-where-ai-agents-fit.md) |
 | Planning | GitHub Issues, Milestones, Project | [0018](docs/decisions/0018-plan-work-with-github-issues-milestones-projects.md) |
 
-All but 0001 are **Proposed**. Ask before building on a Proposed decision in a way that would be costly to undo.
+ADRs 0001–0023 are **Accepted**. Newer ADRs start as **Proposed**. Ask before building on a Proposed decision in a way that would be costly to undo.
 
 ## 7. Repo layout
 ```

@@ -1,10 +1,10 @@
 # About this page: Space weather
 
-> **Last reviewed:** 2026-10-27 · **Owner:** Howard Isaacson
+> **Last reviewed:** 2026-10-29 · **Owner:** Howard Isaacson
 >
 > Written from [the About template](../about-this-page-template.md) ([ADR 0009](../decisions/0009-about-this-page-for-every-section.md)).
 
-The page is the public site at `http://127.0.0.1:8080` (host port `WEB_PORT`). The in-page **About** link points at this file: [`docs/about/space-weather.md`](https://github.com/howardisaacson/tachocline-industries/blob/main/docs/about/space-weather.md). Grafana still has the time-on-x charts. This page does not replace them.
+The page is the public site at `http://127.0.0.1:8080` (host port `WEB_PORT`). The site renders **this markdown file** at `/about/space-weather` ([ADR 0024](../decisions/0024-render-about-markdown-in-react.md)); the header **About** link opens that route. There is no second copy of this prose in React. Grafana still has the time-on-x charts. This page does not replace them.
 
 ## 1. Purpose
 Shows how disturbed Earth's magnetic field is, at three zoom levels, without copying the usual "time on the x-axis" chart. The page is for a visitor who wants the current Kp and for an interviewer asking why the picture is a clock. The numbers are real-time SWPC estimates. They are not the definitive GFZ Kp and they are not a forecast.

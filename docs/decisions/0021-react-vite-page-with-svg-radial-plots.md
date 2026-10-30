@@ -1,6 +1,6 @@
 # 0021. Serve the first public page with Vite, and draw the radial plots in SVG
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-10-27
 - **Deciders:** Howard Isaacson
 

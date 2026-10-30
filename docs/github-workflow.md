@@ -62,12 +62,13 @@ Every Proposed ADR has a **"Review ADR NNNN: …"** issue (`type: adr`), as sub-
 
 A **GitHub Actions workflow** is a YAML file in `.github/workflows/` that GitHub runs when an event happens, such as opening a pull request. Ours is [`.github/workflows/ci.yml`](../.github/workflows/ci.yml). The workflow's name is `CI`. It runs on every pull request and on every push to `main`, on Python 3.12.
 
-A **status check** is the pass/fail result of one job. Branch protection can require a check by its exact name before a merge. These two jobs are the checks:
+A **status check** is the pass/fail result of one job. Branch protection can require a check by its exact name before a merge. These jobs are the checks:
 
-| Job name | What it runs | Why two jobs |
+| Job name | What it runs | Why separate jobs |
 |---|---|---|
 | `lint` | `ruff check .` and `ruff format --check .` | A formatting failure stays visible even if tests fail, and the other way around. |
 | `test` | `pytest` | Unit tests read files in the repo. They do not call the network. The job installs `requirements-dev.txt`, which includes `ingest/requirements.txt` (httpx, APScheduler 3.11). |
+| `e2e` | Playwright in `web/` (Chromium) | Viewport and About-page checks for the React site. The tests mock `/api`, so CI needs no database or internet. Required status checks on `main` are still only `lint` and `test` until Howard adds `e2e` in the branch rule. |
 
 Tool versions are pinned in `requirements-dev.txt` (ruff 0.17.2, pytest 9.1.1). The poller's libraries are pinned in `ingest/requirements.txt` (httpx 0.28.1, APScheduler 3.11.3, pydantic 2.14.1, psycopg 3.3.6). `requirements-dev.txt` includes that file, so the `test` job installs them with `pip install -r requirements-dev.txt`. Those tests mock HTTP and the database; they do not call SWPC. The image installs `ingest/requirements.txt` by itself. `tools/gh-setup/` is excluded from ruff in `pyproject.toml` so turning CI on did not reformat the plan generator. New Python under `tests/`, `ingest/`, and later `api/`, is checked.
 

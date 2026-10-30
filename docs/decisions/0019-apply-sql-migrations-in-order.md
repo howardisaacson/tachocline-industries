@@ -1,6 +1,6 @@
 # 0019. Apply schema changes as ordered SQL files
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-10-23
 - **Deciders:** Howard Isaacson
 

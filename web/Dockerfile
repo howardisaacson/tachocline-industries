@@ -1,15 +1,15 @@
-# Build the React page, then serve the static files. nginx proxies /api
-# to the Compose service `api`, so the browser stays on one origin (ADR 0021).
+# Build context is the repo root so docs/about/ can be imported without
+# copying the prose into web/ (ADR 0024, issue #41).
 FROM node:22-alpine AS build
 
-WORKDIR /src
-COPY package.json package-lock.json ./
+WORKDIR /repo/web
+COPY web/package.json web/package-lock.json ./
 RUN npm ci
-COPY index.html vite.config.js ./
-COPY src ./src
+COPY web/ ./
+COPY docs/about /repo/docs/about
 RUN npm run build
 
 FROM nginx:1.27-alpine
 
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=build /src/dist /usr/share/nginx/html
+COPY web/nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /repo/web/dist /usr/share/nginx/html

@@ -5,7 +5,7 @@ Phased milestones. Each phase ends with something demoable, its About pages writ
 ## Phase 0: Foundations *(now)*
 - [x] Create the GitHub repo `tachocline`, push this tree, protect `main` **[H1]**, [ADR 0010](decisions/0010-use-git-and-github-from-day-one.md). `GET` of `main` shows it protected, with `lint` and `test` required from GitHub Actions (app id 15368) and `enforcement_level` `everyone`. See [github-workflow.md](github-workflow.md).
 - [ ] Decide public vs private; enable secret scanning
-- [ ] Review Proposed ADRs 0002–0018
+- [x] Review ADRs 0001–0023 (all Accepted; 0005 Status was normalized from "Approved")
 - [ ] Seed GitHub Issues/Milestones/Project from this roadmap and finish Project views in the web UI, [ADR 0018](decisions/0018-plan-work-with-github-issues-milestones-projects.md) and accept or revise them
 - [ ] Handle Dropbox + git: one machine, ignore heavy folders, or clone outside Dropbox (AGENTS.md §9)
 - [ ] Add the TI solar graphic to `assets/brand/` when ready **[H3]**
@@ -32,8 +32,8 @@ Phased milestones. Each phase ends with something demoable, its About pages writ
 - [ ] Design brief using the TI graphic **[H3]** (the first page uses a CSS sun until `assets/brand/` has the graphic)
 - [x] First public page: radial Kp plots (day, month, year; 11-year plot deferred until a Kp backfill), [ADR 0020](decisions/0020-radial-time-plots-for-space-weather.md), [ADR 0021](decisions/0021-react-vite-page-with-svg-radial-plots.md)
 - [ ] Rest of the React site (satellite, data, and workflow pages). Plotly.js waits for a later line-chart view, [ADR 0007](decisions/0007-grafana-now-react-later-for-frontend.md)
-- [ ] Mobile-first breakpoints and Playwright viewport tests for every page **[H5]**. The space-weather page is covered at 320, 375, 390, 1280, and 1440 px. [ADR 0012](decisions/0012-responsive-design-mobile-and-desktop.md)
-- [ ] About link on every page. The space-weather page links to its About doc. [ADR 0009](decisions/0009-about-this-page-for-every-section.md)
+- [x] Mobile-first breakpoints and Playwright viewport tests for every page **[H5]** (issue #40). Space-weather checks 320 (no horizontal scroll), 375, 768, and 1280 px in CI. [ADR 0012](decisions/0012-responsive-design-mobile-and-desktop.md)
+- [x] About link on every page (issue #41). `docs/about/*.md` is rendered in the React site; the space-weather page links to `/about/space-weather`. [ADR 0009](decisions/0009-about-this-page-for-every-section.md), [ADR 0024](decisions/0024-render-about-markdown-in-react.md)
 - [ ] **"How the science is done" page** built from [data-science-workflow.md](data-science-workflow.md), with its own About page, [ADR 0016](decisions/0016-data-science-workflow-as-first-class-feature.md)
 - [ ] **First AI agent: space-weather briefing** (SWPC alerts + current indices → short cited briefing, labelled AI-generated, eval set in CI), [ADR 0017](decisions/0017-where-ai-agents-fit.md), [ai-agents.md](ai-agents.md)
 - [ ] TI **MCP server** wrapping the read-only API (may slip to Phase 4)

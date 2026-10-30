@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 import { loadKp } from "./api.js";
 import {
@@ -10,6 +11,9 @@ import {
   toCsv,
 } from "./kp.js";
 import { RadialPlot } from "./RadialPlot.jsx";
+import { SiteChrome } from "./SiteChrome.jsx";
+
+const ABOUT_SLUG = "space-weather";
 
 const PLOTS = [
   {
@@ -70,29 +74,16 @@ export function App() {
   const latest = latestMinute(state);
   const g = latest == null ? null : gScale(latest.estimated_kp);
   const failures = failedFeeds(state);
+  const liveLabel = [
+    "Live",
+    latest == null ? null : `Kp ${Number(latest.estimated_kp).toFixed(1)}`,
+    g,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
   return (
-    <>
-      <header className="site-header">
-        <div className="header-inner">
-          <a className="logo" href="#top">
-            Tachocline
-          </a>
-          <nav aria-label="Primary">
-            <a href="#plots">Space weather</a>
-            <a href="#about">About</a>
-          </nav>
-          <p className="status-chip">
-            <span className="live-dot" aria-hidden="true" />
-            <span>
-              Live
-              {latest == null ? "" : ` · Kp ${Number(latest.estimated_kp).toFixed(1)}`}
-              {g ? ` · ${g}` : ""}
-            </span>
-          </p>
-        </div>
-      </header>
-
+    <SiteChrome aboutSlug={ABOUT_SLUG} liveLabel={liveLabel}>
       <main id="top">
         <section className="hero">
           <p className="eyebrow">Real-time · NOAA SWPC estimated Kp</p>
@@ -143,33 +134,21 @@ export function App() {
           </div>
         </section>
 
-        <section id="about" className="section about">
+        <section className="section about">
           <h2>About this page</h2>
           <p>
-            The three rings are the same index at three zoom levels. Twelve
-            o’clock is the start of the lap: midnight UTC, the 1st, or 1 January.
-            Data fades as it ages. When the head comes around, the new lap
-            replaces the old one. Missing history is an empty track, not a guess.
+            How to read the rings, where the numbers come from, and the limits
+            of the real-time feed live in the About doc. The site renders that
+            markdown file; this page does not copy it.
           </p>
           <p>
-            Numbers are real-time SWPC estimates, not the definitive GFZ Kp and
-            not a forecast. The write-up, sources, and limits are in{" "}
-            <a href="https://github.com/howardisaacson/tachocline-industries/blob/main/docs/about/space-weather.md">
-              docs/about/space-weather.md
-            </a>
-            . NOAA’s scale page is{" "}
-            <a href="https://www.swpc.noaa.gov/noaa-scales-explanation">
-              noaa-scales-explanation
-            </a>
-            .
+            <Link className="button" to={`/about/${ABOUT_SLUG}`}>
+              Open About
+            </Link>
           </p>
         </section>
       </main>
-
-      <footer className="site-footer">
-        <p>Tachocline Industries. Kp from NOAA SWPC, stored by the local poller.</p>
-      </footer>
-    </>
+    </SiteChrome>
   );
 }
 
