@@ -63,6 +63,12 @@ test("layout at 375, 768, and 1280 with no horizontal scroll at 320", async ({ p
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toContainText("5.20");
   await expect(page.getByRole("link", { name: "About" }).first()).toBeVisible();
+  await expect(page.locator(".logo-mark")).toHaveAttribute("src", "/brand/ti-logo.svg");
+  const favicon = await page.evaluate(() => {
+    const link = document.querySelector('link[rel="icon"][href="/favicon.ico"]');
+    return link ? link.getAttribute("href") : null;
+  });
+  expect(favicon).toBe("/favicon.ico");
 
   const day = page.getByRole("heading", { name: "One day" });
   const month = page.getByRole("heading", { name: "30 days" });
@@ -111,6 +117,31 @@ test("About markdown renders at mobile and desktop widths", async ({ page }) => 
   await page.setViewportSize({ width: 320, height: 700 });
   await page.goto("/about/space-weather");
   await assertNoHorizontalScroll(page);
+});
+
+test("workflow page layout and Mermaid at 375, 768, 1280", async ({ page }) => {
+  for (const width of [375, 768, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("/workflow");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText(
+      "data science workflow",
+    );
+    await expect(page.locator('nav[aria-label="Primary"] a[href="/workflow"]')).toBeVisible();
+    await expect(page.locator('a[href="/about/data-science-workflow"]').first()).toBeVisible();
+    await expect(page.locator(".mermaid-wrap svg").first()).toBeVisible({
+      timeout: 15_000,
+    });
+    await assertNoHorizontalScroll(page);
+  }
+
+  await page.setViewportSize({ width: 320, height: 700 });
+  await page.goto("/workflow");
+  await assertNoHorizontalScroll(page);
+
+  await page.goto("/about/data-science-workflow");
+  await expect(page.getByRole("heading", { level: 1 })).toContainText(
+    "How the science is done",
+  );
 });
 
 test("shows an empty ring when the API fails", async ({ page }) => {

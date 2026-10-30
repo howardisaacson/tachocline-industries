@@ -55,6 +55,14 @@ nav a,
   text-transform: uppercase;
   text-decoration: none;
   font-size: 13px;
+  gap: 0.55rem;
+}
+
+.logo-mark {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
 nav {
@@ -377,6 +385,20 @@ td {
   text-decoration: none;
   font-weight: 700;
   letter-spacing: 0.04em;
+}
+
+.mermaid-wrap {
+  margin: 1.25rem 0;
+  padding: 0.75rem;
+  border: 1px solid rgba(240, 240, 250, 0.25);
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.mermaid-wrap .mermaid,
+.mermaid-wrap svg {
+  max-width: 100%;
+  height: auto;
 }
 
 .site-footer {
