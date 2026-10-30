@@ -1,7 +1,7 @@
-import ReactMarkdown from "react-markdown";
 import { Link, useParams } from "react-router-dom";
 
-import { getAboutPage, listAboutPages, rewriteAboutHref } from "./aboutDocs.js";
+import { getAboutPage, listAboutPages } from "./aboutDocs.js";
+import { MarkdownDoc } from "./MarkdownDoc.jsx";
 import { SiteChrome } from "./SiteChrome.jsx";
 
 export function AboutIndexPage() {
@@ -53,29 +53,13 @@ export function AboutPage() {
   return (
     <SiteChrome aboutSlug={page.slug}>
       <main id="top" className="about-page">
-        <section className="section about-doc" aria-label="About this page">
+        <section className="section" aria-label="About this page">
           <p className="eyebrow">
             <Link to="/about">All About pages</Link>
             {" · "}
             Source: <code>docs/about/{page.slug}.md</code>
           </p>
-          <ReactMarkdown
-            components={{
-              a({ href, children }) {
-                const next = rewriteAboutHref(href ?? "");
-                if (next.startsWith("/")) {
-                  return <Link to={next}>{children}</Link>;
-                }
-                return (
-                  <a href={next} rel={next.startsWith("http") ? "noreferrer" : undefined}>
-                    {children}
-                  </a>
-                );
-              },
-            }}
-          >
-            {page.markdown}
-          </ReactMarkdown>
+          <MarkdownDoc markdown={page.markdown} />
         </section>
       </main>
     </SiteChrome>

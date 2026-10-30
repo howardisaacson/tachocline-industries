@@ -387,6 +387,20 @@ td {
   letter-spacing: 0.04em;
 }
 
+.mermaid-wrap {
+  margin: 1.25rem 0;
+  padding: 0.75rem;
+  border: 1px solid rgba(240, 240, 250, 0.25);
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.mermaid-wrap .mermaid,
+.mermaid-wrap svg {
+  max-width: 100%;
+  height: auto;
+}
+
 .site-footer {
   padding: 2rem 1.25rem 3rem;
   font-size: 12px;
