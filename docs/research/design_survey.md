@@ -48,14 +48,14 @@ _Updated 2026-10-27 for issue [#37](https://github.com/howardisaacson/tachocline
 5. **Dark gradient overlays and a fixed transparent header** as above.
 6. **Source and download links** under every chart, so readers can see where the data came from.
 
-### Main data visual: radial Kp plots (decided 2026-10-27, [ADR 0020](../decisions/0020-radial-time-plots-for-space-weather.md))
-SpaceWeatherLive already plots activity with time on the x-axis and the value on the y-axis, so TI will not copy that. The main visual is a set of **radial plots**, starting with three: **a day, a month and a year**. An **11-year plot is deferred** until a Kp backfill exists.
+### Main data visual: radial Kp plots ([ADR 0027](../decisions/0027-eleven-year-kp-ring-with-gfz.md), supersedes [0020](../decisions/0020-radial-time-plots-for-space-weather.md))
+SpaceWeatherLive already plots activity with time on the x-axis and the value on the y-axis, so TI will not copy that. The main visual is a set of **radial plots** for **a day, a month, a year, and 11 years**. The 11-year ring uses **GFZ definitive Kp since 1932** (no longer deferred).
 - Angle is time. Zero is at the top (12 o'clock) and time runs clockwise.
 - Distance from the center is the activity indicator. The first indicator is the **Kp index**.
 - The radius auto-scales: the largest value in the window sits at the circle's edge. The scale rings and the maximum are always labeled.
-- Radar-sweep behavior: a bright "now" head moves clockwise, older data fades, and the sweep overwrites older data naturally. Each lap starts on a fixed UTC boundary (midnight, the 1st of the month, 1 January).
-- The year plot fills slowly because TI only has the data it has collected. A backfill comes later.
-- Layout: three plots in a row on wide screens (1024 px and up, with room for a fourth later), one column on mobile (below 640 px). Each plot has a tap or hover readout, a data table, a CSV download and an "About this page" link.
+- Radar-sweep behavior: a bright "now" head moves clockwise, older data fades, and the sweep overwrites older data naturally. Each lap starts on a fixed UTC boundary (midnight, the 1st of the month, 1 January; the 11-year lap is measured from 1 January 1932).
+- Day ring: SWPC 1-minute estimated Kp. Longer rings: GFZ 3-hour Kp (daily max on year and 11-year).
+- Layout: up to four plots in a row on wide screens (1024 px and up), one column on mobile (below 640 px), day plot first. Each plot has a tap or hover readout, a data table, a CSV download and an "About this page" link.
 
 On the SpaceX-style tiles this works as the hero: the radial plots sit over the dark background, and the header status chip shows the live Kp value.
 

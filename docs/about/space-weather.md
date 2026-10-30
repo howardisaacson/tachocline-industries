@@ -17,7 +17,7 @@ Each ring is one lap. Twelve o'clock is the start of that lap. Time runs clockwi
 - **One day:** 1-minute estimated Kp averaged into 10-minute bins. The lap starts at midnight UTC. About 144 bins when the day is full.
 - **30 days:** GFZ 3-hour Kp. The lap starts on the 1st of the month, UTC. The values are the latest 30 days.
 - **One year:** the daily maximum of GFZ 3-hour Kp. The lap starts on 1 January UTC.
-- **11 years:** the daily maximum of GFZ Kp. The lap is 11 × 365 days measured from 1 January 1932. A recent row can still be a nowcast. The next daily file replaces it.
+- **11 years:** the daily maximum of GFZ Kp. The lap is 11 × 365 days measured from 1 January 1932 ([ADR 0027](../decisions/0027-eleven-year-kp-ring-with-gfz.md); no longer deferred). A recent row can still be a nowcast. The next daily file replaces it.
 
 The table under each ring lists the same bins, newest first. **Download CSV** saves `time_utc`, `kp`, and `g_scale`. Hover or drag on the ring to read one bin. The header chip repeats the latest Kp.
 

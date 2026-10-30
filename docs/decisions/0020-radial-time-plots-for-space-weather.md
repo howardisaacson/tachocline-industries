@@ -1,6 +1,6 @@
 # 0020. Show space weather as radial time plots, not time-on-x line charts
 
-- **Status:** Accepted
+- **Status:** Superseded by [0027](0027-eleven-year-kp-ring-with-gfz.md)
 - **Date:** 2026-10-27
 - **Deciders:** Howard Isaacson
 
