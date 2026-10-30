@@ -94,5 +94,6 @@ What becomes easier? What becomes harder? What new risks or follow-up work does 
 | [0022](0022-store-gfz-kp-apart-from-swpc-estimates.md) | Store GFZ definitive Kp apart from the SWPC estimated index | Accepted |
 | [0023](0023-backfill-gp-history-and-serve-perigee-rate.md) | Backfill GP history from Space-Track and serve the perigee rate | Accepted |
 | [0024](0024-render-about-markdown-in-react.md) | Render About markdown in the React site with a small client router | Proposed |
+| [0025](0025-brand-accent-from-logo-orange.md) | Use the logo’s dark orange as the brand accent on black | Proposed |
 
 Tooling (optional): [adr-tools](https://github.com/npryce/adr-tools) is a small CLI that creates numbered ADR files. Copying the template by hand works just as well.
