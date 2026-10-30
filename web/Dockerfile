@@ -1,6 +1,8 @@
 # Build context is the repo root so docs/about/ can be imported without
 # copying the prose into web/ (ADR 0024, issue #41).
-FROM node:22-alpine AS build
+# Pin the Oct 2026 security release (issue #75).
+# https://nodejs.org/en/blog/vulnerability/october-2026-security-releases
+FROM node:22.23.4-alpine AS build
 
 WORKDIR /repo/web
 COPY web/package.json web/package-lock.json ./

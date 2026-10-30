@@ -63,6 +63,12 @@ test("layout at 375, 768, and 1280 with no horizontal scroll at 320", async ({ p
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toContainText("5.20");
   await expect(page.getByRole("link", { name: "About" }).first()).toBeVisible();
+  await expect(page.locator(".logo-mark")).toHaveAttribute("src", "/brand/ti-logo.svg");
+  const favicon = await page.evaluate(() => {
+    const link = document.querySelector('link[rel="icon"][href="/favicon.ico"]');
+    return link ? link.getAttribute("href") : null;
+  });
+  expect(favicon).toBe("/favicon.ico");
 
   const day = page.getByRole("heading", { name: "One day" });
   const month = page.getByRole("heading", { name: "30 days" });
