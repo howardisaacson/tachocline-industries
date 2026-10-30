@@ -248,6 +248,34 @@ class Kp3hRow(StoredRow):
         return (self.time_tag, self.kp, self.a_running, self.station_count)
 
 
+class GfzKpRow(StoredRow):
+    """One 3-hour block from the GFZ Kp file.
+
+    ``kp`` is already in thirds. ``definitive`` is false for a nowcast.
+    The sunspot number is not a field. ``ap`` is null when the file says -1.
+    """
+
+    time_tag: datetime
+    kp: float
+    ap: int | None = Field(strict=True)
+    definitive: bool
+
+    @field_validator("time_tag")
+    @classmethod
+    def time_tag_as_utc(cls, value: datetime) -> datetime:
+        return _as_utc(value)
+
+    @field_validator("kp")
+    @classmethod
+    def kp_on_scale(cls, value: float) -> float:
+        if value < 0 or value > 9:
+            raise ValueError("kp is outside 0 to 9")
+        return value
+
+    def as_params(self) -> tuple[object, ...]:
+        return (self.time_tag, self.kp, self.ap, self.definitive)
+
+
 class AlertRow(StoredRow):
     """One object from ``alerts.json`` (issue #32).
 

@@ -10,8 +10,8 @@ https://celestrak.org/NORAD/documentation/gp-data-formats.php
 CelesTrak checks for new GP data once every two hours, so this job does
 too. It does not read ``SWPC_POLL_MINUTES``. A 4xx is logged and not
 retried. HTTP 429 skips the catalog numbers still left in this run.
-Space-Track ``gp_history`` is not fetched. That backfill needs an account
-and is optional for this issue.
+Space-Track ``gp_history`` is a separate daily job. It runs only when
+``SPACETRACK_USER`` and ``SPACETRACK_PASSWORD`` are set.
 
 One run makes one GET per catalog number. The body is saved unchanged.
 ``ti_ingest.load`` validates it and derives altitude.

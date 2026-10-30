@@ -31,7 +31,7 @@ test.beforeEach(async ({ page }) => {
       ]),
     }),
   );
-  await page.route("**/api/kp-3h**", (route) =>
+  await page.route("**/api/kp-gfz**", (route) =>
     route.fulfill({
       json: pageBody([
         {
@@ -49,7 +49,7 @@ test("stacks on a phone and sits in a row on a laptop", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toContainText("5.20");
-  await expect(page.getByRole("button", { name: "Download CSV" })).toHaveCount(3);
+  await expect(page.getByRole("button", { name: "Download CSV" })).toHaveCount(4);
 
   const day = page.getByRole("heading", { name: "One day" });
   const year = page.getByRole("heading", { name: "One year" });
@@ -78,7 +78,7 @@ test("shows an empty ring when the API fails", async ({ page }) => {
   await page.route("**/api/kp-1m**", (route) =>
     route.fulfill({ status: 503, body: "nope" }),
   );
-  await page.route("**/api/kp-3h**", (route) =>
+  await page.route("**/api/kp-gfz**", (route) =>
     route.fulfill({ status: 503, body: "nope" }),
   );
   await page.setViewportSize({ width: 375, height: 812 });

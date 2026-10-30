@@ -77,6 +77,42 @@ ORDER BY issue_datetime DESC
 LIMIT %s
 """.strip()
 
+GFZ_KP_SQL = """
+SELECT time_tag, kp, ap, definitive
+FROM gfz_kp_3h
+WHERE time_tag >= %s AND time_tag < %s
+ORDER BY time_tag DESC
+LIMIT %s
+""".strip()
+
+# The inner query keeps the epoch just before the window so LAG can see it.
+# The outer query drops that lookback row and any first point with no rate.
+DECAY_SQL = """
+SELECT epoch, norad_cat_id, object_name, object_id,
+       perigee_altitude_km, km_per_day
+FROM (
+    SELECT epoch, norad_cat_id, object_name, object_id, perigee_altitude_km,
+           (perigee_altitude_km - LAG(perigee_altitude_km) OVER (
+               PARTITION BY norad_cat_id ORDER BY epoch
+           ))
+           / NULLIF(
+               EXTRACT(EPOCH FROM (
+                   epoch - LAG(epoch) OVER (
+                       PARTITION BY norad_cat_id ORDER BY epoch
+                   )
+               )) / 86400.0,
+               0
+           ) AS km_per_day
+    FROM satellite_gp
+    WHERE epoch >= %s
+      AND (%s::int IS NULL OR norad_cat_id = %s)
+) rated
+WHERE epoch >= %s AND epoch < %s
+  AND km_per_day IS NOT NULL
+ORDER BY epoch DESC
+LIMIT %s
+""".strip()
+
 PERIGEE_SQL = """
 SELECT epoch, norad_cat_id, object_name, object_id,
        perigee_altitude_km, apogee_altitude_km

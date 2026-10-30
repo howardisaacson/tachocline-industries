@@ -28,6 +28,8 @@ from pydantic import BaseModel
 from ti_api.db import ConfigError, DatabaseSettings, connect
 from ti_api.queries import (
     ALERTS_SQL,
+    DECAY_SQL,
+    GFZ_KP_SQL,
     GOES_SQL,
     HEALTH_SQL,
     INGEST_LOG_SQL,
@@ -53,6 +55,15 @@ MAX_RANGE = timedelta(days=7)
 # opening the same window on the 1-minute tables.
 MAX_KP3H_RANGE = timedelta(days=400)
 MAX_KP3H_LIMIT = 3300
+# Eleven years of 3-hour Kp is 11 * 365 * 8 = 32120 rows. 4200 days and
+# 40000 rows cover that ring. The SWPC minute routes stay at seven days.
+MAX_GFZ_RANGE = timedelta(days=4200)
+MAX_GFZ_LIMIT = 40000
+# A decay rate needs the epoch just before the window. Fourteen days is
+# enough for the two-hour CelesTrak cadence and a daily Space-Track file.
+DECAY_LOOKBACK = timedelta(days=14)
+MAX_DECAY_RANGE = timedelta(days=400)
+MAX_DECAY_LIMIT = 5000
 
 app = FastAPI(
     title="Tachocline Industries",
@@ -178,6 +189,51 @@ class Kp3hPage(BaseModel):
     time_to: datetime
     limit: int
     rows: list[Kp3hRow]
+
+
+class GfzKpRow(BaseModel):
+    """One GFZ 3-hour block. ``definitive`` is false for a nowcast."""
+
+    time_tag: datetime
+    kp: float
+    ap: int | None
+    definitive: bool
+
+
+class GfzKpPage(BaseModel):
+    """GFZ Kp, not the SWPC estimated product. Cite 10.5880/Kp.0001."""
+
+    processing_level: Literal["gfz-kp"] = "gfz-kp"
+    citation: Literal["10.5880/Kp.0001"] = "10.5880/Kp.0001"
+    time_from: datetime
+    time_to: datetime
+    limit: int
+    rows: list[GfzKpRow]
+
+
+class DecayRow(BaseModel):
+    """Perigee change in kilometers per day. Negative means the orbit is falling."""
+
+    epoch: datetime
+    norad_cat_id: int
+    object_name: str
+    object_id: str
+    perigee_altitude_km: float
+    km_per_day: float
+
+
+class DecayPage(BaseModel):
+    """Two-body perigee rate. The first epoch in a series has no rate."""
+
+    processing_level: Literal["real-time"] = "real-time"
+    altitude: Literal["two-body kilometers above the equatorial radius"] = (
+        "two-body kilometers above the equatorial radius"
+    )
+    rate_unit: Literal["kilometers per day"] = "kilometers per day"
+    time_from: datetime
+    time_to: datetime
+    limit: int
+    rows: list[DecayRow]
 
 
 class AlertRow(BaseModel):
@@ -413,6 +469,58 @@ def kp_3h(
         time_to=end,
         limit=limit,
         rows=[Kp3hRow.model_validate(row) for row in rows],
+    )
+
+
+@app.get("/api/kp-gfz", response_model=GfzKpPage)
+def kp_gfz(
+    conn: Annotated[psycopg.Connection, Depends(get_connection)],
+    now: Annotated[datetime, Depends(utc_now)],
+    time_from: Annotated[datetime | None, Query(alias="from")] = None,
+    time_to: Annotated[datetime | None, Query(alias="to")] = None,
+    limit: Annotated[int, Query(ge=1, le=MAX_GFZ_LIMIT)] = DEFAULT_SOLAR_LIMIT,
+) -> GfzKpPage:
+    """GFZ 3-hour Kp since 1932. Recent rows may still be nowcasts.
+
+    The window may be 4200 days so an 11-year ring is one call.
+    ``limit`` stops at 40000. This is not ``GET /api/kp-3h``.
+    """
+    start, end = _window(time_from, time_to, now, MAX_GFZ_RANGE)
+    rows = _query(conn, GFZ_KP_SQL, (start, end, limit))
+    return GfzKpPage(
+        time_from=start,
+        time_to=end,
+        limit=limit,
+        rows=[GfzKpRow.model_validate(row) for row in rows],
+    )
+
+
+@app.get("/api/satellite-decay", response_model=DecayPage)
+def satellite_decay(
+    conn: Annotated[psycopg.Connection, Depends(get_connection)],
+    now: Annotated[datetime, Depends(utc_now)],
+    time_from: Annotated[datetime | None, Query(alias="from")] = None,
+    time_to: Annotated[datetime | None, Query(alias="to")] = None,
+    limit: Annotated[int, Query(ge=1, le=MAX_DECAY_LIMIT)] = DEFAULT_SOLAR_LIMIT,
+    norad_cat_id: Annotated[int | None, Query(gt=0)] = None,
+) -> DecayPage:
+    """Kilometers per day of two-body perigee. Negative means falling.
+
+    The query looks 14 days before ``from`` so the first point in the
+    window can still see the previous epoch. A single epoch has no rate.
+    The window may be 400 days. ``limit`` stops at 5000.
+    """
+    start, end = _window(time_from, time_to, now, MAX_DECAY_RANGE)
+    rows = _query(
+        conn,
+        DECAY_SQL,
+        (start - DECAY_LOOKBACK, norad_cat_id, norad_cat_id, start, end, limit),
+    )
+    return DecayPage(
+        time_from=start,
+        time_to=end,
+        limit=limit,
+        rows=[DecayRow.model_validate(row) for row in rows],
     )
 
 

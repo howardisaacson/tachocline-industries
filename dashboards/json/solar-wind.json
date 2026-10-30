@@ -550,7 +550,7 @@
       "id": 4,
       "type": "stat",
       "title": "Minutes since last good ingest",
-      "description": "Reads ingest_log only, and skips sources whose names start with gp-. Those are the CelesTrak orbit files, polled every 2 hours, so a healthy orbit run would look 120 minutes old. A good run has error null: the file was loaded. Rows that failed validation increment rows_rejected and still leave error null, so they count as good. The number is the age of the oldest remaining feed (wind, mag, xrays-6-hour, planetary_k_index_1m, noaa-planetary-k-index, and alerts). If any of those feeds has a log row and has never succeeded, the panel says 'no good ingest'. The space-weather poll is every SWPC_POLL_MINUTES (5). Yellow means 15 minutes, red means 30. A failed orbit poll does not change this number.",
+      "description": "Reads ingest_log only, and skips sources whose names start with gp- or gfz-. gp- files are the orbit polls (2 hours, or a daily Space-Track history file). gfz- is the daily GFZ Kp file. A healthy one of those would look hours old. A good run has error null: the file was loaded. Rows that failed validation increment rows_rejected and still leave error null, so they count as good. The number is the age of the oldest remaining feed (wind, mag, xrays-6-hour, planetary_k_index_1m, noaa-planetary-k-index, and alerts). If any of those feeds has a log row and has never succeeded, the panel says 'no good ingest'. The space-weather poll is every SWPC_POLL_MINUTES (5). Yellow means 15 minutes, red means 30. A failed orbit poll does not change this number.",
       "datasource": {
         "type": "postgres",
         "uid": "tachocline-pg"
@@ -608,7 +608,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT CASE\n    WHEN count(*) = 0 THEN NULL\n    WHEN count(*) < (\n      SELECT count(DISTINCT source) FROM ingest_log\n      WHERE source NOT LIKE 'gp-%'\n    ) THEN NULL\n    ELSE EXTRACT(EPOCH FROM (now() - min(last_good))) / 60.0\n  END AS \"minutes\"\nFROM (\n  SELECT max(finished_at) FILTER (WHERE error IS NULL) AS last_good\n  FROM ingest_log\n  WHERE source NOT LIKE 'gp-%'\n  GROUP BY source\n) per_feed\nWHERE last_good IS NOT NULL"
+          "rawSql": "SELECT CASE\n    WHEN count(*) = 0 THEN NULL\n    WHEN count(*) < (\n      SELECT count(DISTINCT source) FROM ingest_log\n      WHERE source NOT LIKE 'gp-%' AND source NOT LIKE 'gfz-%'\n    ) THEN NULL\n    ELSE EXTRACT(EPOCH FROM (now() - min(last_good))) / 60.0\n  END AS \"minutes\"\nFROM (\n  SELECT max(finished_at) FILTER (WHERE error IS NULL) AS last_good\n  FROM ingest_log\n  WHERE source NOT LIKE 'gp-%' AND source NOT LIKE 'gfz-%'\n  GROUP BY source\n) per_feed\nWHERE last_good IS NOT NULL"
         }
       ]
     },

@@ -22,10 +22,10 @@ describe("gScale", () => {
 });
 
 describe("kpRequestPaths", () => {
-  it("asks for one day of minutes and one year of 3-hour Kp", () => {
+  it("asks for one day of minutes and eleven years of GFZ Kp", () => {
     const paths = kpRequestPaths(NOW);
     const minute = new URL(paths.minute, "http://ti.local");
-    const threeHour = new URL(paths.threeHour, "http://ti.local");
+    const threeHour = new URL(paths.gfz, "http://ti.local");
     const minuteSpan =
       Date.parse(minute.searchParams.get("to")) -
       Date.parse(minute.searchParams.get("from"));
@@ -35,9 +35,9 @@ describe("kpRequestPaths", () => {
     assert.equal(minute.pathname, "/api/kp-1m");
     assert.equal(minuteSpan, DAY_MS);
     assert.equal(minute.searchParams.get("limit"), "2000");
-    assert.equal(threeHour.pathname, "/api/kp-3h");
-    assert.equal(yearSpan, YEAR_MS);
-    assert.equal(threeHour.searchParams.get("limit"), "3300");
+    assert.equal(threeHour.pathname, "/api/kp-gfz");
+    assert.equal(yearSpan, 11 * YEAR_MS);
+    assert.equal(threeHour.searchParams.get("limit"), "40000");
   });
 });
 
