@@ -6,6 +6,9 @@
 !docs/
 !docs/about/
 !docs/about/**
+!assets/
+!assets/brand/
+!assets/brand/**
 
 web/node_modules
 web/dist

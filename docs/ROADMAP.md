@@ -8,7 +8,7 @@ Phased milestones. Each phase ends with something demoable, its About pages writ
 - [x] Review ADRs 0001–0023 (all Accepted; 0005 Status was normalized from "Approved")
 - [ ] Seed GitHub Issues/Milestones/Project from this roadmap and finish Project views in the web UI, [ADR 0018](decisions/0018-plan-work-with-github-issues-milestones-projects.md) and accept or revise them
 - [ ] Handle Dropbox + git: one machine, ignore heavy folders, or clone outside Dropbox (AGENTS.md §9)
-- [ ] Add the TI solar graphic to `assets/brand/` when ready **[H3]**
+- [x] Add the TI solar graphic to `assets/brand/` (issue #22): SVG master, icons, heroes, `LICENSE-ASSETS.md` **[H3]**
 
 ## Phase 1: First feed end to end (solar wind)
 - [x] `docker-compose.yml`: `db` (TimescaleDB), `migrate`, `ingest`, `grafana`, [ADR 0002](decisions/0002-build-locally-first-with-docker-compose.md), [0014](decisions/0014-when-to-use-more-than-one-docker-container.md) **[H10]**
