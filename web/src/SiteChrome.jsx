@@ -9,8 +9,15 @@ export function SiteChrome({ aboutSlug, children, liveLabel }) {
     <>
       <header className="site-header">
         <div className="header-inner">
-          <Link className="logo" to="/">
-            Tachocline
+          <Link className="logo" to="/" aria-label="Tachocline Industries home">
+            <img
+              className="logo-mark"
+              src="/brand/ti-logo.svg"
+              width="36"
+              height="36"
+              alt=""
+            />
+            <span>Tachocline</span>
           </Link>
           <nav aria-label="Primary">
             <Link to="/">Space weather</Link>

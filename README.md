@@ -30,6 +30,7 @@ Python pollers (APScheduler) → PostgreSQL + TimescaleDB → FastAPI → Grafan
 |---|---|
 | [AGENTS.md](AGENTS.md) | Rules for AI coding agents *and* humans contributing |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Phased milestones |
+| [docs/design-brief.md](docs/design-brief.md) | Public-site design system (palette, type, grid, components) |
 | [docs/ideas.md](docs/ideas.md) | Product and science ideas backlog |
 | [docs/data-science-workflow.md](docs/data-science-workflow.md) | End-to-end data science workflow (Drag Watch example) |
 | [docs/ai-agents.md](docs/ai-agents.md) | AI agents: building with them and features in the product |

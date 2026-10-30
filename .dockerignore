@@ -7,6 +7,9 @@
 !docs/about/
 !docs/about/**
 !docs/data-science-workflow.md
+!assets/
+!assets/brand/
+!assets/brand/**
 
 web/node_modules
 web/dist
