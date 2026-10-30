@@ -7,6 +7,7 @@ COPY web/package.json web/package-lock.json ./
 RUN npm ci
 COPY web/ ./
 COPY docs/about /repo/docs/about
+COPY docs/data-science-workflow.md /repo/docs/data-science-workflow.md
 RUN npm run build
 
 FROM nginx:1.27-alpine

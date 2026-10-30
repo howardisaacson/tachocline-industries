@@ -53,6 +53,9 @@ export function rewriteAboutHref(href) {
     const slug = cleaned.slice("about/".length, -".md".length);
     return `/about/${slug}`;
   }
+  if (cleaned === "data-science-workflow.md") {
+    return "/workflow";
+  }
   if (
     cleaned.startsWith("decisions/") ||
     cleaned.startsWith("research/") ||

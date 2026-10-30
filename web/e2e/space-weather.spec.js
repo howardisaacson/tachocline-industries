@@ -113,6 +113,31 @@ test("About markdown renders at mobile and desktop widths", async ({ page }) => 
   await assertNoHorizontalScroll(page);
 });
 
+test("workflow page layout and Mermaid at 375, 768, 1280", async ({ page }) => {
+  for (const width of [375, 768, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("/workflow");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText(
+      "data science workflow",
+    );
+    await expect(page.locator('nav[aria-label="Primary"] a[href="/workflow"]')).toBeVisible();
+    await expect(page.locator('a[href="/about/data-science-workflow"]').first()).toBeVisible();
+    await expect(page.locator(".mermaid-wrap svg").first()).toBeVisible({
+      timeout: 15_000,
+    });
+    await assertNoHorizontalScroll(page);
+  }
+
+  await page.setViewportSize({ width: 320, height: 700 });
+  await page.goto("/workflow");
+  await assertNoHorizontalScroll(page);
+
+  await page.goto("/about/data-science-workflow");
+  await expect(page.getByRole("heading", { level: 1 })).toContainText(
+    "How the science is done",
+  );
+});
+
 test("shows an empty ring when the API fails", async ({ page }) => {
   await page.route("**/api/**", (route) => route.fulfill({ status: 503, body: "nope" }));
   await page.setViewportSize({ width: 375, height: 812 });

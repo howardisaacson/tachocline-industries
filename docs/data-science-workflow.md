@@ -1,6 +1,6 @@
 # The data science workflow on Tachocline Industries
 
-> **Status:** plan (no model code yet). This will become a **public site page** ("How the science is done") with its own About page (`docs/about/data-science-workflow.md`, [ADR 0009](decisions/0009-about-this-page-for-every-section.md)). Decision: [ADR 0016](decisions/0016-data-science-workflow-as-first-class-feature.md).
+> **Status:** plan (no model code yet). Public site page: [`/workflow`](/workflow) ("How the science is done"), with About at [`/about/data-science-workflow`](/about/data-science-workflow) ([ADR 0009](decisions/0009-about-this-page-for-every-section.md)). Decision: [ADR 0016](decisions/0016-data-science-workflow-as-first-class-feature.md).
 
 Howard wants to **highlight** this skill: taking a vague question all the way to a validated, monitored, clearly communicated answer. The worked example throughout is **Drag Watch**, which models how solar activity (Kp/Ap, F10.7) speeds up the orbital decay of low-Earth-orbit satellites and predicts re-entry dates. The data and physics background is in [research/satellite_orbit_decay_data.md](research/satellite_orbit_decay_data.md).
 
