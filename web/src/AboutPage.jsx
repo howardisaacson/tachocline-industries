@@ -4,6 +4,32 @@ import { getAboutPage, listAboutPages } from "./aboutDocs.js";
 import { MarkdownDoc } from "./MarkdownDoc.jsx";
 import { SiteChrome } from "./SiteChrome.jsx";
 
+const TRADEMARKS_URL =
+  "https://github.com/howardisaacson/tachocline-industries/blob/develop/TRADEMARKS.md";
+
+/**
+ * Shared note under every About route. The page markdown stays the science
+ * write-up; this is the license that covers that write-up and the code.
+ */
+function AboutLicense() {
+  return (
+    <div className="about-doc about-license">
+      <h2>License</h2>
+      <p>
+        The code is under the{" "}
+        <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache License 2.0</a>.
+        These About pages, and the other original writing under <code>docs/</code>, are
+        under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. The
+        name Tachocline Industries and the TI logo are trademarks of Howard Isaacson.
+        They are not included in those grants. A fork must rename and rebrand, and may
+        say it is based on Tachocline Industries. The eclipse photograph on the home
+        page stays under Phil Hart’s CC BY-NC-SA 4.0 license. This is not legal advice.{" "}
+        <a href={TRADEMARKS_URL}>Trademark policy</a>.
+      </p>
+    </div>
+  );
+}
+
 export function AboutIndexPage() {
   const pages = listAboutPages();
   return (
@@ -24,6 +50,7 @@ export function AboutIndexPage() {
               </li>
             ))}
           </ul>
+          <AboutLicense />
         </section>
       </main>
     </SiteChrome>
@@ -60,6 +87,7 @@ export function AboutPage() {
             Source: <code>docs/about/{page.slug}.md</code>
           </p>
           <MarkdownDoc markdown={page.markdown} />
+          <AboutLicense />
         </section>
       </main>
     </SiteChrome>

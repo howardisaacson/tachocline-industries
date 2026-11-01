@@ -432,6 +432,10 @@ td {
   max-width: 48rem;
 }
 
+.about-license {
+  margin-top: 2.5rem;
+}
+
 .about-doc h1,
 .about-doc h2,
 .about-doc h3 {
