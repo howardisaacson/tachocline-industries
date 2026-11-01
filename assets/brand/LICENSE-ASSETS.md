@@ -13,3 +13,10 @@
 - **SVG author:** Cursor agent, tracing draft v1 into editable SVG paths for Howard Isaacson (2026-10-29)
 - **Hero stills:** composed from draft v1 as reference, then resized for desktop (16:9) and mobile (9:16)
 - **Rights:** Same as the rest of this repository. Tachocline Industries may use, modify, and redistribute these brand files with the project.
+
+## Space-weather hero photograph
+- **File:** `CoronaExmouth_Hart_1920.jpg` (served from `web/public/brand/`)
+- **Subject:** Total solar eclipse corona, Exmouth, Western Australia, 20 April 2023
+- **Photographer:** [Phil Hart](https://philhart.com/exmouth-eclipse/)
+- **License:** [Creative Commons Attribution-NonCommercial-ShareAlike 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) (as stated on [philhart.com/galleries](https://philhart.com/galleries))
+- **Use on TI:** Hero background at 40% opacity over black on the public space-weather page; credit line on the page. Non-commercial portfolio use with attribution. ShareAlike applies to adaptations of this photograph.
