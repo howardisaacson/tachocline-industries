@@ -48,7 +48,7 @@ The poller stores the rows. The page asks the API for them. FastAPI checks the w
 ## 5. Tech used and why
 | Layer | Technology | Why (one line) | Decision |
 |---|---|---|---|
-| Page | React, built with Vite | Components for the hero, the three rings, and the tables. | [ADR 0007](../decisions/0007-grafana-now-react-later-for-frontend.md), [ADR 0021](../decisions/0021-react-vite-page-with-svg-radial-plots.md) |
+| Page | React, built with Vite | Components for the hero, the rings, CSV download, and About. | [ADR 0007](../decisions/0007-grafana-now-react-later-for-frontend.md), [ADR 0021](../decisions/0021-react-vite-page-with-svg-radial-plots.md) |
 | Picture | SVG | Each segment can fade and take a G-scale color; polar↔Cartesian morph stays in SVG. | [ADR 0020](../decisions/0020-radial-time-plots-for-space-weather.md), [ADR 0029](../decisions/0029-radial-cartesian-unwind-toggle.md) |
 | API | FastAPI | The page reads Kp through GET routes. | [ADR 0006](../decisions/0006-fastapi-for-backend-api.md) |
 | Runtime | nginx in the `web` container | Static files, and `/api` stays on the page's origin. | [ADR 0014](../decisions/0014-when-to-use-more-than-one-docker-container.md) |
@@ -58,7 +58,7 @@ Key code: [`web/src/App.jsx`](../../web/src/App.jsx), [`web/src/kp.js`](../../we
 ## 6. Known limitations
 - The day ring is an SWPC estimate. The longer rings are GFZ Kp. They are not the same product. A GFZ nowcast is labeled `definitive: false` on the API row. The ring draws the number either way.
 - The page does not poll. Reload it to see a newer minute.
-- Radius auto-scale makes a quiet day look as large as a storm. The G-scale colors and the fixed 0–9 switch are there for that. The table has the exact numbers.
+- Radius auto-scale makes a quiet day look as large as a storm. The G-scale colors and the fixed 0–9 switch are there for that. The under-plot readout and CSV have the exact numbers.
 - Alerts, solar wind, GOES, and satellite altitude stay on the API and on Grafana. This page is Kp only.
 - The hero background is Phil Hart’s Exmouth (20 Apr 2023) total-eclipse corona photograph at 40% opacity over black (`assets/brand/CoronaExmouth_Hart_1920.jpg`, CC BY-NC-SA 4.0). A credit line links to his expedition write-up.
 - The layout is dark on purpose, from the design brief. `prefers-reduced-motion` turns off the live-dot blink, the view-toggle transition, and the radial↔Cartesian unwind (the view still flips instantly).
