@@ -23,7 +23,7 @@ test.beforeEach(async ({ page }) => {
   // Mock /api so CI needs no database or internet (issue #40).
   await page.route("**/api/**", async (route) => {
     const url = route.request().url();
-    if (url.includes("/api/kp-1m")) {
+    if (url.includes("/api/v1/kp-1m")) {
       await route.fulfill({
         json: pageBody([
           {
@@ -42,7 +42,7 @@ test.beforeEach(async ({ page }) => {
       });
       return;
     }
-    if (url.includes("/api/kp-gfz")) {
+    if (url.includes("/api/v1/kp-gfz")) {
       await route.fulfill({
         json: pageBody([
           {
