@@ -54,8 +54,12 @@ export function SatellitesPage() {
             Original data:{" "}
             <a href="https://celestrak.org/" rel="noopener noreferrer">
               CelesTrak
+            </a>{" "}
+            (
+            <a href="https://celestrak.org/usage-policy.php" rel="noopener noreferrer">
+              usage policy
             </a>
-            . The same five series as the Grafana Perigee altitude panel.
+            ). The same five series as the Grafana Perigee altitude panel.
           </p>
           {state.status === "loading" ? <p className="section-copy">Loading perigee…</p> : null}
           {state.status === "error" ? (

@@ -49,7 +49,7 @@ Key code: `web/src/satellites.js`, `web/src/PerigeeChart.jsx`, `web/src/Satellit
 
 ## 6. Known limitations
 - The route rejects a window longer than 7 days, so this chart cannot show the months before that.
-- `satellite_gp` does not record which poller wrote a row. Space-Track history, when the account is set, lands in the same table. Issue #105 forbids publishing those points. This page does not yet have a way to drop them.
+- The chart asks only for rows tagged `celestrak`. Space-Track history can sit in the same table and is not drawn here ([ADR 0035](../decisions/0035-what-may-be-shown-publicly.md)). Rows from before that tag existed are labeled `celestrak` only when `ingest_log` has no successful `gp-hist-*` run.
 - The altitude is two-body, not SGP4. A reboost and a bad element set can both look like a jump.
 - N2YO and the NASA homepages are outbound links. They are not the source of the plotted kilometers.
 - No data when the local machine is off ([ADR 0002](../decisions/0002-build-locally-first-with-docker-compose.md)).

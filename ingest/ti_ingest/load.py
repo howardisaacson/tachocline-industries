@@ -138,13 +138,22 @@ ON CONFLICT (issue_datetime, product_id) DO UPDATE SET
     message = EXCLUDED.message
 """.strip()
 
-GP_UPSERT = """
+
+def _gp_upsert(provider: str) -> str:
+    """One INSERT. ``provider`` is a fixed literal, not a request value.
+
+    A CelesTrak row stays ``celestrak`` if Space-Track later writes the
+    same epoch. A later CelesTrak write may replace ``spacetrack``.
+    """
+    if provider not in {"celestrak", "spacetrack"}:
+        raise ValueError(f"unknown GP provider {provider}")
+    return f"""
 INSERT INTO satellite_gp (
     epoch, norad_cat_id, object_name, object_id,
     mean_motion, eccentricity, inclination, ra_of_asc_node,
     arg_of_pericenter, mean_anomaly, bstar, mean_motion_dot,
-    perigee_altitude_km, apogee_altitude_km
-) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    perigee_altitude_km, apogee_altitude_km, provider
+) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '{provider}')
 ON CONFLICT (epoch, norad_cat_id) DO UPDATE SET
     object_name = EXCLUDED.object_name,
     object_id = EXCLUDED.object_id,
@@ -157,8 +166,16 @@ ON CONFLICT (epoch, norad_cat_id) DO UPDATE SET
     bstar = EXCLUDED.bstar,
     mean_motion_dot = EXCLUDED.mean_motion_dot,
     perigee_altitude_km = EXCLUDED.perigee_altitude_km,
-    apogee_altitude_km = EXCLUDED.apogee_altitude_km
+    apogee_altitude_km = EXCLUDED.apogee_altitude_km,
+    provider = CASE
+        WHEN satellite_gp.provider = 'celestrak' THEN 'celestrak'
+        ELSE EXCLUDED.provider
+    END
 """.strip()
+
+
+GP_UPSERT = _gp_upsert("celestrak")
+GP_HISTORY_UPSERT = _gp_upsert("spacetrack")
 
 GFZ_UPSERT = """
 INSERT INTO gfz_kp_3h (
@@ -179,10 +196,11 @@ _UPSERTS: dict[str, tuple[type[StoredRow], str]] = {
     "alerts": (AlertRow, ALERT_UPSERT),
     GFZ_PRODUCT: (GfzKpRow, GFZ_UPSERT),
 }
-# One feed name per catalog number, all using the same INSERT.
-# gp-hist- is the Space-Track backfill of the same elements.
+# gp- is CelesTrak. gp-hist- is Space-Track and must not clear a celestrak tag.
 _UPSERTS.update({f"gp-{catnr}": (GpRow, GP_UPSERT) for catnr in CATALOG_NUMBERS})
-_UPSERTS.update({gp_hist_name(catnr): (GpRow, GP_UPSERT) for catnr in CATALOG_NUMBERS})
+_UPSERTS.update(
+    {gp_hist_name(catnr): (GpRow, GP_HISTORY_UPSERT) for catnr in CATALOG_NUMBERS}
+)
 
 _ERROR_LIMIT = 500
 

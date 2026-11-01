@@ -29,7 +29,7 @@ Each entry is a live URL plus one sentence. Credits and citation notes are at th
 
 - [CelesTrak GP data](https://celestrak.org/NORAD/documentation/gp-data-formats.php): current orbital elements for tracked satellites, used to compute perigee altitude. The format page is the human-readable description; the poller requests one catalog number at a time.
 - [CelesTrak SATCAT](https://celestrak.org/satcat/satcat-format.php): catalog records for the same five satellites, including `DECAY_DATE`. The poller saves the JSON once a day. This link is the format page, not that file.
-- [Space-Track](https://www.space-track.org/documentation): the US Space Force satellite catalog, whose `gp_history` records supply past orbits for decay rates (free account required).
+- [Space-Track](https://www.space-track.org/documentation): the US Space Force satellite catalog. A free account can supply past orbits for private checks. Those rows are not shown on this site or the public API.
 
 ## Solar images
 
@@ -40,6 +40,6 @@ Each entry is a live URL plus one sentence. Credits and citation notes are at th
 
 - **NOAA SWPC:** public real-time space-weather products. Credit NOAA Space Weather Prediction Center on pages that show the data. Feeds are provisional / real-time unless marked otherwise.
 - **GFZ German Research Centre for Geosciences:** Kp, ap, Ap, SN, and F10.7 series. Cite Matzka, J., Stolle, C., Yamazaki, Y., Bronkalla, O. and Morschhauser, A., 2021. The geomagnetic Kp index and derived indices of geomagnetic activity. *Space Weather*, doi:[10.5880/Kp.0001](https://doi.org/10.5880/Kp.0001). See also [kp.gfz.de](https://kp.gfz.de/en/).
-- **CelesTrak:** GP/TLE distribution; respect documented rate limits (at most once per 2 hours per group in this repo).
-- **Space-Track (18th Space Defense Squadron):** free account required; use of the API is subject to [Space-Track user agreement / documentation](https://www.space-track.org/documentation). Do not republish bulk catalog dumps beyond what the site already plots.
+- **CelesTrak:** GP elements used for the public perigee chart. Credit CelesTrak (Dr. T.S. Kelso). The [usage policy](https://celestrak.org/usage-policy.php) (updated 2026 May 22) is an access rule: download only what you need, once per update (GP data every 2 hours), and stop on any HTTP status other than 200. It is not a license to republish Space-Track data.
+- **Space-Track (18th Space Defense Squadron):** the [user agreement](https://www.space-track.org/documentation) forbids transferring the data or analysis of it without approval. Tachocline does not put Space-Track rows, or altitudes and rates derived from them, on the public site or the public API. Local Grafana may still read them.
 - **NASA SDAC / SDO AIA / LMSAL:** public solar imagery galleries; credit the observatory named on each image page when imagery is shown on TI.

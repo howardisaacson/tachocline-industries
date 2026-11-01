@@ -157,6 +157,7 @@ New files follow [ADR 0030](docs/decisions/0030-apache-2-license-with-trademark-
 
 ## 12. Data and science integrity
 - Cite every data source on the page that uses it and in its About page.
+- Do not publish Space-Track data, or anything derived from it (elements, altitudes, rates, decay dates, plots, or model output), on the public site or the public API. Local Grafana and private notebooks may use it. A new source does not go on the public site until its terms are written in [`docs/research/data-licenses.md`](docs/research/data-licenses.md) ([ADR 0035](docs/decisions/0035-what-may-be-shown-publicly.md)).
 - **When adding or removing a data source, update the public Links page** [`docs/data-links.md`](docs/data-links.md) (rendered at `/links`) in the same PR. That file is the visitor-facing provenance list; [`docs/links.md`](docs/links.md) stays the internal article reading list.
 - Label provisional or real-time data as such, and never present a model prediction as an observation.
 - Science claims must link to a source (paper, agency page). Mark speculation as speculation.

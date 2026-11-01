@@ -105,6 +105,7 @@ FROM (
            ) AS km_per_day
     FROM satellite_gp
     WHERE epoch >= %s
+      AND provider = 'celestrak'
       AND (%s::int IS NULL OR norad_cat_id = %s)
 ) rated
 WHERE epoch >= %s AND epoch < %s
@@ -118,6 +119,7 @@ SELECT epoch, norad_cat_id, object_name, object_id,
        perigee_altitude_km, apogee_altitude_km
 FROM satellite_gp
 WHERE epoch >= %s AND epoch < %s
+  AND provider = 'celestrak'
   AND (%s::int IS NULL OR norad_cat_id = %s)
 ORDER BY epoch DESC
 LIMIT %s

@@ -36,7 +36,7 @@ This supersedes the Plotly line-chart plan in ADR 0021 for this chart. The radia
 ## Consequences
 
 - Easier: no new frontend dependency. The chart and the Grafana panel show the same five series.
-- Harder: a longer history, or a filter that drops Space-Track rows, is an API change. The table does not record which poller wrote a row (issue #105).
+- Harder: a longer public history is still an API change. Rows are tagged by poller, and the public routes return `celestrak` only ([ADR 0035](0035-what-may-be-shown-publicly.md)).
 
 ## How to explain this in an interview
 

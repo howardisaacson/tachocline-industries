@@ -26,7 +26,7 @@ from ti_ingest.celestrak_gp import (
     startup_line,
 )
 from ti_ingest.elements import altitudes_km
-from ti_ingest.load import GP_UPSERT, store_fetch
+from ti_ingest.load import GP_HISTORY_UPSERT, GP_UPSERT, store_fetch
 from ti_ingest.migrate import DatabaseSettings
 from ti_ingest.models import GpRow
 from ti_ingest.swpc import FetchResult, SwpcSettings, make_client
@@ -265,6 +265,24 @@ def test_upsert_sql_uses_epoch_and_catalog_number() -> None:
     assert "ON CONFLICT (epoch, norad_cat_id) DO UPDATE" in GP_UPSERT
     assert "INSERT INTO satellite_gp" in GP_UPSERT
     assert "perigee_altitude_km" in GP_UPSERT
+    assert "'celestrak'" in GP_UPSERT
+    assert "'spacetrack'" in GP_HISTORY_UPSERT
+    assert (
+        "WHEN satellite_gp.provider = 'celestrak' THEN 'celestrak'" in GP_HISTORY_UPSERT
+    )
+
+
+def test_space_track_history_uses_its_own_upsert(tmp_path: Path) -> None:
+    path = tmp_path / "hist.json"
+    path.write_bytes(json.dumps([gp_row()]).encode())
+    db = FakeDB()
+    store_fetch(
+        db,
+        FetchResult("gp-hist-25544", 200, path, None, False),
+        started_at=WHEN,
+    )
+    assert GP_HISTORY_UPSERT in db.statements
+    assert GP_UPSERT not in db.statements
 
 
 def test_rerun_updates_the_same_epoch(tmp_path: Path) -> None:
