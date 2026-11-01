@@ -13,7 +13,8 @@ This is the **single source of truth** for how to work in this repo. `CLAUDE.md`
 - [8. Conventions](#8-conventions)
 - [9. The repo lives in Dropbox: be careful](#9-the-repo-lives-in-dropbox-be-careful)
 - [10. Data science and AI agent work](#10-data-science-and-ai-agent-work)
-- [11. Data and science integrity](#11-data-and-science-integrity)
+- [11. License](#11-license)
+- [12. Data and science integrity](#12-data-and-science-integrity)
 
 ## 1. Project purpose
 Tachocline Industries (TI) is Howard Isaacson's portfolio site. It ingests real-time open satellite and space-weather data, stores it, and presents it through dashboards and a website. See [README.md](README.md), [docs/ROADMAP.md](docs/ROADMAP.md), [docs/ideas.md](docs/ideas.md).
@@ -145,7 +146,16 @@ The working copy is at `~/Dropbox/TI/` on Howard's Mac. Dropbox syncs files one 
 - Any in-product AI agent follows [docs/ai-agents.md](docs/ai-agents.md) and [ADR 0017](docs/decisions/0017-where-ai-agents-fit.md): read-only tools through the API, grounded and cited answers, an eval set before shipping, cost caps, and AI output labelled.
 - As a coding agent, verify citations by resolving IDs (DOI/arXiv/ADS) and checking titles match. A wrong arXiv citation was already caught once in this repo.
 
-## 11. Data and science integrity
+## 11. License
+
+New files follow [ADR 0030](docs/decisions/0030-apache-2-license-with-trademark-policy.md) (Proposed until Howard accepts it):
+
+- **Code, SQL, and config:** [Apache License 2.0](LICENSE). Do not add a different license header unless Howard asks.
+- **Original prose** under `docs/`: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+- **Name and logo:** not covered by those grants. See [TRADEMARKS.md](TRADEMARKS.md). Do not present a fork as Tachocline Industries.
+- **Third-party assets:** keep their own license. Record it in `assets/brand/LICENSE-ASSETS.md` when the file is a brand or hero asset.
+
+## 12. Data and science integrity
 - Cite every data source on the page that uses it and in its About page.
 - **When adding or removing a data source, update the public Links page** [`docs/data-links.md`](docs/data-links.md) (rendered at `/links`) in the same PR. That file is the visitor-facing provenance list; [`docs/links.md`](docs/links.md) stays the internal article reading list.
 - Label provisional or real-time data as such, and never present a model prediction as an observation.

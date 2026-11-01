@@ -12,7 +12,7 @@
 - **Exports:** `ti-logo-192.png`, `ti-logo-512.png`, `favicon.ico`, `ti-hero-wide.png` / `.webp`, `ti-hero-tall.png` / `.webp`
 - **SVG author:** Cursor agent, tracing draft v1 into editable SVG paths for Howard Isaacson (2026-10-29)
 - **Hero stills:** composed from draft v1 as reference, then resized for desktop (16:9) and mobile (9:16)
-- **Rights:** Same as the rest of this repository. Tachocline Industries may use, modify, and redistribute these brand files with the project.
+- **Rights:** These brand files are **not** under the Apache License 2.0 that covers the code. The name “Tachocline Industries” and the TI logo are trademarks of Howard Isaacson. See [`TRADEMARKS.md`](../../TRADEMARKS.md). Third-party images keep the license named in their own section.
 
 ## Space-weather hero photograph
 - **File:** `CoronaExmouth_Hart_1920.jpg` (served from `web/public/brand/`)

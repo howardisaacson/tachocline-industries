@@ -99,6 +99,7 @@ What becomes easier? What becomes harder? What new risks or follow-up work does 
 | [0027](0027-eleven-year-kp-ring-with-gfz.md) | Ship the 11-year radial Kp ring using GFZ history since 1932 | Proposed |
 | [0028](0028-version-read-api-under-api-v1.md) | Version the read API under `/api/v1` | Proposed |
 | [0029](0029-radial-cartesian-unwind-toggle.md) | Offer a radial↔Cartesian “Change Data View” unwind on each Kp plot | Proposed |
+| [0030](0030-apache-2-license-with-trademark-policy.md) | License the code under Apache 2.0 and keep the name and logo out of that grant | Proposed |
 | [0031](0031-build-locally-from-develop.md) | Build locally from `develop`; agents may merge there, not to `main` | Proposed |
 
 Tooling (optional): [adr-tools](https://github.com/npryce/adr-tools) is a small CLI that creates numbered ADR files. Copying the template by hand works just as well.
