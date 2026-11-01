@@ -1,4 +1,4 @@
-# Continuous integration for every pull request and every push to main.
+# Continuous integration for every pull request and every push to main or develop.
 #
 # A GitHub Actions workflow is a YAML file GitHub runs for you when an
 # event happens. This one is the event handler for pull requests.
@@ -14,7 +14,7 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, develop]
 
 # Read the repo. The jobs do not push, comment, or deploy.
 permissions:

@@ -6,6 +6,14 @@ Tachocline Industries (TI) is a portfolio project by **Howard Isaacson** (astron
 
 > The **tachocline** is the shear layer at the base of the Sun's convection zone, thought to drive the solar dynamo. That dynamo powers the activity this site tracks: sunspots, flares, CMEs, and solar wind, and their effects on Earth and on satellites.
 
+## Contents
+- [Goals](#goals)
+- [Current status (2026-10-25)](#current-status-2026-10-25)
+- [Planned stack](#planned-stack)
+- [Documentation](#documentation)
+- [Quick start](#quick-start)
+- [Data credits](#data-credits)
+
 ## Goals
 1. **Job-search portfolio** for data engineering, data science, and software engineering roles. It shows a real end-to-end system: ingestion → storage → API → visualisation → (later) cloud deployment.
 2. **Learn by building**, with full understanding: databases, Grafana, APIs, JavaScript/React, service architecture, cloud, and Rust. Every decision is recorded as an [ADR](docs/decisions/README.md), and every page has an ["About this page"](docs/about-this-page-template.md).
@@ -43,9 +51,11 @@ Python pollers (APScheduler) → PostgreSQL + TimescaleDB → FastAPI → Grafan
 | [docs/about-this-page-template.md](docs/about-this-page-template.md) | Template for each page's About section |
 
 ## Quick start
-Install [Docker](https://docs.docker.com/get-started/get-docker/), then from this directory:
+Install [Docker](https://docs.docker.com/get-started/get-docker/), then from this directory on the **`develop`** branch. That is the branch the local stack is built from. `main` is the protected release line and is not the day-to-day checkout.
 
 ```bash
+git checkout develop
+git pull
 cp .env.example .env
 # edit the passwords in .env; do not commit that file
 docker compose up --build

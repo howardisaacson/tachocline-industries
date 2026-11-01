@@ -12,7 +12,7 @@ Shows how disturbed Earth's magnetic field is, at three zoom levels, without cop
 ## 2. What you're seeing
 The hero is the latest 1-minute `estimated_kp`. Below G1 means Kp is under 5. G1 and above follow [NOAA's scale](https://www.swpc.noaa.gov/noaa-scales-explanation).
 
-Each ring is one lap. Twelve o'clock is the start of that lap. Time runs clockwise. Distance from the center is Kp. The largest value in the window sits on the outer ring unless **Fixed 0–9 scale** is on. A white dot on the rim is now. Older samples are fainter. Gold through red is Kp 5 and above, so a quiet day that fills its own ring does not look like a storm. An empty arc is a time Tachocline has not stored. It is not a zero.
+Each ring is one lap. Twelve o'clock is the start of that lap. Time runs clockwise. Distance from the center is Kp. The largest value in the window sits on the outer ring unless **Fixed 0–9 scale** is on. A white dot on the rim is now. Older samples are fainter. Gold through red is Kp 5 and above, so a quiet day that fills its own ring does not look like a storm. An empty arc is a time Tachocline has not stored. It is not a zero. Move the pointer over the ring (or the now head) to update the centered readout under the plot with UTC time and Kp.
 
 - **One day:** 1-minute estimated Kp averaged into 10-minute bins. The lap starts at midnight UTC. About 144 bins when the day is full.
 - **30 days:** GFZ 3-hour Kp. The lap starts on the 1st of the month, UTC. The values are the latest 30 days.
@@ -26,7 +26,7 @@ Each ring is one lap. Twelve o'clock is the start of that lap. Time runs clockwi
 |---|---|
 | Provider | [NOAA SWPC](https://www.swpc.noaa.gov/products/planetary-k-index), real-time estimated Kp. The page reads it from our API, not from SWPC directly. |
 | Satellite(s) / instrument(s) | Ground magnetometers. The 3-hour product names Sitka, Meanook, Ottawa, Fredericksburg, Hartland, Wingst, Niemegk, and Canberra. |
-| Endpoint | `GET /api/kp-1m` for the day ring and the hero. `GET /api/kp-gfz` for the 30-day, year, and 11-year rings. |
+| Endpoint | `GET /api/v1/kp-1m` for the day ring and the hero. `GET /api/v1/kp-gfz` for the 30-day, year, and 11-year rings. |
 | Format / access | JSON over HTTP, no auth, same origin. The `web` container proxies `/api` to the API container. |
 | Upstream update cadence | 1-minute estimated Kp and 3-hour estimated Kp ([data_sources.md](../research/data_sources.md)). |
 | Our polling cadence | `SWPC_POLL_MINUTES` (5 in `.env.example`). |
@@ -61,13 +61,14 @@ Key code: [`web/src/App.jsx`](../../web/src/App.jsx), [`web/src/kp.js`](../../we
 - Radius auto-scale makes a quiet day look as large as a storm. The G-scale colors and the fixed 0–9 switch are there for that. The under-plot readout and CSV have the exact numbers.
 - Alerts, solar wind, GOES, and satellite altitude stay on the API and on Grafana. This page is Kp only.
 - The hero background is Phil Hart’s Exmouth (20 Apr 2023) total-eclipse corona photograph at 40% opacity over black (`assets/brand/CoronaExmouth_Hart_1920.jpg`, CC BY-NC-SA 4.0). A credit line links to his expedition write-up.
+- Moving the pointer over a ring updates the centered readout under that plot with UTC time and Kp. There is no floating tooltip on the graphic itself.
 - The layout is dark on purpose, from the design brief. `prefers-reduced-motion` turns off the live-dot blink, the view-toggle transition, and the radial↔Cartesian unwind (the view still flips instantly).
 - The Change Data View control is at 10% opacity until hover or keyboard focus; on coarse pointers (`hover: none`) it stays faintly visible so a tap can find it.
 - No live call against the running stack was made for this page. Tests mock the API.
 
 ## 7. Interview talking points
 - **30-second pitch:** The live number is SWPC's 1-minute estimated Kp. The longer clocks are GFZ's Kp since 1932, kept in a separate table so the estimate and the definitive index are not mixed. Angle is time, radius is Kp, and the stroke fades until the next lap overwrites it.
-- **Hardest problem:** The SWPC files are short, and they are a different product from GFZ. The long rings call `GET /api/kp-gfz`, which allows 4200 days. The 1-minute route stays at 7 days.
+- **Hardest problem:** The SWPC files are short, and they are a different product from GFZ. The long rings call `GET /api/v1/kp-gfz`, which allows 4200 days. The 1-minute route stays at 7 days.
 - **Trade-off I made:** SVG instead of Plotly for this picture, because one Plotly line cannot fade segment by segment. Plotly is still the plan for a normal line chart.
 - **How I know it works:** `web/src/kp.test.js` checks the bin average, the lap overwrite, the daily maximum, and the request windows. Playwright loads the page at 320, 375, 390, 1280, and 1440 px with a mocked API, and checks a failed API as well. Run both from `web/` with `npm test` and `npx playwright test`. The GitHub Actions workflow does not run them yet.
 - **If I had more time / at scale:** Refresh the page on a timer. Add the other tiles from the design brief.

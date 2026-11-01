@@ -32,10 +32,10 @@ describe("kpRequestPaths", () => {
     const yearSpan =
       Date.parse(threeHour.searchParams.get("to")) -
       Date.parse(threeHour.searchParams.get("from"));
-    assert.equal(minute.pathname, "/api/kp-1m");
+    assert.equal(minute.pathname, "/api/v1/kp-1m");
     assert.equal(minuteSpan, DAY_MS);
     assert.equal(minute.searchParams.get("limit"), "2000");
-    assert.equal(threeHour.pathname, "/api/kp-gfz");
+    assert.equal(threeHour.pathname, "/api/v1/kp-gfz");
     assert.equal(yearSpan, 11 * YEAR_MS);
     assert.equal(threeHour.searchParams.get("limit"), "40000");
   });
