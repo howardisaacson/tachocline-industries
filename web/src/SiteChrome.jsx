@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 
 /**
- * Shared header/footer so every route has an About link (issue #41, ADR 0009).
+ * Shared header/footer so every route has About and Links (issues #41, #86).
  * @param {{ aboutSlug: string, children: import("react").ReactNode, liveLabel?: string }} props
  */
 export function SiteChrome({ aboutSlug, children, liveLabel }) {
@@ -22,6 +22,7 @@ export function SiteChrome({ aboutSlug, children, liveLabel }) {
           <nav aria-label="Primary">
             <Link to="/">Space weather</Link>
             <Link to="/workflow">Science</Link>
+            <Link to="/links">Links</Link>
             <Link to={`/about/${aboutSlug}`}>About</Link>
           </nav>
           {liveLabel ? (
@@ -38,7 +39,12 @@ export function SiteChrome({ aboutSlug, children, liveLabel }) {
       </header>
       {children}
       <footer className="site-footer">
-        <p>Tachocline Industries. Kp from NOAA SWPC, stored by the local poller.</p>
+        <p>
+          Tachocline Industries. Kp from NOAA SWPC, stored by the local poller.{" "}
+          <Link to="/links">Data source links</Link>
+          {" · "}
+          <Link to={`/about/${aboutSlug}`}>About this page</Link>
+        </p>
       </footer>
     </>
   );

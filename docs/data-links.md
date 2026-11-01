@@ -1,0 +1,44 @@
+# Links: where TI's data comes from
+
+Public list of the feeds Tachocline Industries reads or plans to read. This is **not** the internal reading list in [`docs/links.md`](links.md) (articles and news). Deeper notes live in [`docs/research/data_sources.md`](research/data_sources.md). Provenance matters for the data science workflow ([ADR 0016](decisions/0016-data-science-workflow-as-first-class-feature.md)).
+
+Each entry is a live URL plus one sentence. Credits and citation notes are at the bottom.
+
+## Solar wind (NOAA SWPC)
+
+- [Real-time solar wind, 1-minute plasma](https://services.swpc.noaa.gov/json/rtsw/rtsw_wind_1m.json): proton speed, density and temperature measured upstream of Earth at L1, about the last 24 hours.
+- [Real-time solar wind, 1-minute magnetic field](https://services.swpc.noaa.gov/json/rtsw/rtsw_mag_1m.json): interplanetary magnetic field strength and direction (including Bz) from the same L1 spacecraft.
+- [SWPC Real-Time Solar Wind product page](https://www.swpc.noaa.gov/products/real-time-solar-wind): NOAA's explanation of the real-time solar wind feed and which spacecraft supply it.
+
+## Solar flares (NOAA SWPC / GOES)
+
+- [GOES X-ray flux, 6 hours](https://services.swpc.noaa.gov/json/goes/primary/xrays-6-hour.json): solar X-ray brightness from the primary GOES satellite, used to classify flares (A, B, C, M, X).
+- [SWPC GOES X-ray Flux product page](https://www.swpc.noaa.gov/products/goes-x-ray-flux): what the X-ray channels mean and how flare classes are defined.
+
+## Geomagnetic activity (Kp index)
+
+- [SWPC estimated Kp, 1-minute](https://services.swpc.noaa.gov/json/planetary_k_index_1m.json): a near-real-time estimate of global geomagnetic activity, used for the day plot.
+- [SWPC planetary K-index, 3-hourly](https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json): NOAA's 3-hour Kp values; the [product page](https://www.spaceweather.gov/products/planetary-k-index) explains the index.
+- [GFZ Kp since 1932](https://kp.gfz.de/app/files/Kp_ap_Ap_SN_F107_since_1932.txt): the official Kp and ap record from GFZ Potsdam, back-filling the month, year and 11-year plots ([GFZ Kp home](https://kp.gfz.de/en/); cite as [doi:10.5880/Kp.0001](https://doi.org/10.5880/Kp.0001)).
+
+## Space weather alerts
+
+- [SWPC alerts, watches and warnings](https://services.swpc.noaa.gov/products/alerts.json): NOAA's official space-weather alert messages; the [product page](https://www.spaceweather.gov/products/alerts-watches-and-warnings) explains each type.
+
+## Satellite orbits
+
+- [CelesTrak GP data](https://celestrak.org/NORAD/elements/gp.php?CATNR=25544&FORMAT=json): current orbital elements for tracked satellites (the example is the ISS), used to compute perigee altitude; [format docs](https://celestrak.org/NORAD/documentation/gp-data-formats.php).
+- [Space-Track](https://www.space-track.org/documentation): the US Space Force satellite catalog, whose `gp_history` records supply past orbits for decay rates (free account required).
+
+## Solar images
+
+- [NASA SDAC Solar Images](https://umbra.nascom.nasa.gov/newsite/images.html): NASA Goddard's Solar Data Analysis Center gallery of current solar images from several observatories (added by Howard 2026-10-30; not yet ingested).
+- [SDO AIA / LMSAL](https://aia.lmsal.com/index.htm): Atmospheric Imaging Assembly images and context from Lockheed Martin Solar and Astrophysics Laboratory ([LMSAL home](https://www.lmsal.com/)); not yet ingested.
+
+## Credits and terms
+
+- **NOAA SWPC:** public real-time space-weather products. Credit NOAA Space Weather Prediction Center on pages that show the data. Feeds are provisional / real-time unless marked otherwise.
+- **GFZ German Research Centre for Geosciences:** Kp, ap, Ap, SN, and F10.7 series. Cite Matzka, J., Stolle, C., Yamazaki, Y., Bronkalla, O. and Morschhauser, A., 2021. The geomagnetic Kp index and derived indices of geomagnetic activity. *Space Weather*, doi:[10.5880/Kp.0001](https://doi.org/10.5880/Kp.0001). See also [kp.gfz.de](https://kp.gfz.de/en/).
+- **CelesTrak:** GP/TLE distribution; respect documented rate limits (at most once per 2 hours per group in this repo).
+- **Space-Track (18th Space Defense Squadron):** free account required; use of the API is subject to [Space-Track user agreement / documentation](https://www.space-track.org/documentation). Do not republish bulk catalog dumps beyond what the site already plots.
+- **NASA SDAC / SDO AIA / LMSAL:** public solar imagery galleries; credit the observatory named on each image page when imagery is shown on TI.

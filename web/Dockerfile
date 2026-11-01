@@ -10,6 +10,7 @@ RUN npm ci
 COPY web/ ./
 COPY docs/about /repo/docs/about
 COPY docs/data-science-workflow.md /repo/docs/data-science-workflow.md
+COPY docs/data-links.md /repo/docs/data-links.md
 RUN npm run build
 
 FROM nginx:1.27-alpine
