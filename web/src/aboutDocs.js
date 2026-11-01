@@ -56,6 +56,9 @@ export function rewriteAboutHref(href) {
   if (cleaned === "data-science-workflow.md") {
     return "/workflow";
   }
+  if (cleaned === "data-links.md") {
+    return "/links";
+  }
   if (
     cleaned.startsWith("decisions/") ||
     cleaned.startsWith("research/") ||

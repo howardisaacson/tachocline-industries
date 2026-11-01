@@ -4,6 +4,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 import { AboutIndexPage, AboutPage } from "./AboutPage.jsx";
 import { App } from "./App.jsx";
+import { LinksPage } from "./LinksPage.jsx";
 import { WorkflowPage } from "./WorkflowPage.jsx";
 import "./styles.css";
 
@@ -14,6 +15,7 @@ createRoot(root).render(
       <Routes>
         <Route path="/" element={<App />} />
         <Route path="/workflow" element={<WorkflowPage />} />
+        <Route path="/links" element={<LinksPage />} />
         <Route path="/about" element={<AboutIndexPage />} />
         <Route path="/about/:slug" element={<AboutPage />} />
       </Routes>

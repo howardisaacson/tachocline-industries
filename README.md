@@ -34,7 +34,8 @@ Python pollers (APScheduler) → PostgreSQL + TimescaleDB → FastAPI → Grafan
 | [docs/ideas.md](docs/ideas.md) | Product and science ideas backlog |
 | [docs/data-science-workflow.md](docs/data-science-workflow.md) | End-to-end data science workflow (Drag Watch example) |
 | [docs/ai-agents.md](docs/ai-agents.md) | AI agents: building with them and features in the product |
-| [docs/links.md](docs/links.md) | Relevant articles and news (newest first) |
+| [docs/data-links.md](docs/data-links.md) | Public Links page: TI data-source URLs (`/links`) |
+| [docs/links.md](docs/links.md) | Internal reading list: articles and news (newest first) |
 | [docs/github-workflow.md](docs/github-workflow.md) | How work is planned and tracked: Issues, Milestones, Project, PRs |
 | [Issues](https://github.com/howardisaacson/tachocline-industries/issues) · [Milestones](https://github.com/howardisaacson/tachocline-industries/milestones) | Live status of the roadmap |
 | [docs/decisions/](docs/decisions/README.md) | Architecture Decision Records |

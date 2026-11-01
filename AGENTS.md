@@ -87,9 +87,10 @@ ADRs 0001–0023 are **Accepted**. Newer ADRs start as **Proposed**. Ask before 
     ├── ROADMAP.md
     ├── ideas.md
     ├── data-science-workflow.md # how analysis/modelling is done here (follow it)
+    ├── data-links.md            # public Links page: TI data-source URLs (issue #86)
     ├── ai-agents.md             # agent use: building TI + agents in the product
     ├── github-workflow.md       # issues, milestones, Project, PR loop
-    └── links.md                 # relevant articles, newest first
+    └── links.md                 # internal reading list (articles), newest first
 ```
 
 ## 8. Conventions
@@ -130,5 +131,6 @@ The working copy is at `~/Dropbox/TI/` on Howard's Mac. Dropbox syncs files one 
 
 ## 11. Data and science integrity
 - Cite every data source on the page that uses it and in its About page.
+- **When adding or removing a data source, update the public Links page** [`docs/data-links.md`](docs/data-links.md) (rendered at `/links`) in the same PR. That file is the visitor-facing provenance list; [`docs/links.md`](docs/links.md) stays the internal article reading list.
 - Label provisional or real-time data as such, and never present a model prediction as an observation.
 - Science claims must link to a source (paper, agency page). Mark speculation as speculation.

@@ -1,6 +1,8 @@
 # Relevant links
 
-Articles, news, and resources relevant to Tachocline Industries. Newest first.
+Internal reading list: articles, news, and resources relevant to Tachocline Industries. Newest first.
+
+This is **not** the public data-source list. Visitor-facing feed URLs live in [`data-links.md`](data-links.md) (site route `/links`, issue #86).
 
 | Date added | Link | Why it matters |
 |---|---|---|

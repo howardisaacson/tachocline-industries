@@ -408,6 +408,11 @@ td {
   text-transform: uppercase;
 }
 
+.site-footer a {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
 :focus-visible {
   outline: 2px solid #f0f0fa;
   outline-offset: 3px;

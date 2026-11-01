@@ -144,6 +144,31 @@ test("workflow page layout and Mermaid at 375, 768, 1280", async ({ page }) => {
   );
 });
 
+test("links page lists data sources at 375, 768, 1280", async ({ page }) => {
+  for (const width of [375, 768, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("/links");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText(
+      "where TI's data comes from",
+    );
+    await expect(page.locator('nav[aria-label="Primary"] a[href="/links"]')).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Solar wind (NOAA SWPC)" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Credits and terms" })).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "Real-time solar wind, 1-minute plasma" }),
+    ).toBeVisible();
+    await expect(page.locator('footer a[href="/links"]')).toBeVisible();
+    await assertNoHorizontalScroll(page);
+  }
+
+  await page.setViewportSize({ width: 320, height: 700 });
+  await page.goto("/links");
+  await assertNoHorizontalScroll(page);
+
+  await page.goto("/about/data-links");
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Links");
+});
+
 test("shows an empty ring when the API fails", async ({ page }) => {
   await page.route("**/api/**", (route) => route.fulfill({ status: 503, body: "nope" }));
   await page.setViewportSize({ width: 375, height: 812 });
