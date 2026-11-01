@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import json
 from datetime import UTC, datetime
 from pathlib import Path
 
 import httpx
 
 from ti_ingest.gfz_kp import parse_gfz_text
+from ti_ingest.manifest import manifest_path, sha256_hex
 from ti_ingest.spacetrack_gp import (
     SpaceTrackSettings,
     poll_spacetrack,
@@ -111,6 +113,10 @@ def test_spacetrack_logs_in_then_fetches_history(tmp_path: Path) -> None:
     assert results[0].path.suffix == ".json"
     assert seen[0].endswith("/ajaxauth/login")
     assert len(results) == 5
+    record = json.loads(manifest_path(results[0].path).read_text(encoding="utf-8"))
+    assert "gp_history" in record["url"]
+    assert "secret" not in record["url"]
+    assert record["sha256"] == sha256_hex(results[0].path.read_bytes())
 
 
 def test_spacetrack_stops_when_login_is_rejected(tmp_path: Path) -> None:

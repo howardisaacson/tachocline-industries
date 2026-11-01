@@ -143,6 +143,7 @@ def fetch_gfz(
             response.content,
             source_dir=SOURCE_DIR,
             suffix=".txt",
+            url=PRODUCT.url,
         )
     except OSError as exc:
         logger.error("Could not write raw %s: %s", PRODUCT.name, exc)

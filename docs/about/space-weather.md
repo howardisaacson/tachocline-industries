@@ -56,7 +56,7 @@ The poller stores the rows. The page asks the API for them. FastAPI checks the w
 Key code: [`web/src/App.jsx`](../../web/src/App.jsx), [`web/src/kp.js`](../../web/src/kp.js), [`web/src/plotLayout.js`](../../web/src/plotLayout.js), [`web/src/RadialPlot.jsx`](../../web/src/RadialPlot.jsx), [`api/ti_api/main.py`](../../api/ti_api/main.py).
 
 ## 6. Known limitations
-- The day ring is an SWPC estimate. The longer rings are GFZ Kp. They are not the same product. A GFZ nowcast is labeled `definitive: false` on the API row. The ring draws the number either way.
+- The day ring is an SWPC estimate. The longer rings are GFZ Kp. They are not the same product. A GFZ nowcast is labeled `definitive: false` on the API row. The ring draws the number either way. The daily GFZ file also contains ap and F10.7. That whole file is kept in the raw zone with a sha256 manifest. The rings read Kp only.
 - The page does not poll. Reload it to see a newer minute.
 - Radius auto-scale makes a quiet day look as large as a storm. The G-scale colors and the fixed 0–9 switch are there for that. The under-plot readout and CSV have the exact numbers.
 - Alerts, solar wind, GOES, and satellite altitude stay on the API and on Grafana. This page is Kp only.

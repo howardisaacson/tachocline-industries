@@ -144,6 +144,7 @@ def poll_spacetrack(
                 name,
                 response.content,
                 source_dir=SOURCE_DIR,
+                url=history_url(catnr),
             )
         except OSError as exc:
             logger.error("Could not write raw %s: %s", name, exc)

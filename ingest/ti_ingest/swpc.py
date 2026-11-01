@@ -23,6 +23,8 @@ from pathlib import Path
 
 import httpx
 
+from ti_ingest.manifest import write_manifest
+
 logger = logging.getLogger(__name__)
 
 # Folder name from issue #26. The date under it is YYYY-MM-DD in UTC,
@@ -156,13 +158,28 @@ def write_raw(
     *,
     source_dir: str = SOURCE_DIR,
     suffix: str = ".json",
+    url: str | None = None,
 ) -> Path:
-    """Save ``body`` unchanged. A crash mid-write leaves a ``.partial`` file."""
+    """Save ``body`` unchanged. A crash mid-write leaves a ``.partial`` file.
+
+    When ``url`` is set, a ``.manifest.json`` sidecar is written after the
+    bytes. The hash is of ``body``. Callers that do not pass ``url`` keep
+    the old landing with no sidecar.
+    """
     path = landing_path(raw_dir, when, product, source_dir=source_dir, suffix=suffix)
     path.parent.mkdir(parents=True, exist_ok=True)
     partial = path.with_suffix(path.suffix + ".partial")
     partial.write_bytes(body)
     partial.replace(path)
+    if url is not None:
+        write_manifest(
+            path,
+            source=source_dir,
+            product=product,
+            url=url,
+            retrieved_at=when,
+            body=body,
+        )
     return path
 
 

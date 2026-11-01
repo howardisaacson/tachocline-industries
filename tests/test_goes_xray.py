@@ -322,7 +322,13 @@ def test_scheduler_registers_xray_beside_solar_wind() -> None:
     assert job.max_instances == 1
     assert job.coalesce is True
     both = build_scheduler(
-        5, lambda: None, lambda: None, lambda: None, lambda: None, lambda: None
+        5,
+        lambda: None,
+        lambda: None,
+        lambda: None,
+        lambda: None,
+        lambda: None,
+        lambda: None,
     )
     assert {item.id for item in both.get_jobs()} == {
         JOB_ID,
@@ -330,9 +336,11 @@ def test_scheduler_registers_xray_beside_solar_wind() -> None:
         KP_JOB_ID,
         CELESTRAK_JOB_ID,
         "gfz_kp",
+        "satcat_decay",
     }
     with_history = build_scheduler(
         5,
+        lambda: None,
         lambda: None,
         lambda: None,
         lambda: None,
