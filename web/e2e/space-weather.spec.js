@@ -42,6 +42,38 @@ test.beforeEach(async ({ page }) => {
       });
       return;
     }
+    if (url.includes("/api/v1/satellite-perigee")) {
+      const sats = [
+        [25544, "ISS (ZARYA)", 414],
+        [39084, "LANDSAT 8", 701],
+        [49260, "LANDSAT 9", 702],
+        [20580, "HST", 468],
+        [28485, "SWIFT", 230],
+      ];
+      await route.fulfill({
+        json: pageBody(
+          sats.flatMap(([id, name, km]) => [
+            {
+              epoch: iso(2 * 86_400_000),
+              norad_cat_id: id,
+              object_name: name,
+              object_id: "1998-067A",
+              perigee_altitude_km: km + 1,
+              apogee_altitude_km: km + 2,
+            },
+            {
+              epoch: iso(86_400_000),
+              norad_cat_id: id,
+              object_name: name,
+              object_id: "1998-067A",
+              perigee_altitude_km: km,
+              apogee_altitude_km: km + 1,
+            },
+          ]),
+        ),
+      });
+      return;
+    }
     if (url.includes("/api/v1/kp-gfz")) {
       await route.fulfill({
         json: pageBody([
@@ -63,6 +95,7 @@ test("layout at 375, 768, and 1280 with no horizontal scroll at 320", async ({ p
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toContainText("5.20");
   await expect(page.getByRole("link", { name: "About" }).first()).toBeVisible();
+  await expect(page.getByRole("link", { name: "Satellite Tracking" }).first()).toBeVisible();
   await expect(page.locator(".logo-mark")).toHaveAttribute("src", "/brand/ti-logo.svg");
   const favicon = await page.evaluate(() => {
     const link = document.querySelector('link[rel="icon"][href="/favicon.ico"]');
@@ -173,6 +206,32 @@ test("links page lists data sources at 375, 768, 1280", async ({ page }) => {
 
   await page.goto("/about/data-links");
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Links");
+});
+
+test("satellite tracking page at 320, 375, and 1280", async ({ page }) => {
+  for (const width of [320, 375, 1280]) {
+    await page.setViewportSize({ width, height: width === 320 ? 700 : 900 });
+    await page.goto("/");
+    await page.getByRole("link", { name: "Satellite Tracking" }).first().click();
+    await expect(page).toHaveURL(/\/satellites$/);
+    const title = page.getByRole("heading", { level: 1, name: "Satellite Tracking" });
+    await expect(title).toBeVisible();
+    const headerBox = await page.locator(".site-header").boundingBox();
+    const titleBox = await title.boundingBox();
+    expect(titleBox.y).toBeGreaterThan(headerBox.y + headerBox.height - 1);
+    await expect(page.getByRole("img", { name: /Perigee altitude/ })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Tracking ISS (ZARYA)" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Homepage SWIFT" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Tracking ISS (ZARYA)" })).toHaveAttribute(
+      "href",
+      "https://www.n2yo.com/satellite/?s=25544",
+    );
+    await expect(page.getByRole("link", { name: "Homepage HST" })).toHaveAttribute(
+      "href",
+      "https://science.nasa.gov/mission/hubble/",
+    );
+    await assertNoHorizontalScroll(page);
+  }
 });
 
 test("shows an empty ring when the API fails", async ({ page }) => {

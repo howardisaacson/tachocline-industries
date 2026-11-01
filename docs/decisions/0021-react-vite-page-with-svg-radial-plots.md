@@ -1,6 +1,6 @@
 # 0021. Serve the first public page with Vite, and draw the radial plots in SVG
 
-- **Status:** Accepted
+- **Status:** Accepted. The public perigee line chart is [ADR 0034](0034-svg-perigee-chart-on-the-public-site.md). The radial plots stay SVG.
 - **Date:** 2026-10-27
 - **Deciders:** Howard Isaacson
 

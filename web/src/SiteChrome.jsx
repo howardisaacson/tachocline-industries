@@ -20,6 +20,7 @@ export function SiteChrome({ aboutSlug, children, liveLabel }) {
             <span>Tachocline Industries</span>
           </Link>
           <nav aria-label="Primary">
+            <Link to="/satellites">Satellite Tracking</Link>
             <Link to="/workflow">Science</Link>
             <Link to="/links">Links</Link>
             <Link to={`/about/${aboutSlug}`}>About</Link>
