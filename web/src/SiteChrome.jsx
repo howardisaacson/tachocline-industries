@@ -17,10 +17,9 @@ export function SiteChrome({ aboutSlug, children, liveLabel }) {
               height="36"
               alt=""
             />
-            <span>Tachocline</span>
+            <span>Tachocline Industries</span>
           </Link>
           <nav aria-label="Primary">
-            <Link to="/">Space weather</Link>
             <Link to="/workflow">Science</Link>
             <Link to="/links">Links</Link>
             <Link to={`/about/${aboutSlug}`}>About</Link>

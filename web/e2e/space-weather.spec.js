@@ -174,5 +174,22 @@ test("shows an empty ring when the API fails", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto("/");
   await expect(page.getByRole("alert")).toContainText("did not return Kp");
-  await expect(page.getByText("No stored values in this window.").first()).toBeVisible();
+  await expect(page.getByText("No stored value on this lap.").first()).toBeVisible();
+});
+
+test("Change Data View toggles independently on mobile and desktop", async ({ page }) => {
+  for (const width of [375, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("/");
+    const dayToggle = page.getByRole("button", { name: "Change Data View" }).first();
+    const monthToggle = page.getByRole("button", { name: "Change Data View" }).nth(1);
+    await expect(dayToggle).toHaveAttribute("aria-pressed", "false");
+    await expect(monthToggle).toHaveAttribute("aria-pressed", "false");
+    await dayToggle.click();
+    await expect(dayToggle).toHaveAttribute("aria-pressed", "true");
+    await expect(monthToggle).toHaveAttribute("aria-pressed", "false");
+    await dayToggle.click();
+    await expect(dayToggle).toHaveAttribute("aria-pressed", "false");
+    await assertNoHorizontalScroll(page);
+  }
 });
