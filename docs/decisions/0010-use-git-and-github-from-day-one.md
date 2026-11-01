@@ -40,6 +40,7 @@ We will use **git + GitHub from day one** (repo `tachocline`). Recommendation: *
 "The project was on GitHub from the first commit, with a protected main branch, PR-based changes, and GitHub Actions running lint and tests. Even as a solo developer I used PRs because they force small, reviewable changes and leave a readable history alongside my decision records."
 
 ## Learn more
+- [ADR 0031](0031-build-locally-from-develop.md) adds `develop` as the local integration branch. `main` stays the protected release line. This ADR's decision (use git and GitHub, protect `main`) is unchanged.
 - [Pro Git book](https://git-scm.com/book/en/v2) (official, free)
 - GitHub Docs, [About protected branches](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches) and [GitHub Actions](https://docs.github.com/en/actions)
 - GitHub Docs, [Secret scanning](https://docs.github.com/en/code-security/secret-scanning/introduction/about-secret-scanning); Dropbox, [Ignored files](https://help.dropbox.com/sync/ignored-files)
