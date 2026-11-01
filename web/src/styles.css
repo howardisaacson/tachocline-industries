@@ -99,12 +99,37 @@ nav a {
 }
 
 .hero {
+  position: relative;
+  isolation: isolate;
   min-height: auto;
   padding: 8rem 1.25rem 4rem;
-  background:
-    radial-gradient(circle at 70% 40%, rgba(240, 240, 250, 0.18), transparent 28%),
-    radial-gradient(circle at 70% 40%, rgba(232, 170, 70, 0.35), transparent 42%),
-    #000;
+  background: #000;
+}
+
+/* Full-bleed Exmouth corona (Phil Hart), faded to 40% over black. */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: url("/brand/CoronaExmouth_Hart_1920.jpg") center / cover no-repeat;
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.hero-credit {
+  margin: 1.25rem 0 0;
+  max-width: 36rem;
+  font-family: "Roboto Mono", ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(240, 240, 250, 0.55);
+}
+
+.hero-credit a {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
 }
 
 .eyebrow,
@@ -230,6 +255,18 @@ h2 {
   width: 100%;
   height: auto;
   display: block;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.now-head-hit {
+  fill: transparent;
+  cursor: pointer;
+}
+
+.plot-point-active {
+  stroke: #fff;
+  stroke-width: 1;
 }
 
 .ring {
@@ -256,7 +293,8 @@ table {
 .readout {
   min-height: 2.5rem;
   margin: 0.25rem 0 0;
-  font-size: 12px;
+  font-size: 14.4px;
+  text-align: center;
 }
 
 .table-wrap {
@@ -352,6 +390,7 @@ td {
 .about-doc code {
   font-family: "Roboto Mono", ui-monospace, monospace;
   font-size: 0.9em;
+  overflow-wrap: anywhere;
 }
 
 .about-doc pre {

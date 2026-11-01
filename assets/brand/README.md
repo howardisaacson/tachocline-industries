@@ -10,9 +10,10 @@ Tachocline Industries mark: a magnetically active Sun with coronal loops, dark o
 | `favicon.ico` | Browser favicon (16 + 32 px) |
 | `ti-hero-wide.png` / `.webp` | Desktop hero (1920×1080) |
 | `ti-hero-tall.png` / `.webp` | Mobile hero (1080×1920) |
+| `CoronaExmouth_Hart_1920.jpg` | Space-weather page hero photo (Phil Hart, Exmouth 2023; see LICENSE) |
 | `LICENSE-ASSETS.md` | Creator and rights |
 
-Runtime copies used by the Vite app live under `web/public/` (`favicon.ico`, `brand/ti-logo.svg`, icon PNGs). Change the SVG master here, then re-export and copy into `web/public/` before committing.
+Runtime copies used by the Vite app live under `web/public/` (`favicon.ico`, `brand/ti-logo.svg`, icon PNGs, corona JPG). Change the SVG master here, then re-export and copy into `web/public/` before committing.
 
 ## Rebuild icons from the SVG
 ```bash

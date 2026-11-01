@@ -33,6 +33,40 @@ function segments(bins, binCount) {
   return lines;
 }
 
+function formatUtc(ms) {
+  return new Date(ms).toISOString().slice(0, 16).replace("T", " ");
+}
+
+function formatKp(value) {
+  if (value == null || Number.isNaN(Number(value))) return "—";
+  const scale = gScale(value);
+  return scale
+    ? `Kp ${Number(value).toFixed(2)} · ${scale}`
+    : `Kp ${Number(value).toFixed(2)}`;
+}
+
+function nearestBin(bins, angle) {
+  let best = bins[0];
+  let bestDistance = 360;
+  for (const bin of bins) {
+    const raw = Math.abs(bin.angleDeg - angle);
+    const distance = Math.min(raw, 360 - raw);
+    if (distance < bestDistance) {
+      best = bin;
+      bestDistance = distance;
+    }
+  }
+  return best;
+}
+
+function pointerAngle(event) {
+  const rect = event.currentTarget.getBoundingClientRect();
+  const x = event.clientX - rect.left - rect.width / 2;
+  const y = event.clientY - rect.top - rect.height / 2;
+  const pointer = (Math.atan2(x, -y) * 180) / Math.PI;
+  return (pointer + 360) % 360;
+}
+
 export function RadialPlot({
   title,
   lapLabel,
@@ -43,35 +77,30 @@ export function RadialPlot({
   onSelect,
 }) {
   const [active, setActive] = useState(null);
+  const [hoverNow, setHoverNow] = useState(false);
   const scale = fixedScale ? 9 : Math.max(geometry.max, 1);
   const head = polar(angleDeg(nowMs, nowMs, plot), RING);
-  const shown = active ?? newest(geometry.bins);
+  const atNow = newest(geometry.bins);
+  const shown = active ?? atNow;
 
   function selectFromPointer(event) {
     if (geometry.bins.length === 0) return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    const x = event.clientX - rect.left - rect.width / 2;
-    const y = event.clientY - rect.top - rect.height / 2;
-    const pointer = (Math.atan2(x, -y) * 180) / Math.PI;
-    const angle = (pointer + 360) % 360;
-    let best = geometry.bins[0];
-    let bestDistance = 360;
-    for (const bin of geometry.bins) {
-      const raw = Math.abs(bin.angleDeg - angle);
-      const distance = Math.min(raw, 360 - raw);
-      if (distance < bestDistance) {
-        best = bin;
-        bestDistance = distance;
-      }
-    }
-    setActive(best);
-    onSelect?.(best);
+    const bin = nearestBin(geometry.bins, pointerAngle(event));
+    setHoverNow(false);
+    setActive(bin);
+    onSelect?.(bin);
   }
 
   const label =
     shown == null
       ? `${title}. No stored Kp on this lap. Angle is time, clockwise from ${lapLabel}. Radius is Kp.`
       : `${title}. Selected Kp ${shown.value.toFixed(2)} at ${new Date(shown.time).toISOString()}. Angle is time, clockwise from ${lapLabel}. Radius is Kp.`;
+
+  const readoutText = hoverNow
+    ? `Now · ${formatUtc(nowMs)} UTC · ${formatKp(atNow?.value ?? null)}`
+    : shown == null
+      ? "No stored value on this lap."
+      : `${formatUtc(shown.time)} UTC · ${formatKp(shown.value)}`;
 
   return (
     <div className="plot-frame">
@@ -80,6 +109,7 @@ export function RadialPlot({
         role="img"
         aria-label={label}
         onPointerMove={selectFromPointer}
+        onPointerLeave={() => setHoverNow(false)}
       >
         {[1, 2, 3].map((step) => (
           <circle
@@ -99,14 +129,16 @@ export function RadialPlot({
         {geometry.bins.map((bin) => {
           const at = polar(bin.angleDeg, (bin.value / scale) * RING);
           const opacity = Math.max(0.28, 1 - 0.72 * (bin.ageMs / geometry.periodMs));
+          const isActive = !hoverNow && shown != null && shown.index === bin.index;
           return (
             <circle
               key={`point-${bin.index}`}
               cx={at.x}
               cy={at.y}
-              r="2.2"
+              r={isActive ? 3.4 : 2.2}
               fill={stormColor(bin.value)}
               fillOpacity={opacity}
+              className={isActive ? "plot-point plot-point-active" : "plot-point"}
             />
           );
         })}
@@ -130,12 +162,27 @@ export function RadialPlot({
           );
         })}
         <circle cx={head.x} cy={head.y} r="3.5" className="now-head" />
+        <circle
+          cx={head.x}
+          cy={head.y}
+          r="10"
+          className="now-head-hit"
+          onPointerEnter={(event) => {
+            event.stopPropagation();
+            setHoverNow(true);
+            if (atNow) {
+              setActive(atNow);
+              onSelect?.(atNow);
+            }
+          }}
+          onPointerMove={(event) => {
+            event.stopPropagation();
+            setHoverNow(true);
+          }}
+          onPointerLeave={() => setHoverNow(false)}
+        />
       </svg>
-      <p className="readout">
-        {shown == null
-          ? "No stored value on this lap."
-          : `${new Date(shown.time).toISOString().slice(0, 16).replace("T", " ")} UTC · Kp ${shown.value.toFixed(2)}${gScale(shown.value) ? ` · ${gScale(shown.value)}` : ""}`}
-      </p>
+      <p className="readout">{readoutText}</p>
     </div>
   );
 }

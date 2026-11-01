@@ -96,6 +96,16 @@ export function App() {
           <a className="button" href="#plots">
             Explore
           </a>
+          <p className="hero-credit">
+            Background: solar corona at totality, Exmouth, 20 Apr 2023.{" "}
+            <a
+              href="https://philhart.com/exmouth-eclipse/"
+              rel="noopener noreferrer"
+            >
+              Photo © Phil Hart
+            </a>
+            , CC BY-NC-SA 4.0
+          </p>
         </section>
 
         <section id="plots" className="section">
