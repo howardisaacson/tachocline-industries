@@ -1,6 +1,6 @@
 # About this page: Space weather
 
-> **Last reviewed:** 2026-10-29 · **Owner:** Howard Isaacson
+> **Last reviewed:** 2026-11-01 · **Owner:** Howard Isaacson
 >
 > Written from [the About template](../about-this-page-template.md) ([ADR 0009](../decisions/0009-about-this-page-for-every-section.md)).
 
@@ -60,7 +60,7 @@ Key code: [`web/src/App.jsx`](../../web/src/App.jsx), [`web/src/kp.js`](../../we
 - The page does not poll. Reload it to see a newer minute.
 - Radius auto-scale makes a quiet day look as large as a storm. The G-scale colors and the fixed 0–9 switch are there for that. The table has the exact numbers.
 - Alerts, solar wind, GOES, and satellite altitude stay on the API and on Grafana. This page is Kp only.
-- The sun in the hero is a CSS gradient. The TI graphic is not in `assets/brand/` yet.
+- The hero background is Phil Hart’s Exmouth (20 Apr 2023) total-eclipse corona photograph at 50% opacity over black (`assets/brand/CoronaExmouth_Hart_1920.jpg`, CC BY-NC-SA 4.0). A credit line links to his expedition write-up.
 - The layout is dark on purpose, from the design brief. `prefers-reduced-motion` turns off the live-dot blink and the button transition.
 - No live call against the running stack was made for this page. Tests mock the API.
 
