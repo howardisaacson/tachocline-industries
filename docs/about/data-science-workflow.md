@@ -1,6 +1,6 @@
 # About this page: How the science is done
 
-> **Last reviewed:** 2026-10-29 · **Owner:** Howard Isaacson
+> **Last reviewed:** 2026-11-01 · **Owner:** Howard Isaacson
 >
 > Written from [the About template](../about-this-page-template.md) ([ADR 0009](../decisions/0009-about-this-page-for-every-section.md)).
 
@@ -37,7 +37,7 @@ flowchart LR
 Vite loads the workflow markdown the same way as About pages. Fenced `mermaid` blocks are rendered with the Mermaid library in the browser. Relative links to ADRs and research notes rewrite to GitHub blob URLs (or in-app About routes).
 
 ## 6. Limitations & caveats
-- The workflow is a **plan**. Drag Watch model code is not shipped yet.
+- The model, the backtest, and the public prediction are still a plan. The acquisition step is in the poller: GP history, SATCAT decay records, and the GFZ Kp/ap/F10.7 file each get a sha256 manifest ([ADR 0032](../decisions/0032-raw-landing-manifest-for-drag-watch.md)).
 - Mermaid needs JavaScript; with JS off, the diagram appears as a code block.
 - Wide tables may scroll horizontally inside the page; the page itself must not scroll the viewport sideways at 320 px.
 

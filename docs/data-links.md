@@ -27,7 +27,8 @@ Each entry is a live URL plus one sentence. Credits and citation notes are at th
 
 ## Satellite orbits
 
-- [CelesTrak GP data](https://celestrak.org/NORAD/elements/gp.php?CATNR=25544&FORMAT=json): current orbital elements for tracked satellites (the example is the ISS), used to compute perigee altitude; [format docs](https://celestrak.org/NORAD/documentation/gp-data-formats.php).
+- [CelesTrak GP data](https://celestrak.org/NORAD/documentation/gp-data-formats.php): current orbital elements for tracked satellites, used to compute perigee altitude. The format page is the human-readable description; the poller requests one catalog number at a time.
+- [CelesTrak SATCAT](https://celestrak.org/satcat/satcat-format.php): catalog records for the same five satellites, including `DECAY_DATE`. The poller saves the JSON once a day. This link is the format page, not that file.
 - [Space-Track](https://www.space-track.org/documentation): the US Space Force satellite catalog, whose `gp_history` records supply past orbits for decay rates (free account required).
 
 ## Solar images

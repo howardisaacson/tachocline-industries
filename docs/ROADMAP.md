@@ -48,6 +48,7 @@ Phased milestones. Each phase ends with something demoable, its About pages writ
 - [ ] Natural-language (text-to-SQL) query agent with SELECT-only role, timeouts, row limits, and the SQL shown to the user ([ai-agents.md](ai-agents.md))
 
 ## Phase 5: Value-add science features
+- [x] Drag Watch acquisition: Space-Track `gp_history`, CelesTrak SATCAT decay records, and the GFZ Kp/ap/F10.7 file land in the raw zone with a sha256 manifest (issue #49, [ADR 0032](decisions/0032-raw-landing-manifest-for-drag-watch.md))
 - [ ] **Drag Watch, the orbital decay and re-entry predictor**, run through the full [data science workflow](data-science-workflow.md) (provenance → backtests vs SATCAT decay dates → intervals → monitoring), [ADR 0016](decisions/0016-data-science-workflow-as-first-class-feature.md): how long tracked satellites stay up, and how flares/storms inflate the thermosphere and speed up drag; Starlink Feb 2022 as the validation case study **[H6] [H11]**
 - [ ] **Rust (PyO3) propagation/drag module** benchmarked against Python, [ADR 0015](decisions/0015-where-rust-could-fit.md) **[H9]**
 - [ ] **Sun-as-a-star:** compare solar activity with stellar activity (S-index, Ca II H&K) from Howard's domain **[H7]**

@@ -1,6 +1,6 @@
 # About this page: Satellite GP history
 
-> **Last reviewed:** 2026-10-25 · **Owner:** Howard Isaacson
+> **Last reviewed:** 2026-11-01 · **Owner:** Howard Isaacson
 >
 > Written from [the About template](../about-this-page-template.md) ([ADR 0009](../decisions/0009-about-this-page-for-every-section.md)).
 
@@ -25,7 +25,7 @@ The stored altitudes are kilometers above Earth's equatorial radius. For a nearl
 | Our polling cadence | Every 120 minutes, on startup and then on that interval. The number is `POLL_MINUTES` in `celestrak_gp.py`. It does not read `SWPC_POLL_MINUTES`. |
 | End-to-end latency | Not measured here. A new element set waits for the next two-hour poll. |
 | Processing level | Real-time mean elements (OMM JSON). Perigee and apogee are derived. Space-Track `gp_history` adds the last 400 days when the account is set. |
-| History we keep | Whatever the poller has upserted into the Docker volume `pgdata`, from the first successful run forward. Raw copies stay under `data/raw/celestrak_gp/<YYYY-MM-DD>/`. There is no retention job and no backfill. |
+| History we keep | Whatever the poller has upserted into the Docker volume `pgdata`, from the first successful run forward. Raw copies stay under `data/raw/celestrak_gp/<YYYY-MM-DD>/`. Space-Track history, when the account is set, lands under `data/raw/spacetrack_gp/` with a `.manifest.json` sidecar (URL, time, sha256). SATCAT records, including `DECAY_DATE`, land once a day under `data/raw/satcat/` with the same sidecar and are not upserted. |
 
 ### TLE and element-set references
 Checked 2026-10-25; each returned HTTP 200.
@@ -59,7 +59,8 @@ CelesTrak publishes one JSON array per catalog number. The poller saves each bod
 Key code: [`ingest/ti_ingest/celestrak_gp.py`](../../ingest/ti_ingest/celestrak_gp.py), [`ingest/ti_ingest/elements.py`](../../ingest/ti_ingest/elements.py), [`ingest/ti_ingest/models.py`](../../ingest/ti_ingest/models.py) (`GpRow`), [`ingest/ti_ingest/load.py`](../../ingest/ti_ingest/load.py), [`ingest/ti_ingest/__main__.py`](../../ingest/ti_ingest/__main__.py), [`db/migrations/0004_satellite_gp.sql`](../../db/migrations/0004_satellite_gp.sql).
 
 ## 6. Known limitations
-- No new rows while the local stack is off ([ADR 0002](../decisions/0002-build-locally-first-with-docker-compose.md)). Without `SPACETRACK_USER` and `SPACETRACK_PASSWORD`, history is only what the two-hour CelesTrak poll has collected. The Space-Track job asks for 400 days, not the whole catalog.
+- No new rows while the local stack is off ([ADR 0002](../decisions/0002-build-locally-first-with-docker-compose.md)). Without `SPACETRACK_USER` and `SPACETRACK_PASSWORD`, history is only what the two-hour CelesTrak poll has collected. The Space-Track job asks for 400 days, not the whole catalog. A successful `gp_history` download writes `<file>.manifest.json` beside the JSON ([ADR 0032](../decisions/0032-raw-landing-manifest-for-drag-watch.md)).
+- SATCAT `DECAY_DATE` for the five tracked objects is saved raw once a day. On the 2026-10-25 check those dates were blank. The raw file is the catalog’s answer; it is not a column on `satellite_gp`.
 - The altitude is two-body: `n` in radians per second is mean motion times `2π / 86400`, `a = (μ / n²)^(1/3)`, perigee is `a(1-e) − R`, apogee is `a(1+e) − R`. μ is 398600.0 km³/s² and R is 6378.137 km, from the NASA fact sheet. A TLE mean motion is Kozai. SGP4 converts it before propagating ([AIAA 2006-6753](https://celestrak.org/publications/AIAA/2006-6753/AIAA-2006-6753.pdf)). The difference is small beside a reboost. Do not quote these kilometers as an SGP4 state.
 - A 4xx is logged and not retried. HTTP 429 skips the catalog numbers still left in that run. The next try is two hours later. The solar-wind, GOES, and Kp jobs are separate schedule entries.
 - If Postgres is down, the raw files stay on disk and that run is not upserted.

@@ -41,6 +41,9 @@ from ti_ingest.kp_alerts import poll_kp_alerts
 from ti_ingest.kp_alerts import startup_line as kp_startup_line
 from ti_ingest.load import DBConnection, store_fetch
 from ti_ingest.migrate import DatabaseSettings
+from ti_ingest.satcat import POLL_MINUTES as SATCAT_POLL_MINUTES
+from ti_ingest.satcat import poll_satcat
+from ti_ingest.satcat import startup_line as satcat_startup_line
 from ti_ingest.spacetrack_gp import POLL_MINUTES as SPACETRACK_POLL_MINUTES
 from ti_ingest.spacetrack_gp import SpaceTrackSettings, poll_spacetrack
 from ti_ingest.spacetrack_gp import startup_line as spacetrack_startup_line
@@ -53,6 +56,7 @@ GOES_JOB_ID = "goes_xray"
 KP_JOB_ID = "kp_alerts"
 CELESTRAK_JOB_ID = "celestrak_gp"
 GFZ_JOB_ID = "gfz_kp"
+SATCAT_JOB_ID = "satcat_decay"
 SPACETRACK_JOB_ID = "spacetrack_gp_history"
 # A start that is a few seconds late still runs once. Later than this,
 # the run is skipped instead of firing a backlog. coalesce does the same
@@ -189,6 +193,21 @@ def add_gfz_job(scheduler: BlockingScheduler, job: Callable[[], None]) -> Job:
     )
 
 
+def add_satcat_job(scheduler: BlockingScheduler, job: Callable[[], None]) -> Job:
+    """Register the daily SATCAT pull. Not the two-hour GP job."""
+    return scheduler.add_job(
+        job,
+        "interval",
+        minutes=SATCAT_POLL_MINUTES,
+        id=SATCAT_JOB_ID,
+        name="CelesTrak SATCAT decay dates for the starter satellite set",
+        next_run_time=datetime.now(UTC),
+        max_instances=1,
+        coalesce=True,
+        misfire_grace_time=MISFIRE_GRACE_SECONDS,
+    )
+
+
 def add_spacetrack_job(scheduler: BlockingScheduler, job: Callable[[], None]) -> Job:
     """Register the daily gp_history pull. Not the two-hour CelesTrak job."""
     return scheduler.add_job(
@@ -211,6 +230,7 @@ def build_scheduler(
     kp_job: Callable[[], None],
     celestrak_job: Callable[[], None],
     gfz_job: Callable[[], None],
+    satcat_job: Callable[[], None],
     spacetrack_job: Callable[[], None] | None = None,
 ) -> BlockingScheduler:
     scheduler = BlockingScheduler(timezone=UTC)
@@ -219,6 +239,7 @@ def build_scheduler(
     add_kp_job(scheduler, poll_minutes, kp_job)
     add_celestrak_job(scheduler, celestrak_job)
     add_gfz_job(scheduler, gfz_job)
+    add_satcat_job(scheduler, satcat_job)
     if spacetrack_job is not None:
         add_spacetrack_job(scheduler, spacetrack_job)
     return scheduler
@@ -430,6 +451,27 @@ def execute_gfz_job(
         conn.close()
 
 
+def execute_satcat_job(
+    settings: SwpcSettings,
+    *,
+    transport: httpx.BaseTransport | None = None,
+    now: datetime | None = None,
+) -> None:
+    """One SATCAT run. Land the JSON and the manifest. Do not open Postgres."""
+    started = now if now is not None else datetime.now(UTC)
+    with make_client(settings.user_agent, transport=transport) as client:
+        poll_satcat(client, settings.raw_dir, now=started)
+
+
+def make_satcat_job(settings: SwpcSettings) -> Callable[[], None]:
+    """One SATCAT run. The HTTP client closes before the next day."""
+
+    def job() -> None:
+        execute_satcat_job(settings)
+
+    return job
+
+
 def make_gfz_job(
     settings: SwpcSettings, database: DatabaseSettings
 ) -> Callable[[], None]:
@@ -498,6 +540,7 @@ def main() -> None:
     logger.info("%s", kp_startup_line(str(settings.raw_dir), settings.poll_minutes))
     logger.info("%s", celestrak_startup_line(str(settings.raw_dir)))
     logger.info("%s", gfz_startup_line(str(settings.raw_dir)))
+    logger.info("%s", satcat_startup_line(str(settings.raw_dir)))
     space = SpaceTrackSettings.from_env()
     logger.info("%s", spacetrack_startup_line(str(settings.raw_dir), space.enabled))
     scheduler = build_scheduler(
@@ -507,6 +550,7 @@ def main() -> None:
         make_kp_job(settings, database),
         make_celestrak_job(settings, database),
         make_gfz_job(settings, database),
+        make_satcat_job(settings),
         make_spacetrack_job(settings, database, space) if space.enabled else None,
     )
 
