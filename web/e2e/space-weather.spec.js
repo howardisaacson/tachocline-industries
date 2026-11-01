@@ -157,9 +157,11 @@ test("links page lists data sources at 375, 768, 1280", async ({ page }) => {
     await expect(page.locator('nav[aria-label="Primary"] a[href="/links"]')).toBeVisible();
     await expect(page.getByRole("heading", { name: "Solar wind (NOAA SWPC)" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Credits and terms" })).toBeVisible();
-    await expect(
-      page.getByRole("link", { name: "Real-time solar wind, 1-minute plasma" }),
-    ).toBeVisible();
+    const plasma = page.getByRole("link", { name: "Real-time solar wind, 1-minute plasma" });
+    const mag = page.getByRole("link", { name: "Real-time solar wind, 1-minute magnetic field" });
+    await expect(plasma).toBeVisible();
+    await expect(plasma).toHaveAttribute("href", "https://www.swpc.noaa.gov/products/solar-wind");
+    await expect(mag).toHaveAttribute("href", "https://www.swpc.noaa.gov/products/solar-wind");
     await expect(page.locator('footer a[href="/links"]')).toBeVisible();
     await assertNoHorizontalScroll(page);
   }
