@@ -19,7 +19,7 @@ Each ring is one lap. Twelve o'clock is the start of that lap. Time runs clockwi
 - **One year:** the daily maximum of GFZ 3-hour Kp. The lap starts on 1 January UTC.
 - **11 years:** the daily maximum of GFZ Kp. The lap is 11 × 365 days measured from 1 January 1932 ([ADR 0027](../decisions/0027-eleven-year-kp-ring-with-gfz.md); no longer deferred). A recent row can still be a nowcast. The next daily file replaces it.
 
-**Change Data View** (upper-left on each tile, faint until hover or focus) unwinds that ring into a time-on-x chart and back, about one second, like a rotary dial ([ADR 0029](../decisions/0029-radial-cartesian-unwind-toggle.md)). Each tile toggles on its own. Both layouts draw the same bins; only the geometry changes. `prefers-reduced-motion` skips the tween. The blurb above each plot links to the upstream file under the source name (**NOAA SWPC** or **GFZ**). **Download CSV** saves `time_utc`, `kp`, and `g_scale` for the bins on that ring. Move the pointer over the plot to update the readout. The header chip repeats the latest Kp.
+**Change Data View** (upper-left on each tile, faint until hover or focus) unwinds that ring into a time-on-x chart and back, about one second, like a rotary dial ([ADR 0029](../decisions/0029-radial-cartesian-unwind-toggle.md)). Each tile toggles on its own. Both layouts draw the same bins; only the geometry changes. `prefers-reduced-motion` skips the tween. The blurb above each plot links to the source’s main site under the source name (**NOAA SWPC** or **GFZ**). **Download CSV** saves `time_utc`, `kp`, and `g_scale` for the bins on that ring. Move the pointer over the plot to update the readout. The header chip repeats the latest Kp.
 
 ## 3. Data source & cadence
 | Item | Value |

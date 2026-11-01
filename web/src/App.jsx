@@ -24,7 +24,7 @@ const PLOTS = [
     valueKey: "estimated_kp",
     source: "minute",
     sourceName: "NOAA SWPC",
-    sourceUrl: "https://services.swpc.noaa.gov/json/planetary_k_index_1m.json",
+    sourceUrl: "https://www.swpc.noaa.gov/",
   },
   {
     id: "month",
@@ -35,7 +35,7 @@ const PLOTS = [
     source: "gfz",
     windowMs: MONTH_MS,
     sourceName: "GFZ",
-    sourceUrl: "https://kp.gfz.de/app/files/Kp_ap_Ap_SN_F107_since_1932.txt",
+    sourceUrl: "https://www.gfz.de/",
   },
   {
     id: "year",
@@ -46,7 +46,7 @@ const PLOTS = [
     source: "gfz",
     windowMs: YEAR_MS,
     sourceName: "GFZ",
-    sourceUrl: "https://kp.gfz.de/app/files/Kp_ap_Ap_SN_F107_since_1932.txt",
+    sourceUrl: "https://www.gfz.de/",
   },
   {
     id: "solar",
@@ -56,7 +56,7 @@ const PLOTS = [
     valueKey: "kp",
     source: "gfz",
     sourceName: "GFZ",
-    sourceUrl: "https://kp.gfz.de/app/files/Kp_ap_Ap_SN_F107_since_1932.txt",
+    sourceUrl: "https://www.gfz.de/",
   },
 ];
 
