@@ -2,6 +2,19 @@
 
 This is the **single source of truth** for how to work in this repo. `CLAUDE.md`, `GROK.md`, and `.cursor/rules/agents.mdc` only point here. If anything conflicts, this file wins; update it in a PR rather than working around it.
 
+## Contents
+- [1. Project purpose](#1-project-purpose)
+- [2. Howard is learning, so teach, don't just generate](#2-howard-is-learning-so-teach-dont-just-generate)
+- [3. Architecture Decision Records (mandatory)](#3-architecture-decision-records-mandatory)
+- [4. "About this page" (mandatory)](#4-about-this-page-mandatory)
+- [5. Mobile and desktop specs (mandatory for all UI)](#5-mobile-and-desktop-specs-mandatory-for-all-ui)
+- [6. Stack summary](#6-stack-summary)
+- [7. Repo layout](#7-repo-layout)
+- [8. Conventions](#8-conventions)
+- [9. The repo lives in Dropbox: be careful](#9-the-repo-lives-in-dropbox-be-careful)
+- [10. Data science and AI agent work](#10-data-science-and-ai-agent-work)
+- [11. Data and science integrity](#11-data-and-science-integrity)
+
 ## 1. Project purpose
 Tachocline Industries (TI) is Howard Isaacson's portfolio site. It ingests real-time open satellite and space-weather data, stores it, and presents it through dashboards and a website. See [README.md](README.md), [docs/ROADMAP.md](docs/ROADMAP.md), [docs/ideas.md](docs/ideas.md).
 
@@ -100,11 +113,14 @@ ADRs 0001–0023 are **Accepted**. Newer ADRs start as **Proposed**. Ask before 
 - Never close, relabel, or re-scope issues, or touch the Project board, unless Howard asks; suggest the change instead.
 - When scope changes, update the issue and ROADMAP.md together.
 
-**Git workflow**
-- `main` is always working. Work on short-lived branches: `feat/…`, `fix/…`, `docs/…`, `adr/NNNN-…`.
+**Git workflow** ([ADR 0031](docs/decisions/0031-build-locally-from-develop.md), Proposed)
+- **Build locally from `develop`.** `docker compose` runs on a checkout of `develop`, not `main`. Feature branches are cut from `develop` and their pull requests target `develop`.
+- `main` is the protected release line. Only Howard merges `develop` into `main`.
+- Short-lived branches: `feat/…`, `fix/…`, `docs/…`, `adr/NNNN-…`.
+- **Cursor CLI may merge into `develop` and must not merge into `main`.** After CI passes, the CLI may merge a pull request whose base is `develop`. It must not merge, push, or force-push to `main`, and it must not change branch protection on `main`.
 - **Small PRs** with one purpose each, ideally under about 300 changed lines. The PR description says what, why, how it was tested, which viewports were checked (UI), and links ADR/About updates.
 - Commit messages are imperative and specific ("Add SWPC wind poller with upsert on (time_tag, source)"). Conventional Commits prefixes (`feat:`, `fix:`, `docs:`) are welcome.
-- Never force-push `main` and never rewrite shared history.
+- Never force-push `develop` or `main`, and never rewrite shared history.
 
 **Code and tests**
 - Python 3.12+, formatted and linted with `ruff`, type hints everywhere, `pytest` tests for parsing, validation, and upsert logic. Network calls are mocked in unit tests.
