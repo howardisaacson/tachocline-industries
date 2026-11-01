@@ -472,6 +472,7 @@ td {
 .about-doc code {
   font-family: "Roboto Mono", ui-monospace, monospace;
   font-size: 0.9em;
+  overflow-wrap: anywhere;
 }
 
 .about-doc pre {
