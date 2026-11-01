@@ -26,7 +26,7 @@ The table under each ring lists the same bins, newest first. **Download CSV** sa
 |---|---|
 | Provider | [NOAA SWPC](https://www.swpc.noaa.gov/products/planetary-k-index), real-time estimated Kp. The page reads it from our API, not from SWPC directly. |
 | Satellite(s) / instrument(s) | Ground magnetometers. The 3-hour product names Sitka, Meanook, Ottawa, Fredericksburg, Hartland, Wingst, Niemegk, and Canberra. |
-| Endpoint | `GET /api/kp-1m` for the day ring and the hero. `GET /api/kp-gfz` for the 30-day, year, and 11-year rings. |
+| Endpoint | `GET /api/v1/kp-1m` for the day ring and the hero. `GET /api/v1/kp-gfz` for the 30-day, year, and 11-year rings. |
 | Format / access | JSON over HTTP, no auth, same origin. The `web` container proxies `/api` to the API container. |
 | Upstream update cadence | 1-minute estimated Kp and 3-hour estimated Kp ([data_sources.md](../research/data_sources.md)). |
 | Our polling cadence | `SWPC_POLL_MINUTES` (5 in `.env.example`). |
@@ -67,7 +67,7 @@ Key code: [`web/src/App.jsx`](../../web/src/App.jsx), [`web/src/kp.js`](../../we
 
 ## 7. Interview talking points
 - **30-second pitch:** The live number is SWPC's 1-minute estimated Kp. The longer clocks are GFZ's Kp since 1932, kept in a separate table so the estimate and the definitive index are not mixed. Angle is time, radius is Kp, and the stroke fades until the next lap overwrites it.
-- **Hardest problem:** The SWPC files are short, and they are a different product from GFZ. The long rings call `GET /api/kp-gfz`, which allows 4200 days. The 1-minute route stays at 7 days.
+- **Hardest problem:** The SWPC files are short, and they are a different product from GFZ. The long rings call `GET /api/v1/kp-gfz`, which allows 4200 days. The 1-minute route stays at 7 days.
 - **Trade-off I made:** SVG instead of Plotly for this picture, because one Plotly line cannot fade segment by segment. Plotly is still the plan for a normal line chart.
 - **How I know it works:** `web/src/kp.test.js` checks the bin average, the lap overwrite, the daily maximum, and the request windows. Playwright loads the page at 320, 375, 390, 1280, and 1440 px with a mocked API, and checks a failed API as well. Run both from `web/` with `npm test` and `npx playwright test`. The GitHub Actions workflow does not run them yet.
 - **If I had more time / at scale:** Refresh the page on a timer. Add the other tiles from the design brief.

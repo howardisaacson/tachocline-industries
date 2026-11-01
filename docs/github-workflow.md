@@ -10,7 +10,7 @@ A plain-language guide to the planning and change workflow ([ADR 0018](decisions
 | **Milestone** | A goal grouping issues, with a progress bar | One per roadmap phase (Phase 0 … Phase 5) |
 | **Sub-issue** | A child of a parent issue | Breaks epics (e.g., "Phase 1: solar wind end to end", "Drag Watch") into PR-sized steps |
 | **Project** | A board/table/roadmap over issues, with custom fields | "Tachocline Industries Roadmap": Status, Phase, Priority (P0–P2), Size (XS–L) |
-| **Pull request (PR)** | A proposed change, reviewed before merging into `main` | Every change; says `Closes #N` |
+| **Pull request (PR)** | A proposed change, reviewed before merging into `develop` | Every change; says `Closes #N`. Howard later promotes `develop` to `main`. |
 | **Actions (CI)** | Automated checks on each push/PR | ruff + pytest; required to merge |
 
 ## The everyday loop
@@ -21,15 +21,19 @@ flowchart LR
     C --> P["Open PR<br/>'Closes #12' + checklist"]
     P --> CI["CI runs<br/>ruff + pytest"]
     CI --> R["Review<br/>(self + optional AI reviewer)"]
-    R --> M["Merge to main"]
+    R --> M["Merge to develop<br/>Cursor CLI may do this"]
     M --> D["Issue auto-closes<br/>Project: Done"]
+    D --> H["Howard merges<br/>develop → main"]
 ```
 1. **Pick** an issue from the board (Todo) and move it to *In Progress*. Small and well-defined first; `good first issue` is the warm-up label.
-2. **Branch** off `main`, named `type/<issue#>-short-name` (e.g., `feat/12-swpc-poller`, `docs/31-solar-wind-about`, `adr/5-review-timescale`).
+2. **Branch** off `develop`, named `type/<issue#>-short-name` (e.g., `feat/12-swpc-poller`, `docs/31-solar-wind-about`, `adr/5-review-timescale`). The local Docker stack is built from `develop`.
 3. **Commit** in small, meaningful steps. Mentioning `#12` in a commit message links it to the issue.
-4. **Open a PR** using the template: what and why, `Closes #12`, how it was tested, and the ADR / About-page / mobile-desktop / secrets checkboxes.
+4. **Open a PR into `develop`** using the template: what and why, `Closes #12`, how it was tested, and the ADR / About-page / mobile-desktop / secrets checkboxes.
 5. **CI** must pass. Review your own diff (and optionally an AI reviewer). Fix anything flagged.
-6. **Merge** (squash merge keeps `main` history tidy). `Closes #12` closes the issue, and the Project moves it to *Done*.
+6. **Merge into `develop`** (squash merge keeps history tidy). Cursor CLI may do this merge. It must not merge into `main`. `Closes #12` closes the issue, and the Project moves it to *Done*.
+7. **Promote** when Howard chooses: he merges `develop` into `main`. Agents do not.
+
+`main` stays protected ([ADR 0010](decisions/0010-use-git-and-github-from-day-one.md)). [ADR 0031](decisions/0031-build-locally-from-develop.md) is the integration-branch decision.
 
 ## Planning rhythm (solo version of what teams do)
 - **Weekly (15 min):** look at the current milestone. Set Priority and Size on new issues and pick the week's 2–4 issues. This is a mini "sprint planning".
@@ -60,7 +64,7 @@ Every Proposed ADR has a **"Review ADR NNNN: …"** issue (`type: adr`), as sub-
 
 ### Continuous integration
 
-A **GitHub Actions workflow** is a YAML file in `.github/workflows/` that GitHub runs when an event happens, such as opening a pull request. Ours is [`.github/workflows/ci.yml`](../.github/workflows/ci.yml). The workflow's name is `CI`. It runs on every pull request and on every push to `main`, on Python 3.12.
+A **GitHub Actions workflow** is a YAML file in `.github/workflows/` that GitHub runs when an event happens, such as opening a pull request. Ours is [`.github/workflows/ci.yml`](../.github/workflows/ci.yml). The workflow's name is `CI`. It runs on every pull request and on every push to `main` or `develop`, on Python 3.12.
 
 A **status check** is the pass/fail result of one job. Branch protection can require a check by its exact name before a merge. These jobs are the checks:
 

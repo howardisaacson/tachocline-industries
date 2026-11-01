@@ -1,18 +1,21 @@
-"""Read-only HTTP API (issue #36, ADR 0006).
+"""Read-only HTTP API (issue #36, ADR 0006; versioning issue #89, ADR 0028).
 
-A route is one URL plus one method. These routes are all GET. FastAPI
+A route is one URL plus one method. These routes are all GET. The public
+contract lives under ``/api/v1``. The same handlers are also mounted at
+unversioned ``/api/…`` as hidden aliases during the cutover. FastAPI
 builds the OpenAPI page at ``/docs`` from the type hints on the
 functions. Pydantic checks each response against the model before the
 bytes go out, the same way the pollers check rows on the way in.
 
 https://fastapi.tiangolo.com/tutorial/
+https://fastapi.tiangolo.com/tutorial/bigger-applications/
 
 The database login is the read-only role. Every statement is a SELECT
 in ``ti_api.queries``. A request that asks for more than seven days, or
 for a ``limit`` outside the declared bounds, is rejected before a query
-runs. ``GET /api/kp-3h`` is the exception: the year ring needs one call
-covering 365 days of 3-hour rows, so that route allows 400 days and
-3300 rows. Minute-level routes stay at seven days.
+runs. ``GET /api/v1/kp-3h`` is the exception: the year ring needs one
+call covering 365 days of 3-hour rows, so that route allows 400 days
+and 3300 rows. Minute-level routes stay at seven days.
 """
 
 from __future__ import annotations
@@ -22,7 +25,7 @@ from datetime import UTC, datetime, timedelta
 from typing import Annotated, Literal
 
 import psycopg
-from fastapi import Depends, FastAPI, HTTPException, Query
+from fastapi import APIRouter, Depends, FastAPI, HTTPException, Query
 from pydantic import BaseModel
 
 from ti_api.db import ConfigError, DatabaseSettings, connect
@@ -68,10 +71,14 @@ MAX_DECAY_LIMIT = 5000
 app = FastAPI(
     title="Tachocline Industries",
     summary="Read-only access to stored space-weather and orbit rows.",
-    version="0.1.0",
+    version="1.0.0",
     docs_url="/docs",
     redoc_url=None,
 )
+
+# Path operations are defined once on this router, then mounted under
+# /api/v1 (public, in OpenAPI) and /api (hidden aliases). ADR 0028.
+router = APIRouter()
 
 
 class HealthBody(BaseModel):
@@ -345,14 +352,14 @@ def _window(
     return start, end
 
 
-@app.get("/api/health", response_model=HealthBody)
+@router.get("/health", response_model=HealthBody)
 def health(conn: Annotated[psycopg.Connection, Depends(get_connection)]) -> HealthBody:
     """Database reachability. HTTP 503 when the SELECT fails."""
     _query(conn, HEALTH_SQL, ())
     return HealthBody(status="ok", database="ok")
 
 
-@app.get("/api/solar-wind", response_model=SolarWindPage)
+@router.get("/solar-wind", response_model=SolarWindPage)
 def solar_wind(
     conn: Annotated[psycopg.Connection, Depends(get_connection)],
     now: Annotated[datetime, Depends(utc_now)],
@@ -371,17 +378,17 @@ def solar_wind(
     )
 
 
-@app.get("/api/sources", response_model=list[SourceRow])
+@router.get("/sources", response_model=list[SourceRow])
 def sources(
     conn: Annotated[psycopg.Connection, Depends(get_connection)],
     limit: Annotated[int, Query(ge=1, le=MAX_SOURCE_LIMIT)] = MAX_SOURCE_LIMIT,
 ) -> list[SourceRow]:
-    """Spacecraft ids in ``solar_wind``. Feed names are on ``/api/ingest-log``."""
+    """Spacecraft ids in ``solar_wind``. Feed names are on ``/api/v1/ingest-log``."""
     rows = _query(conn, SOURCES_SQL, (limit,))
     return [SourceRow.model_validate(row) for row in rows]
 
 
-@app.get("/api/ingest-log", response_model=list[IngestLogRow])
+@router.get("/ingest-log", response_model=list[IngestLogRow])
 def ingest_log(
     conn: Annotated[psycopg.Connection, Depends(get_connection)],
     limit: Annotated[int, Query(ge=1, le=MAX_LOG_LIMIT)] = DEFAULT_LOG_LIMIT,
@@ -391,7 +398,7 @@ def ingest_log(
     return [IngestLogRow.model_validate(row) for row in rows]
 
 
-@app.get("/api/mag", response_model=MagPage)
+@router.get("/mag", response_model=MagPage)
 def mag(
     conn: Annotated[psycopg.Connection, Depends(get_connection)],
     now: Annotated[datetime, Depends(utc_now)],
@@ -410,7 +417,7 @@ def mag(
     )
 
 
-@app.get("/api/goes-xray", response_model=GoesPage)
+@router.get("/goes-xray", response_model=GoesPage)
 def goes_xray(
     conn: Annotated[psycopg.Connection, Depends(get_connection)],
     now: Annotated[datetime, Depends(utc_now)],
@@ -430,7 +437,7 @@ def goes_xray(
     )
 
 
-@app.get("/api/kp-1m", response_model=Kp1mPage)
+@router.get("/kp-1m", response_model=Kp1mPage)
 def kp_1m(
     conn: Annotated[psycopg.Connection, Depends(get_connection)],
     now: Annotated[datetime, Depends(utc_now)],
@@ -449,7 +456,7 @@ def kp_1m(
     )
 
 
-@app.get("/api/kp-3h", response_model=Kp3hPage)
+@router.get("/kp-3h", response_model=Kp3hPage)
 def kp_3h(
     conn: Annotated[psycopg.Connection, Depends(get_connection)],
     now: Annotated[datetime, Depends(utc_now)],
@@ -472,7 +479,7 @@ def kp_3h(
     )
 
 
-@app.get("/api/kp-gfz", response_model=GfzKpPage)
+@router.get("/kp-gfz", response_model=GfzKpPage)
 def kp_gfz(
     conn: Annotated[psycopg.Connection, Depends(get_connection)],
     now: Annotated[datetime, Depends(utc_now)],
@@ -483,7 +490,7 @@ def kp_gfz(
     """GFZ 3-hour Kp since 1932. Recent rows may still be nowcasts.
 
     The window may be 4200 days so an 11-year ring is one call.
-    ``limit`` stops at 40000. This is not ``GET /api/kp-3h``.
+    ``limit`` stops at 40000. This is not ``GET /api/v1/kp-3h``.
     """
     start, end = _window(time_from, time_to, now, MAX_GFZ_RANGE)
     rows = _query(conn, GFZ_KP_SQL, (start, end, limit))
@@ -495,7 +502,7 @@ def kp_gfz(
     )
 
 
-@app.get("/api/satellite-decay", response_model=DecayPage)
+@router.get("/satellite-decay", response_model=DecayPage)
 def satellite_decay(
     conn: Annotated[psycopg.Connection, Depends(get_connection)],
     now: Annotated[datetime, Depends(utc_now)],
@@ -524,7 +531,7 @@ def satellite_decay(
     )
 
 
-@app.get("/api/alerts", response_model=AlertPage)
+@router.get("/alerts", response_model=AlertPage)
 def alerts(
     conn: Annotated[psycopg.Connection, Depends(get_connection)],
     now: Annotated[datetime, Depends(utc_now)],
@@ -543,7 +550,7 @@ def alerts(
     )
 
 
-@app.get("/api/satellite-perigee", response_model=PerigeePage)
+@router.get("/satellite-perigee", response_model=PerigeePage)
 def satellite_perigee(
     conn: Annotated[psycopg.Connection, Depends(get_connection)],
     now: Annotated[datetime, Depends(utc_now)],
@@ -561,3 +568,8 @@ def satellite_perigee(
         limit=limit,
         rows=[PerigeeRow.model_validate(row) for row in rows],
     )
+
+
+app.include_router(router, prefix="/api/v1", tags=["v1"])
+# Unversioned aliases for the cutover; hidden from OpenAPI (ADR 0028).
+app.include_router(router, prefix="/api", include_in_schema=False)

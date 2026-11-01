@@ -1,4 +1,4 @@
-"""Read-only API (issue #36). The database is a fake. TestClient calls the app in-process."""
+"""Read-only API (issue #36, versioning #89). Fake DB; TestClient calls the app in-process."""
 
 from __future__ import annotations
 
@@ -116,7 +116,7 @@ def sql_placeholders(sql: str) -> int:
 
 
 def test_health_selects_one(client: TestClient) -> None:
-    response = client.get("/api/health")
+    response = client.get("/api/v1/health")
     assert response.status_code == 200
     assert response.json() == {"status": "ok", "database": "ok"}
     assert client.conn.calls[0][0] == HEALTH_SQL  # type: ignore[attr-defined]
@@ -125,7 +125,7 @@ def test_health_selects_one(client: TestClient) -> None:
 
 def test_health_is_503_when_the_query_fails(client: TestClient) -> None:
     client.conn.fail = True  # type: ignore[attr-defined]
-    response = client.get("/api/health")
+    response = client.get("/api/v1/health")
     assert response.status_code == 503
     assert response.json()["detail"] == "database unavailable"
 
@@ -141,7 +141,7 @@ def test_solar_wind_defaults_to_six_hours_and_returns_rows(client: TestClient) -
             "proton_temperature": 80000.0,
         }
     ]
-    response = client.get("/api/solar-wind")
+    response = client.get("/api/v1/solar-wind")
     assert response.status_code == 200
     body = response.json()
     assert body["processing_level"] == "real-time"
@@ -158,7 +158,7 @@ def test_solar_wind_defaults_to_six_hours_and_returns_rows(client: TestClient) -
 
 def test_solar_wind_rejects_a_range_over_seven_days(client: TestClient) -> None:
     response = client.get(
-        "/api/solar-wind",
+        "/api/v1/solar-wind",
         params={"from": "2026-10-01T00:00:00Z", "to": "2026-10-18T00:00:00Z"},
     )
     assert response.status_code == 422
@@ -168,10 +168,10 @@ def test_solar_wind_rejects_a_range_over_seven_days(client: TestClient) -> None:
 def test_solar_wind_rejects_a_naive_timestamp_and_a_backwards_window(
     client: TestClient,
 ) -> None:
-    naive = client.get("/api/solar-wind", params={"from": "2026-10-26T00:00:00"})
+    naive = client.get("/api/v1/solar-wind", params={"from": "2026-10-26T00:00:00"})
     assert naive.status_code == 422
     backwards = client.get(
-        "/api/solar-wind",
+        "/api/v1/solar-wind",
         params={"from": "2026-10-26T05:00:00Z", "to": "2026-10-26T04:00:00Z"},
     )
     assert backwards.status_code == 422
@@ -179,10 +179,10 @@ def test_solar_wind_rejects_a_naive_timestamp_and_a_backwards_window(
 
 
 def test_solar_wind_limit_stops_at_2000(client: TestClient) -> None:
-    response = client.get("/api/solar-wind", params={"limit": 2001})
+    response = client.get("/api/v1/solar-wind", params={"limit": 2001})
     assert response.status_code == 422
     kept = client.get(
-        "/api/solar-wind",
+        "/api/v1/solar-wind",
         params={
             "from": "2026-10-26T00:00:00Z",
             "to": "2026-10-26T05:00:00Z",
@@ -197,7 +197,7 @@ def test_sources_and_ingest_log_pass_the_limit(client: TestClient) -> None:
     client.conn.rows = [  # type: ignore[attr-defined]
         {"source": "ACE", "rows": 3, "latest": MINUTE}
     ]
-    sources = client.get("/api/sources", params={"limit": 20})
+    sources = client.get("/api/v1/sources", params={"limit": 20})
     assert sources.status_code == 200
     assert sources.json() == [
         {"source": "ACE", "rows": 3, "latest": "2026-10-26T04:00:00Z"}
@@ -218,20 +218,20 @@ def test_sources_and_ingest_log_pass_the_limit(client: TestClient) -> None:
         }
     ]
     client.conn.calls.clear()  # type: ignore[attr-defined]
-    log = client.get("/api/ingest-log")
+    log = client.get("/api/v1/ingest-log")
     assert log.status_code == 200
     assert log.json()[0]["source"] == "gp-25544"
     assert log.json()[0]["error"] is None
     assert client.conn.calls[0][0] == INGEST_LOG_SQL  # type: ignore[attr-defined]
     assert client.conn.calls[0][1] == (50,)  # type: ignore[attr-defined]
 
-    too_many = client.get("/api/ingest-log", params={"limit": 201})
+    too_many = client.get("/api/v1/ingest-log", params={"limit": 201})
     assert too_many.status_code == 422
 
 
 def test_new_series_share_the_window_and_return_rows(client: TestClient) -> None:
     refused = client.get(
-        "/api/mag",
+        "/api/v1/mag",
         params={"from": "2026-10-01T00:00:00Z", "to": "2026-10-18T00:00:00Z"},
     )
     assert refused.status_code == 422
@@ -251,7 +251,7 @@ def test_new_series_share_the_window_and_return_rows(client: TestClient) -> None
             "bz_gsm": -4.0,
         }
     ]
-    mag = client.get("/api/mag")
+    mag = client.get("/api/v1/mag")
     assert mag.status_code == 200
     assert mag.json()["processing_level"] == "real-time"
     assert mag.json()["rows"][0]["bz_gsm"] == -4.0
@@ -269,7 +269,7 @@ def test_new_series_share_the_window_and_return_rows(client: TestClient) -> None
         }
     ]
     goes = client.get(
-        "/api/goes-xray",
+        "/api/v1/goes-xray",
         params={
             "from": "2026-10-26T00:00:00Z",
             "to": "2026-10-26T05:00:00Z",
@@ -284,7 +284,7 @@ def test_new_series_share_the_window_and_return_rows(client: TestClient) -> None
     client.conn.rows = [  # type: ignore[attr-defined]
         {"time_tag": MINUTE, "kp_index": 5, "estimated_kp": 5.0, "kp": "5Z"}
     ]
-    one_minute = client.get("/api/kp-1m")
+    one_minute = client.get("/api/v1/kp-1m")
     assert one_minute.status_code == 200
     assert one_minute.json()["rows"][0]["estimated_kp"] == 5.0
     assert client.conn.calls[-1][0] == KP_1M_SQL  # type: ignore[attr-defined]
@@ -292,7 +292,7 @@ def test_new_series_share_the_window_and_return_rows(client: TestClient) -> None
     client.conn.rows = [  # type: ignore[attr-defined]
         {"time_tag": MINUTE, "kp": 5.33, "a_running": 32, "station_count": 8}
     ]
-    three_hour = client.get("/api/kp-3h")
+    three_hour = client.get("/api/v1/kp-3h")
     assert three_hour.status_code == 200
     assert three_hour.json()["rows"][0]["kp"] == 5.33
     assert client.conn.calls[-1][0] == KP_3H_SQL  # type: ignore[attr-defined]
@@ -304,7 +304,7 @@ def test_new_series_share_the_window_and_return_rows(client: TestClient) -> None
             "message": "Space Weather Message Code: ALTK04",
         }
     ]
-    alerts = client.get("/api/alerts")
+    alerts = client.get("/api/v1/alerts")
     assert alerts.status_code == 200
     assert alerts.json()["limit"] == 50
     assert alerts.json()["rows"][0]["product_id"] == "K04A"
@@ -320,7 +320,7 @@ def test_new_series_share_the_window_and_return_rows(client: TestClient) -> None
             "apogee_altitude_km": 424.2,
         }
     ]
-    perigee = client.get("/api/satellite-perigee", params={"norad_cat_id": 25544})
+    perigee = client.get("/api/v1/satellite-perigee", params={"norad_cat_id": 25544})
     assert perigee.status_code == 200
     body = perigee.json()
     assert body["altitude"].startswith("two-body")
@@ -328,14 +328,14 @@ def test_new_series_share_the_window_and_return_rows(client: TestClient) -> None
     assert client.conn.calls[-1][0] == PERIGEE_SQL  # type: ignore[attr-defined]
     assert client.conn.calls[-1][1][2:4] == (25544, 25544)  # type: ignore[attr-defined]
 
-    missing = client.get("/api/satellite-perigee", params={"norad_cat_id": 0})
+    missing = client.get("/api/v1/satellite-perigee", params={"norad_cat_id": 0})
     assert missing.status_code == 422
 
 
 def test_kp_3h_allows_a_year_and_rejects_a_longer_range(client: TestClient) -> None:
     """The year ring is 365 days of 3-hour rows. Minute routes stay at 7 days."""
     year = client.get(
-        "/api/kp-3h",
+        "/api/v1/kp-3h",
         params={
             "from": "2025-10-27T00:00:00Z",
             "to": "2026-10-27T00:00:00Z",
@@ -347,14 +347,14 @@ def test_kp_3h_allows_a_year_and_rejects_a_longer_range(client: TestClient) -> N
     assert client.conn.calls[-1][1][2] == 3300  # type: ignore[attr-defined]
 
     too_long = client.get(
-        "/api/kp-3h",
+        "/api/v1/kp-3h",
         params={"from": "2024-01-01T00:00:00Z", "to": "2026-01-01T00:00:00Z"},
     )
     assert too_long.status_code == 422
-    too_many = client.get("/api/kp-3h", params={"limit": 3301})
+    too_many = client.get("/api/v1/kp-3h", params={"limit": 3301})
     assert too_many.status_code == 422
     minute = client.get(
-        "/api/kp-1m",
+        "/api/v1/kp-1m",
         params={"from": "2026-10-01T00:00:00Z", "to": "2026-10-18T00:00:00Z"},
     )
     assert minute.status_code == 422
@@ -364,7 +364,7 @@ def test_gfz_window_covers_eleven_years_and_decay_looks_back(
     client: TestClient,
 ) -> None:
     gfz = client.get(
-        "/api/kp-gfz",
+        "/api/v1/kp-gfz",
         params={
             "from": "2015-10-27T00:00:00Z",
             "to": "2026-10-27T00:00:00Z",
@@ -375,7 +375,7 @@ def test_gfz_window_covers_eleven_years_and_decay_looks_back(
     assert gfz.json()["citation"] == "10.5880/Kp.0001"
     assert client.conn.calls[-1][0] == GFZ_KP_SQL  # type: ignore[attr-defined]
     too_long = client.get(
-        "/api/kp-gfz",
+        "/api/v1/kp-gfz",
         params={"from": "2000-01-01T00:00:00Z", "to": "2026-01-01T00:00:00Z"},
     )
     assert too_long.status_code == 422
@@ -391,7 +391,7 @@ def test_gfz_window_covers_eleven_years_and_decay_looks_back(
         }
     ]
     decay = client.get(
-        "/api/satellite-decay",
+        "/api/v1/satellite-decay",
         params={
             "from": "2026-10-01T00:00:00Z",
             "to": "2026-10-26T00:00:00Z",
@@ -412,20 +412,27 @@ def test_openapi_lists_the_read_routes(client: TestClient) -> None:
     assert "text/html" in docs.headers["content-type"]
     spec = client.get("/openapi.json")
     assert spec.status_code == 200
-    paths = spec.json()["paths"]
+    body = spec.json()
+    assert body["info"]["version"] == "1.0.0"
+    paths = body["paths"]
     assert set(paths) == {
-        "/api/health",
-        "/api/solar-wind",
-        "/api/sources",
-        "/api/ingest-log",
-        "/api/mag",
-        "/api/goes-xray",
-        "/api/kp-1m",
-        "/api/kp-3h",
-        "/api/alerts",
-        "/api/satellite-perigee",
-        "/api/kp-gfz",
-        "/api/satellite-decay",
+        "/api/v1/health",
+        "/api/v1/solar-wind",
+        "/api/v1/sources",
+        "/api/v1/ingest-log",
+        "/api/v1/mag",
+        "/api/v1/goes-xray",
+        "/api/v1/kp-1m",
+        "/api/v1/kp-3h",
+        "/api/v1/alerts",
+        "/api/v1/satellite-perigee",
+        "/api/v1/kp-gfz",
+        "/api/v1/satellite-decay",
     }
     for path in paths:
         assert list(paths[path]) == ["get"]
+    # Unversioned aliases work but stay out of the public schema (ADR 0028).
+    alias = client.get("/api/health")
+    assert alias.status_code == 200
+    assert alias.json() == {"status": "ok", "database": "ok"}
+    assert "/api/health" not in paths
