@@ -1,0 +1,48 @@
+{
+  "files": [
+    {
+      "file": "satcat_2022-010.json",
+      "url": "https://celestrak.org/satcat/records.php?INTDES=2022-010&FORMAT=json",
+      "retrieved_at": "2026-11-01T22:40:00Z",
+      "sha256": "f13c35754d13eccef6382e4c23cdf7722beb80952d910400011e8d1a66afb204",
+      "bytes": 7045
+    },
+    {
+      "file": "gp_first_2022-010.json",
+      "url": "https://celestrak.org/NORAD/elements/gp-first.php?INTDES=2022-010&FORMAT=json",
+      "retrieved_at": "2026-11-01T22:40:00Z",
+      "sha256": "8c9021f8827df6858932413bc78c6b70a7327f867282eb2fae03cd4531f43794",
+      "bytes": 8959
+    },
+    {
+      "file": "gp_last_2022-010.json",
+      "url": "https://celestrak.org/NORAD/elements/gp-last.php?INTDES=2022-010&FORMAT=json",
+      "retrieved_at": "2026-11-01T22:40:00Z",
+      "sha256": "a99654707735a5b9f77ce8cdd23b356efb84a52781917b49e393398093296cf6",
+      "bytes": 8859
+    }
+  ],
+  "kp": {
+    "source": "GFZ Kp_ap_Ap_SN_F107_since_1932.txt",
+    "citation": "doi:10.5880/Kp.0001",
+    "retrieved_at": "2026-11-01T22:22:25Z",
+    "daily_max_kp": {
+      "2022-02-01": 3.333,
+      "2022-02-02": 4.0,
+      "2022-02-03": 5.333,
+      "2022-02-04": 5.333,
+      "2022-02-05": 3.0,
+      "2022-02-06": 3.667,
+      "2022-02-07": 2.333,
+      "2022-02-08": 2.0,
+      "2022-02-09": 2.0,
+      "2022-02-10": 5.0,
+      "2022-02-11": 4.333,
+      "2022-02-12": 3.333,
+      "2022-02-13": 3.667,
+      "2022-02-14": 2.667,
+      "2022-02-15": 2.0,
+      "2022-02-16": 3.0
+    }
+  }
+}

@@ -37,7 +37,7 @@ flowchart LR
 Vite loads the workflow markdown the same way as About pages. Fenced `mermaid` blocks are rendered with the Mermaid library in the browser. Relative links to ADRs and research notes rewrite to GitHub blob URLs (or in-app About routes).
 
 ## 6. Limitations & caveats
-- The model, the backtest, and the public prediction are still a plan. The acquisition step is in the poller: GP history, SATCAT decay records, and the GFZ Kp/ap/F10.7 file each get a sha256 manifest ([ADR 0032](../decisions/0032-raw-landing-manifest-for-drag-watch.md)).
+- The density model and the public re-entry outlook are still a plan. The acquisition step is in the poller ([ADR 0032](../decisions/0032-raw-landing-manifest-for-drag-watch.md)). The February 2022 section on the workflow page is a persistence backtest against SATCAT decay dates, using only public CelesTrak first and last element sets ([ADR 0033](../decisions/0033-time-ordered-decay-backtest.md)). It is not a forecast of satellites that are still in orbit.
 - Mermaid needs JavaScript; with JS off, the diagram appears as a code block.
 - Wide tables may scroll horizontally inside the page; the page itself must not scroll the viewport sideways at 320 px.
 

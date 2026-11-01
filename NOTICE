@@ -15,5 +15,9 @@ Licensing
   by either grant. See TRADEMARKS.md.
 - Third-party assets keep their own licenses. See
   assets/brand/LICENSE-ASSETS.md.
+- analysis/backtest/fixtures/ holds small extracts from CelesTrak
+  (SATCAT and GP for international designator 2022-010) and a
+  GFZ daily-maximum Kp excerpt (doi:10.5880/Kp.0001). Those bytes
+  are not covered by the Apache grant. See sources.json beside them.
 
 This NOTICE is informational and does not modify the Apache License.

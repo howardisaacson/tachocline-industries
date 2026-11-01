@@ -134,6 +134,7 @@ test("workflow page layout and Mermaid at 375, 768, 1280", async ({ page }) => {
     await expect(page.locator(".mermaid-wrap svg").first()).toBeVisible({
       timeout: 15_000,
     });
+    await expect(page.getByRole("heading", { name: "February 2022 backtest" })).toBeVisible();
     await assertNoHorizontalScroll(page);
   }
 

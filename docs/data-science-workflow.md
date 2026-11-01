@@ -41,7 +41,29 @@ The loops matter: validation sends you back to features, and monitoring sends yo
 | 10 | **Communication** | Grafana panel for internal checks; public Drag Watch page with altitude curves, a re-entry outlook table with intervals, a "how wrong were we?" backtest chart, and an About page with limitations. Plain-language summary first, details after. | `dashboards/`, `web/`, `docs/about/` | Grafana, React + Plotly | [0007](decisions/0007-grafana-now-react-later-for-frontend.md), [0009](decisions/0009-about-this-page-for-every-section.md), [0012](decisions/0012-responsive-design-mobile-and-desktop.md) |
 | 11 | **Monitoring & retraining** | Each new real decay is a free test case: log predicted vs actual automatically, alert when error drifts (e.g., in solar max vs min), retrain on a schedule or when drift is detected. Track data freshness in `ingest_log`. | `analysis/`, `ingest/` | scheduler, SQL, Grafana alerts | [0004](decisions/0004-python-scheduled-pollers-with-raw-landing-zone.md) |
 
-New folders this introduces: `notebooks/` (exploration) and `analysis/` (importable, tested Python package code). They will be created when Phase 5 starts.
+`analysis/` holds tested code. `notebooks/` is still only for exploration and is not in the repo yet.
+
+## February 2022 backtest
+
+This is the first Drag Watch score against real SATCAT decay dates (issue #52, [ADR 0033](decisions/0033-time-ordered-decay-backtest.md)). It is a **persistence baseline**, not the density model. The truth is the CelesTrak SATCAT `DECAY_DATE` for international designator `2022-010` (the 3 February 2022 Starlink launch). That query returned 21 catalog rows on 2026-11-01. Twelve have a decay date, including four Falcon 9 debris objects from the same launch. Nine were still in orbit and are not scored.
+
+The orbit used for the forecast is CelesTrak's public **first** and **last** GP for that launch, not Space-Track. Space-Track history stays off this page. An element counts only when its epoch is at or before the cutoff and no more than 36 hours earlier. The cutoff is the decay date at 00:00 UTC, minus 30, 7, or 1 day. Activity is the GFZ daily maximum Kp on the cutoff date (quiet below 4, active from 4 up to 5, storm at 5 and above). The baseline continues the recent perigee slope, or the published mean-motion rate when only one element qualifies, until 120 km. That altitude is a model stop, not a SATCAT field.
+
+| Days before decay | Objects with a decay date | Scored | No element near the cutoff |
+|---|---|---|---|
+| 30 | 12 | 0 | 12 |
+| 7 | 12 | 3 | 9 |
+| 1 | 12 | 2 | 9 |
+
+No object has an element 30 days before its decay date. Most of this launch group reentered within days, and the public record has two element sets, not a daily track. One object at 1 day before decay was climbing or flat under persistence, so it has no date error.
+
+| Days before decay | Altitude at the element | Activity | Scored | Median absolute error (days) |
+|---|---|---|---|---|
+| 1 | 200-350 km | quiet | 1 | 22.3 |
+| 1 | under 200 km | quiet | 1 | 7.1 |
+| 7 | 200-350 km | quiet | 3 | 23.1 |
+
+Storm and active bands have no scored forecast in this extract. The errors are large because a rate from one early element set does not capture the fast final decay. That is the baseline a later model has to beat. The bytes and hashes are in `analysis/backtest/fixtures/`. Re-run `tests/test_decay_backtest.py`; it fails if this table drifts from the code.
 
 ## Interview talking points, one per step
 1. **Framing:** "I wrote down the decision the model supports and the error metric *before* touching data, so success was defined up front."
@@ -51,7 +73,7 @@ New folders this introduces: `notebooks/` (exploration) and `analysis/` (importa
 5. **EDA:** "EDA showed the storm effect lags Kp by hours and is strongest below ~400 km, which directly shaped my features."
 6. **Features:** "I derived altitude from orbital elements and added lagged geomagnetic indices and model air density, encoding the physics as features."
 7. **Modelling:** "I started with a persistence baseline and a physics-lite drag model; any ML model had to beat both to earn its complexity."
-8. **Backtesting:** "I validated on time-ordered splits and held-out satellites against real re-entry dates, avoiding leakage from the future."
+8. **Backtesting:** "I scored each decayed object only with element sets from before the cutoff, at 30, 7, and 1 days out. For the February 2022 launch, 30 days out has no eligible element, and the persistence errors that do exist are many days. Those errors are the baseline, not a claim that the model is good."
 9. **Uncertainty:** "Predictions are ranges derived from backtest errors, plus quiet and storm scenarios, because solar activity itself is uncertain."
 10. **Communication:** "Every result page leads with a plain-language answer and links to an About page explaining data, method and limitations."
 11. **Monitoring:** "Each new re-entry automatically scores the model, so I can see drift, for example across the solar cycle, and retrain."
