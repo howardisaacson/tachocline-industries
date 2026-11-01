@@ -106,14 +106,14 @@ nav a {
   background: #000;
 }
 
-/* Full-bleed Exmouth corona (Phil Hart), faded to 50% over black. */
+/* Full-bleed Exmouth corona (Phil Hart), faded to 40% over black. */
 .hero::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
   background: url("/brand/CoronaExmouth_Hart_1920.jpg") center / cover no-repeat;
-  opacity: 0.5;
+  opacity: 0.4;
   pointer-events: none;
 }
 
@@ -251,10 +251,46 @@ h2 {
   font-size: 1.4rem;
 }
 
+.plot-frame {
+  position: relative;
+}
+
 .plot-frame svg {
   width: 100%;
   height: auto;
   display: block;
+  touch-action: none;
+}
+
+.plot-hit {
+  fill: transparent;
+  cursor: crosshair;
+}
+
+.now-head-hit {
+  cursor: pointer;
+}
+
+.plot-point-active {
+  stroke: #fff;
+  stroke-width: 1;
+}
+
+.plot-tooltip {
+  position: absolute;
+  z-index: 1;
+  max-width: min(18rem, 90%);
+  padding: 0.35rem 0.55rem;
+  border: 1px solid rgba(240, 240, 250, 0.35);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.88);
+  color: #f0f0fa;
+  font-family: "Roboto Mono", ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
 }
 
 .ring {

@@ -19,4 +19,4 @@
 - **Subject:** Total solar eclipse corona, Exmouth, Western Australia, 20 April 2023
 - **Photographer:** [Phil Hart](https://philhart.com/exmouth-eclipse/)
 - **License:** [Creative Commons Attribution-NonCommercial-ShareAlike 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) (as stated on [philhart.com/galleries](https://philhart.com/galleries))
-- **Use on TI:** Hero background at 50% opacity over black on the public space-weather page; credit line on the page. Non-commercial portfolio use with attribution. ShareAlike applies to adaptations of this photograph.
+- **Use on TI:** Hero background at 40% opacity over black on the public space-weather page; credit line on the page. Non-commercial portfolio use with attribution. ShareAlike applies to adaptations of this photograph.
