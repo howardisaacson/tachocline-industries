@@ -45,8 +45,8 @@ export function kpRequestPaths(nowMs) {
   const dayFrom = new Date(nowMs - DAY_MS).toISOString();
   const solarFrom = new Date(nowMs - SOLAR_CYCLE_MS).toISOString();
   return {
-    minute: `/api/kp-1m?from=${encodeURIComponent(dayFrom)}&to=${encodeURIComponent(end)}&limit=${MINUTE_LIMIT}`,
-    gfz: `/api/kp-gfz?from=${encodeURIComponent(solarFrom)}&to=${encodeURIComponent(end)}&limit=${GFZ_LIMIT}`,
+    minute: `/api/v1/kp-1m?from=${encodeURIComponent(dayFrom)}&to=${encodeURIComponent(end)}&limit=${MINUTE_LIMIT}`,
+    gfz: `/api/v1/kp-gfz?from=${encodeURIComponent(solarFrom)}&to=${encodeURIComponent(end)}&limit=${GFZ_LIMIT}`,
   };
 }
 
