@@ -12,7 +12,7 @@ Shows how disturbed Earth's magnetic field is, at three zoom levels, without cop
 ## 2. What you're seeing
 The hero is the latest 1-minute `estimated_kp`. Below G1 means Kp is under 5. G1 and above follow [NOAA's scale](https://www.swpc.noaa.gov/noaa-scales-explanation).
 
-Each ring is one lap. Twelve o'clock is the start of that lap. Time runs clockwise. Distance from the center is Kp. The largest value in the window sits on the outer ring unless **Fixed 0–9 scale** is on. A white dot on the rim is now. Older samples are fainter. Gold through red is Kp 5 and above, so a quiet day that fills its own ring does not look like a storm. An empty arc is a time Tachocline has not stored. It is not a zero. Mouse over a sample or the now head to read UTC time and Kp in a tooltip; the line under the plot repeats the same selection.
+Each ring is one lap. Twelve o'clock is the start of that lap. Time runs clockwise. Distance from the center is Kp. The largest value in the window sits on the outer ring unless **Fixed 0–9 scale** is on. A white dot on the rim is now. Older samples are fainter. Gold through red is Kp 5 and above, so a quiet day that fills its own ring does not look like a storm. An empty arc is a time Tachocline has not stored. It is not a zero. Move the pointer over the ring (or the now head) to update the centered readout under the plot with UTC time and Kp.
 
 - **One day:** 1-minute estimated Kp averaged into 10-minute bins. The lap starts at midnight UTC. About 144 bins when the day is full.
 - **30 days:** GFZ 3-hour Kp. The lap starts on the 1st of the month, UTC. The values are the latest 30 days.
@@ -61,7 +61,7 @@ Key code: [`web/src/App.jsx`](../../web/src/App.jsx), [`web/src/kp.js`](../../we
 - Radius auto-scale makes a quiet day look as large as a storm. The G-scale colors and the fixed 0–9 switch are there for that. The table has the exact numbers.
 - Alerts, solar wind, GOES, and satellite altitude stay on the API and on Grafana. This page is Kp only.
 - The hero background is Phil Hart’s Exmouth (20 Apr 2023) total-eclipse corona photograph at 40% opacity over black (`assets/brand/CoronaExmouth_Hart_1920.jpg`, CC BY-NC-SA 4.0). A credit line links to his expedition write-up.
-- Hover a ring sample (or move the pointer over the plot) to see its UTC time and Kp. Hover the bright outer “now” head for the current time and the latest Kp on that lap.
+- Moving the pointer over a ring updates the centered readout under that plot with UTC time and Kp. The outer “now” head sets that readout to the current time and the latest Kp on the lap. There is no floating tooltip on the graphic itself.
 - The layout is dark on purpose, from the design brief. `prefers-reduced-motion` turns off the live-dot blink and the button transition.
 - No live call against the running stack was made for this page. Tests mock the API.
 

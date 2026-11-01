@@ -1,11 +1,10 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useState } from "react";
 
 import { angleDeg, gScale } from "./kp.js";
 
 const SIZE = 200;
 const CENTER = 100;
 const RING = 78;
-const HIT_RADIUS = 8;
 
 function polar(angle, radius) {
   const radians = (angle * Math.PI) / 180;
@@ -68,20 +67,6 @@ function pointerAngle(event) {
   return (pointer + 360) % 360;
 }
 
-function tooltipStyle(point, frameWidth) {
-  if (point == null || frameWidth <= 0) return { display: "none" };
-  const left = (point.x / SIZE) * frameWidth;
-  const top = (point.y / SIZE) * frameWidth;
-  const flipX = left > frameWidth * 0.62;
-  return {
-    left: `${left}px`,
-    top: `${top}px`,
-    transform: flipX
-      ? "translate(-100%, -120%) translateX(-8px)"
-      : "translate(8px, -120%)",
-  };
-}
-
 export function RadialPlot({
   title,
   lapLabel,
@@ -91,57 +76,19 @@ export function RadialPlot({
   fixedScale,
   onSelect,
 }) {
-  const tooltipId = useId();
-  const frameRef = useRef(null);
   const [active, setActive] = useState(null);
-  const [hover, setHover] = useState(null);
-  const [frameWidth, setFrameWidth] = useState(0);
+  const [hoverNow, setHoverNow] = useState(false);
   const scale = fixedScale ? 9 : Math.max(geometry.max, 1);
   const head = polar(angleDeg(nowMs, nowMs, plot), RING);
   const atNow = newest(geometry.bins);
-  const shown = hover?.bin ?? active ?? atNow;
-
-  useEffect(() => {
-    const node = frameRef.current;
-    if (node == null || typeof ResizeObserver === "undefined") return undefined;
-    const sync = () => setFrameWidth(node.clientWidth);
-    sync();
-    const observer = new ResizeObserver(sync);
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, []);
-
-  function showBin(bin, point) {
-    setActive(bin);
-    setHover({
-      kind: "bin",
-      bin,
-      point,
-      timeMs: bin.time,
-      value: bin.value,
-    });
-    onSelect?.(bin);
-  }
-
-  function showNow() {
-    setHover({
-      kind: "now",
-      bin: atNow,
-      point: head,
-      timeMs: nowMs,
-      value: atNow?.value ?? null,
-    });
-    if (atNow) {
-      setActive(atNow);
-      onSelect?.(atNow);
-    }
-  }
+  const shown = active ?? atNow;
 
   function selectFromPointer(event) {
     if (geometry.bins.length === 0) return;
     const bin = nearestBin(geometry.bins, pointerAngle(event));
-    const point = polar(bin.angleDeg, (bin.value / scale) * RING);
-    showBin(bin, point);
+    setHoverNow(false);
+    setActive(bin);
+    onSelect?.(bin);
   }
 
   const label =
@@ -149,29 +96,20 @@ export function RadialPlot({
       ? `${title}. No stored Kp on this lap. Angle is time, clockwise from ${lapLabel}. Radius is Kp.`
       : `${title}. Selected Kp ${shown.value.toFixed(2)} at ${new Date(shown.time).toISOString()}. Angle is time, clockwise from ${lapLabel}. Radius is Kp.`;
 
-  const tooltipText =
-    hover == null
-      ? null
-      : hover.kind === "now"
-        ? `Now · ${formatUtc(hover.timeMs)} UTC · ${formatKp(hover.value)}`
-        : `${formatUtc(hover.timeMs)} UTC · ${formatKp(hover.value)}`;
-
-  const readoutText =
-    hover != null
-      ? tooltipText
-      : shown == null
-        ? "No stored value on this lap."
-        : `${formatUtc(shown.time)} UTC · ${formatKp(shown.value)}`;
+  const readoutText = hoverNow
+    ? `Now · ${formatUtc(nowMs)} UTC · ${formatKp(atNow?.value ?? null)}`
+    : shown == null
+      ? "No stored value on this lap."
+      : `${formatUtc(shown.time)} UTC · ${formatKp(shown.value)}`;
 
   return (
-    <div className="plot-frame" ref={frameRef}>
+    <div className="plot-frame">
       <svg
         viewBox={`0 0 ${SIZE} ${SIZE}`}
         role="img"
         aria-label={label}
-        aria-describedby={hover ? tooltipId : undefined}
         onPointerMove={selectFromPointer}
-        onPointerLeave={() => setHover(null)}
+        onPointerLeave={() => setHoverNow(false)}
       >
         {[1, 2, 3].map((step) => (
           <circle
@@ -191,34 +129,17 @@ export function RadialPlot({
         {geometry.bins.map((bin) => {
           const at = polar(bin.angleDeg, (bin.value / scale) * RING);
           const opacity = Math.max(0.28, 1 - 0.72 * (bin.ageMs / geometry.periodMs));
-          const isActive = shown != null && shown.index === bin.index;
+          const isActive = !hoverNow && shown != null && shown.index === bin.index;
           return (
-            <g key={`point-${bin.index}`}>
-              <circle
-                cx={at.x}
-                cy={at.y}
-                r={isActive ? 3.4 : 2.2}
-                fill={stormColor(bin.value)}
-                fillOpacity={opacity}
-                className={isActive ? "plot-point plot-point-active" : "plot-point"}
-              />
-              <circle
-                cx={at.x}
-                cy={at.y}
-                r={HIT_RADIUS}
-                className="plot-hit"
-                onPointerEnter={(event) => {
-                  event.stopPropagation();
-                  showBin(bin, at);
-                }}
-                onPointerMove={(event) => {
-                  event.stopPropagation();
-                  showBin(bin, at);
-                }}
-              >
-                <title>{`${formatUtc(bin.time)} UTC · ${formatKp(bin.value)}`}</title>
-              </circle>
-            </g>
+            <circle
+              key={`point-${bin.index}`}
+              cx={at.x}
+              cy={at.y}
+              r={isActive ? 3.4 : 2.2}
+              fill={stormColor(bin.value)}
+              fillOpacity={opacity}
+              className={isActive ? "plot-point plot-point-active" : "plot-point"}
+            />
           );
         })}
         {segments(geometry.bins, geometry.binCount).map(([start, end]) => {
@@ -237,7 +158,6 @@ export function RadialPlot({
               stroke={stormColor(kp)}
               strokeOpacity={opacity}
               strokeWidth="2"
-              pointerEvents="none"
             />
           );
         })}
@@ -245,30 +165,23 @@ export function RadialPlot({
         <circle
           cx={head.x}
           cy={head.y}
-          r={HIT_RADIUS + 2}
-          className="plot-hit now-head-hit"
+          r="10"
+          className="now-head-hit"
           onPointerEnter={(event) => {
             event.stopPropagation();
-            showNow();
+            setHoverNow(true);
+            if (atNow) {
+              setActive(atNow);
+              onSelect?.(atNow);
+            }
           }}
           onPointerMove={(event) => {
             event.stopPropagation();
-            showNow();
+            setHoverNow(true);
           }}
-        >
-          <title>{`Now · ${formatUtc(nowMs)} UTC · ${formatKp(atNow?.value ?? null)}`}</title>
-        </circle>
+          onPointerLeave={() => setHoverNow(false)}
+        />
       </svg>
-      {tooltipText ? (
-        <div
-          id={tooltipId}
-          className="plot-tooltip"
-          role="tooltip"
-          style={tooltipStyle(hover.point, frameWidth)}
-        >
-          {tooltipText}
-        </div>
-      ) : null}
       <p className="readout">{readoutText}</p>
     </div>
   );
