@@ -6,8 +6,8 @@ Each entry is a live URL plus one sentence. Credits and citation notes are at th
 
 ## Solar wind (NOAA SWPC)
 
-- [Real-time solar wind, 1-minute plasma](https://services.swpc.noaa.gov/json/rtsw/rtsw_wind_1m.json): proton speed, density and temperature measured upstream of Earth at L1, about the last 24 hours.
-- [Real-time solar wind, 1-minute magnetic field](https://services.swpc.noaa.gov/json/rtsw/rtsw_mag_1m.json): interplanetary magnetic field strength and direction (including Bz) from the same L1 spacecraft.
+- [Real-time solar wind, 1-minute plasma](https://www.swpc.noaa.gov/products/solar-wind): proton speed, density and temperature measured upstream of Earth at L1, about the last 24 hours. The link opens NOAA’s solar-wind product page, which plots plasma and the magnetic field together.
+- [Real-time solar wind, 1-minute magnetic field](https://www.swpc.noaa.gov/products/solar-wind): interplanetary magnetic field strength and direction (including Bz) from the same L1 spacecraft. Same product page as the plasma link; SWPC does not publish a separate HTML page for the magnetometer.
 - [SWPC Real-Time Solar Wind product page](https://www.swpc.noaa.gov/products/real-time-solar-wind): NOAA's explanation of the real-time solar wind feed and which spacecraft supply it.
 
 ## Solar flares (NOAA SWPC / GOES)
