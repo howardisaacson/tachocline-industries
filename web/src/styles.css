@@ -51,11 +51,17 @@ nav a,
 
 .logo {
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   text-decoration: none;
-  font-size: 13px;
-  gap: 0.55rem;
+  font-size: 12px;
+  gap: 0.45rem;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.logo span {
+  line-height: 1.15;
 }
 
 .logo-mark {
