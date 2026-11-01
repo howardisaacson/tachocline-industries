@@ -28,6 +28,7 @@ Phased milestones. Each phase ends with something demoable, its About pages writ
 - [x] FastAPI read-only endpoints: `/api/health`, `/api/solar-wind`, `/api/mag`, `/api/goes-xray`, `/api/kp-1m`, `/api/kp-3h`, `/api/alerts`, `/api/satellite-perigee`, `/api/sources`, `/api/ingest-log`, OpenAPI at `/docs` (issue #36, [ADR 0006](decisions/0006-fastapi-for-backend-api.md), [About page](about/api.md)).
 
 ## Phase 3: Public website
+- [x] License the code under Apache 2.0, docs under CC BY 4.0, and keep the name and logo in [TRADEMARKS.md](../TRADEMARKS.md) (issue #97, [ADR 0030](decisions/0030-apache-2-license-with-trademark-policy.md))
 - [x] Design survey: SpaceX-style brief plus space and science references ([design_survey.md](research/design_survey.md), issue #37), [ADR 0013](decisions/0013-design-by-studying-existing-sites.md)
 - [x] Design brief using the TI graphic **[H3]** (issue #38): [`docs/design-brief.md`](design-brief.md), accent choice in [ADR 0025](decisions/0025-brand-accent-from-logo-orange.md)
 - [x] First public page: radial Kp plots (day, month, year; 11-year plot deferred until a Kp backfill), [ADR 0020](decisions/0020-radial-time-plots-for-space-weather.md), [ADR 0021](decisions/0021-react-vite-page-with-svg-radial-plots.md)

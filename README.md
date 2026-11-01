@@ -60,3 +60,6 @@ docker compose up --build
 
 ## Data credits
 NOAA Space Weather Prediction Center, CelesTrak / 18th Space Defense Squadron, NASA (FIRMS, CMR, SDO, DONKI), ESA Copernicus, SatNOGS / Libre Space Foundation. See the research doc for details.
+
+## License and trademarks
+Source code, SQL, and configuration are under the [Apache License 2.0](LICENSE). Original prose in `docs/` is under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The name **Tachocline Industries** and the TI logo are trademarks of Howard Isaacson and are not included in those grants: a fork must rename and rebrand, and may say it is based on this project. See [TRADEMARKS.md](TRADEMARKS.md) and [ADR 0030](docs/decisions/0030-apache-2-license-with-trademark-policy.md). This is not legal advice.

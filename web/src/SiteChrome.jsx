@@ -40,10 +40,18 @@ export function SiteChrome({ aboutSlug, children, liveLabel }) {
       {children}
       <footer className="site-footer">
         <p>
-          Tachocline Industries. Kp from NOAA SWPC, stored by the local poller.{" "}
+          Tachocline Industries™. Kp from NOAA SWPC, stored by the local poller.{" "}
           <Link to="/links">Data source links</Link>
           {" · "}
           <Link to={`/about/${aboutSlug}`}>About this page</Link>
+          {" · "}
+          <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>
+          {" code · "}
+          <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>
+          {" docs · "}
+          <a href="https://github.com/howardisaacson/tachocline-industries/blob/main/TRADEMARKS.md">
+            Trademarks
+          </a>
         </p>
       </footer>
     </>

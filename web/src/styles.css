@@ -406,6 +406,7 @@ td {
   font-size: 12px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+  overflow-wrap: anywhere;
 }
 
 .site-footer a {

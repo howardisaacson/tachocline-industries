@@ -97,5 +97,6 @@ What becomes easier? What becomes harder? What new risks or follow-up work does 
 | [0025](0025-brand-accent-from-logo-orange.md) | Use the logo’s dark orange as the brand accent on black | Proposed |
 | [0026](0026-render-mermaid-in-doc-pages.md) | Render Mermaid diagrams client-side on doc pages | Proposed |
 | [0027](0027-eleven-year-kp-ring-with-gfz.md) | Ship the 11-year radial Kp ring using GFZ history since 1932 | Proposed |
+| [0030](0030-apache-2-license-with-trademark-policy.md) | License the code under Apache 2.0 and keep the name and logo out of that grant | Proposed |
 
 Tooling (optional): [adr-tools](https://github.com/npryce/adr-tools) is a small CLI that creates numbered ADR files. Copying the template by hand works just as well.

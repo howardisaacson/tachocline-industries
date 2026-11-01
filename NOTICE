@@ -1,0 +1,19 @@
+Tachocline Industries
+Copyright 2026 Howard Isaacson
+
+This product includes software developed by Howard Isaacson
+as the Tachocline Industries portfolio project.
+
+Licensing
+- Source code, SQL, and configuration files are licensed under the
+  Apache License, Version 2.0. See the LICENSE file.
+- Original prose under docs/ (About pages, research notes, and the
+  other markdown there) is licensed under Creative Commons
+  Attribution 4.0 International (CC BY 4.0):
+  https://creativecommons.org/licenses/by/4.0/
+- The name "Tachocline Industries" and the TI logo are not covered
+  by either grant. See TRADEMARKS.md.
+- Third-party assets keep their own licenses. See
+  assets/brand/LICENSE-ASSETS.md.
+
+This NOTICE is informational and does not modify the Apache License.
