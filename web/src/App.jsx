@@ -196,14 +196,8 @@ function PlotCard({ plot, state, fixedScale }) {
         geometry={geometry}
         nowMs={ready ? state.nowMs : Date.UTC(2026, 0, 1)}
         fixedScale={fixedScale}
+        onDownloadCsv={() => download(`${plot.id}-kp.csv`, toCsv(csvRows))}
       />
-      <button
-        type="button"
-        className="button button-small"
-        onClick={() => download(`${plot.id}-kp.csv`, toCsv(csvRows))}
-      >
-        Download CSV
-      </button>
     </article>
   );
 }

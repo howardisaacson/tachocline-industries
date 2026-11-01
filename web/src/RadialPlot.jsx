@@ -88,6 +88,7 @@ export function RadialPlot({
   nowMs,
   fixedScale,
   onSelect,
+  onDownloadCsv,
 }) {
   const [active, setActive] = useState(null);
   const [cartesian, setCartesian] = useState(false);
@@ -344,7 +345,18 @@ export function RadialPlot({
           />
         ) : null}
       </svg>
-      <p className="readout">{readoutText}</p>
+      <div className="plot-meta">
+        <p className="readout">{readoutText}</p>
+        {onDownloadCsv ? (
+          <button
+            type="button"
+            className="button button-csv"
+            onClick={onDownloadCsv}
+          >
+            Download CSV
+          </button>
+        ) : null}
+      </div>
     </div>
   );
 }
