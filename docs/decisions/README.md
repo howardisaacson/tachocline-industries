@@ -103,5 +103,6 @@ What becomes easier? What becomes harder? What new risks or follow-up work does 
 | [0031](0031-build-locally-from-develop.md) | Build locally from `develop`; agents may merge there, not to `main` | Proposed |
 | [0032](0032-raw-landing-manifest-for-drag-watch.md) | Record a sha256 manifest beside each Drag Watch raw file | Proposed |
 | [0033](0033-time-ordered-decay-backtest.md) | Score decay forecasts only with elements from before the cutoff | Proposed |
+| [0034](0034-svg-perigee-chart-on-the-public-site.md) | Draw the public perigee chart in SVG | Proposed |
 
 Tooling (optional): [adr-tools](https://github.com/npryce/adr-tools) is a small CLI that creates numbered ADR files. Copying the template by hand works just as well.
