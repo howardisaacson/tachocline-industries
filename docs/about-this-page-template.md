@@ -37,7 +37,7 @@ flowchart LR
     POLL -->|validate + upsert| DB[("PostgreSQL + TimescaleDB<br/>{table name}")]
     DB --> AGG["Continuous aggregates<br/>(hourly/daily)"]
     DB --> GRAF["Grafana dashboard"]
-    AGG --> API["FastAPI<br/>GET /api/{resource}"]
+    AGG --> API["FastAPI<br/>GET /api/v1/{resource}"]
     API --> WEB["React page (this page)"]
 ```
 <1–2 sentences walking through the diagram, in order. Replace `{placeholders}` in the diagram (curly braces, because Mermaid treats angle brackets as HTML); remove boxes that don't apply.>
