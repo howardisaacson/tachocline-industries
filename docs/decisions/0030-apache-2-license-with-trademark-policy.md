@@ -44,7 +44,7 @@ We will use **option A** for source code, SQL, and configuration.
 
 Original prose under `docs/` is under **CC BY 4.0**.
 
-The name **Tachocline Industries** and the TI logo are **not** included in either grant. [`TRADEMARKS.md`](../../TRADEMARKS.md) says forks must rename and rebrand, and that “based on Tachocline Industries” is allowed. The site footer and the README state both grants and point at that file.
+The name **Tachocline Industries** and the TI logo are **not** included in either grant. [`TRADEMARKS.md`](../../TRADEMARKS.md) says forks must rename and rebrand, and that “based on Tachocline Industries” is allowed. The site footer, each About page, and the README state both grants and point at that file.
 
 Third-party files keep their own terms. Brand files are listed in `assets/brand/LICENSE-ASSETS.md` as excluded from Apache 2.0.
 

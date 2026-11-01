@@ -111,11 +111,14 @@ test("About markdown renders at mobile and desktop widths", async ({ page }) => 
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Space weather");
     await expect(page.getByText("docs/about/space-weather.md")).toBeVisible();
     await expect(page.getByRole("heading", { name: "1. Purpose" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "License" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Trademark policy" })).toBeVisible();
     await assertNoHorizontalScroll(page);
   }
 
   await page.setViewportSize({ width: 320, height: 700 });
   await page.goto("/about/space-weather");
+  await expect(page.getByRole("heading", { name: "License" })).toBeVisible();
   await assertNoHorizontalScroll(page);
 });
 
