@@ -23,6 +23,8 @@ const PLOTS = [
     note: "1-minute estimated Kp, averaged into 10-minute bins. The lap starts at midnight UTC.",
     valueKey: "estimated_kp",
     source: "minute",
+    sourceName: "NOAA SWPC",
+    sourceUrl: "https://services.swpc.noaa.gov/json/planetary_k_index_1m.json",
   },
   {
     id: "month",
@@ -32,6 +34,8 @@ const PLOTS = [
     valueKey: "kp",
     source: "gfz",
     windowMs: MONTH_MS,
+    sourceName: "GFZ",
+    sourceUrl: "https://kp.gfz.de/app/files/Kp_ap_Ap_SN_F107_since_1932.txt",
   },
   {
     id: "year",
@@ -41,6 +45,8 @@ const PLOTS = [
     valueKey: "kp",
     source: "gfz",
     windowMs: YEAR_MS,
+    sourceName: "GFZ",
+    sourceUrl: "https://kp.gfz.de/app/files/Kp_ap_Ap_SN_F107_since_1932.txt",
   },
   {
     id: "solar",
@@ -49,6 +55,8 @@ const PLOTS = [
     note: "Daily maximum of GFZ Kp across 11 years of 365 days. The lap is measured from 1 January 1932. A nowcast is still Kp, and the file replaces it later.",
     valueKey: "kp",
     source: "gfz",
+    sourceName: "GFZ",
+    sourceUrl: "https://kp.gfz.de/app/files/Kp_ap_Ap_SN_F107_since_1932.txt",
   },
 ];
 
@@ -169,12 +177,18 @@ function PlotCard({ plot, state, fixedScale }) {
   const geometry = ready
     ? radialBins({ samples, nowMs: state.nowMs, plot: plot.id })
     : { binCount: 1, bins: [], max: 0, periodMs: 1 };
-  const tableRows = [...geometry.bins].sort((left, right) => right.time - left.time);
+  const csvRows = [...geometry.bins].sort((left, right) => right.time - left.time);
 
   return (
     <article className="plot-card">
       <h3>{plot.title}</h3>
-      <p>{plot.note}</p>
+      <p>
+        {plot.note} Original data:{" "}
+        <a href={plot.sourceUrl} rel="noopener noreferrer">
+          {plot.sourceName}
+        </a>
+        .
+      </p>
       <RadialPlot
         title={plot.title}
         lapLabel={plot.lapLabel}
@@ -186,37 +200,10 @@ function PlotCard({ plot, state, fixedScale }) {
       <button
         type="button"
         className="button button-small"
-        onClick={() => download(`${plot.id}-kp.csv`, toCsv(tableRows))}
+        onClick={() => download(`${plot.id}-kp.csv`, toCsv(csvRows))}
       >
         Download CSV
       </button>
-      <div className="table-wrap">
-        <table>
-          <caption>{plot.title} values used in the ring</caption>
-          <thead>
-            <tr>
-              <th scope="col">Time (UTC)</th>
-              <th scope="col">Kp</th>
-              <th scope="col">Scale</th>
-            </tr>
-          </thead>
-          <tbody>
-            {tableRows.length === 0 ? (
-              <tr>
-                <td colSpan={3}>No stored values in this window.</td>
-              </tr>
-            ) : (
-              tableRows.map((bin) => (
-                <tr key={bin.index}>
-                  <td>{new Date(bin.time).toISOString().slice(0, 16).replace("T", " ")}</td>
-                  <td>{bin.value.toFixed(2)}</td>
-                  <td>{gScale(bin.value) ?? "—"}</td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
     </article>
   );
 }

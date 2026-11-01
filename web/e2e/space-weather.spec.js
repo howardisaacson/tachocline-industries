@@ -174,7 +174,7 @@ test("shows an empty ring when the API fails", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto("/");
   await expect(page.getByRole("alert")).toContainText("did not return Kp");
-  await expect(page.getByText("No stored values in this window.").first()).toBeVisible();
+  await expect(page.getByText("No stored value on this lap.").first()).toBeVisible();
 });
 
 test("Change Data View toggles independently on mobile and desktop", async ({ page }) => {

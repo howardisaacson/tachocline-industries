@@ -251,6 +251,12 @@ h2 {
   font-size: 1.4rem;
 }
 
+.plot-card a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
 .plot-frame {
   position: relative;
 }
