@@ -106,6 +106,8 @@ def test_queries_are_selects_with_placeholders() -> None:
     ):
         assert sql.startswith("SELECT")
         assert _WRITE_SQL.search(sql) is None
+    assert "provider = 'celestrak'" in PERIGEE_SQL
+    assert "provider = 'celestrak'" in DECAY_SQL
     assert sql_placeholders(SOLAR_WIND_SQL) == 3
     assert "%s" in SOURCES_SQL
     assert "%s" in INGEST_LOG_SQL

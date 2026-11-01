@@ -66,7 +66,7 @@ Bonus (not satellite-native but related): `https://api.wheretheiss.at/v1/satelli
 - Issue #34 polls the five starter-set catalog numbers (ISS 25544, Landsat 8 39084, Landsat 9 49260, HST 20580, Swift 28485) at `gp.php?CATNR=<id>&FORMAT=json` every 2 hours. It does not use `GROUP=active`. TLE layout and the altitude constants are linked from [tracked-satellites.md](tracked-satellites.md).
 - Why: shows polite polling (conditional fetch, backoff, stopping on errors). You can propagate with SGP4 (`sgp4` / `skyfield` Python libraries) to plot live ground tracks and compute passes over Berkeley.
 
-**6. Space-Track.org**: the authoritative source of the same GP data plus decay and conjunction data. You need a free account and must use session-cookie login. Verified that it returns 401 without login. Use CelesTrak first.
+**6. Space-Track.org**: the authoritative source of the same GP data plus decay and conjunction data. You need a free account and must use session-cookie login. Verified that it returns 401 without login. Use CelesTrak first. What may be shown publicly is [data-licenses.md](data-licenses.md): Space-Track stays off the public site and API.
 
 **7. SatNOGS**: a global network of open-source amateur ground stations receiving cubesat downlinks. This is the most literal "satellite data stream" on the list.
 - `https://network.satnogs.org/api/observations/?format=json` (verified, no auth). Each record has station lat/lon, NORAD ID, and links to audio (`.ogg`), waterfall PNG and demodulated frames.

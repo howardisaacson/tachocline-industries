@@ -39,7 +39,7 @@ Same pattern as the workflow and About pages: one markdown file in `docs/`, no c
 ## 6. Limitations & caveats
 - Link availability depends on the providers; TI does not mirror their sites.
 - The two real-time solar-wind names open NOAA’s solar-wind product page (`/products/solar-wind`), not the JSON files the poller fetches. Some other entries still open a raw JSON or text file.
-- Space-Track needs a free account; TI must not dump the catalog beyond what the product already shows.
+- Space-Track needs a free account. Those rows stay off the public site and the public API ([ADR 0035](../decisions/0035-what-may-be-shown-publicly.md)).
 
 ## 7. Related reading
 - [docs/data-links.md](../data-links.md)

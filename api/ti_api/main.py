@@ -559,7 +559,11 @@ def satellite_perigee(
     limit: Annotated[int, Query(ge=1, le=MAX_SOLAR_LIMIT)] = DEFAULT_SOLAR_LIMIT,
     norad_cat_id: Annotated[int | None, Query(gt=0)] = None,
 ) -> PerigeePage:
-    """Two-body perigee and apogee. ``norad_cat_id`` keeps one satellite."""
+    """Two-body perigee and apogee from CelesTrak rows only.
+
+    ``norad_cat_id`` keeps one satellite. Space-Track rows stay out
+    (issue #105).
+    """
     start, end = _window(time_from, time_to, now)
     rows = _query(conn, PERIGEE_SQL, (start, end, norad_cat_id, norad_cat_id, limit))
     return PerigeePage(

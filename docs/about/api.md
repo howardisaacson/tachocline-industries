@@ -23,7 +23,7 @@ Gives the future website, and any agent, a way to read stored rows without a dat
 - **`GET /api/v1/kp-gfz`:** GFZ Kp and ap from `gfz_kp_3h`. `definitive` is false for a nowcast. The page field `citation` is `10.5880/Kp.0001`. The window may be 4200 days and `limit` stops at 40000, so the 11-year ring is one call. Minute routes stay at 7 days and 2000 rows.
 - **`GET /api/v1/satellite-decay`:** `km_per_day` of two-body perigee. Negative means falling. The query reads 14 days before `from` so the first epoch in the window can see the previous one. A single epoch is omitted. The window may be 400 days and `limit` stops at 5000. Optional `norad_cat_id` keeps one satellite.
 - **`GET /api/v1/alerts`:** SWPC alert text from `swpc_alert`. The window filters `issue_datetime`. `limit` defaults to 50 and stops at 200, because messages are long.
-- **`GET /api/v1/satellite-perigee`:** `perigee_altitude_km` and `apogee_altitude_km` from `satellite_gp`. Optional `norad_cat_id` keeps one satellite, such as `25544`. The page field `altitude` says these are two-body kilometers. A rate is not included. Two epochs are still required before a caller can divide the change by the days between them.
+- **`GET /api/v1/satellite-perigee`:** `perigee_altitude_km` and `apogee_altitude_km` from `satellite_gp`, only where `provider` is `celestrak`. Optional `norad_cat_id` keeps one satellite, such as `25544`. The page field `altitude` says these are two-body kilometers. A rate is not included. `GET /api/v1/satellite-decay` uses the same filter, so a public rate is not computed from a Space-Track neighbor.
 
 ## 3. Data source & cadence
 | Item | Value |
