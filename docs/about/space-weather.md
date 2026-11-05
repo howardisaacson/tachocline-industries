@@ -1,6 +1,6 @@
 # About this page: Space weather
 
-> **Last reviewed:** 2026-11-01 · **Owner:** Howard Isaacson
+> **Last reviewed:** 2026-11-05 · **Owner:** Howard Isaacson
 >
 > Written from [the About template](../about-this-page-template.md) ([ADR 0009](../decisions/0009-about-this-page-for-every-section.md)).
 
@@ -19,6 +19,16 @@ Each ring is one lap. Twelve o'clock is the start of that lap. Time runs clockwi
 - **One year:** the daily maximum of GFZ 3-hour Kp. The lap starts on 1 January UTC.
 - **11 years:** the daily maximum of GFZ Kp. The lap is 11 × 365 days measured from 1 January 1932 ([ADR 0027](../decisions/0027-eleven-year-kp-ring-with-gfz.md); no longer deferred). A recent row can still be a nowcast. The next daily file replaces it.
 
+Under each ring, one sentence compares that stretch with earlier stretches of the same length ([ADR 0036](../decisions/0036-plain-language-kp-sentences.md)). **How is this worked out?** opens the method below.
+
+### How the sentence is worked out
+
+The day sentence uses today's mean of SWPC 1-minute estimated Kp, set against the mean of each of the previous 7 UTC days. The other three sentences use GFZ 3-hour Kp. "The last 30 days" is compared with the 12 blocks of 30 days before it. "The last 365 days" is compared with each complete calendar year since 1932 that ended before that window. "The last 11 years" is the last 11 × 365 days, compared with earlier blocks of that length back to 1 January 1932. Those blocks are the ring's length. They are not solar-cycle minima.
+
+The label is how far the current mean sits from the mean of those baseline windows, using the population standard deviation. More than 1 SD out is "well below" or "well above". Between 0.5 and 1 SD is "below" or "above". Inside 0.5 SD is "about average". If the spread is zero, the label is about average, above, or below, and never "well". A finished UTC day needs at least 720 one-minute samples before it can be one of the seven baseline days. Today can be described after 60 samples, and the sentence then says "so far". A GFZ window counts only when at least half its days have 4 of the 8 three-hour slots. The mean still uses every stored slot. If that coverage is missing, the sentence says the record is too short and does not pick a label.
+
+Numbers in the sentence are those means and peaks rounded to two decimal places. The year sentence also gives the percent of earlier complete years whose mean is strictly lower, rounded to the nearest whole percent. A peak of Kp 5 or more adds the NOAA G-scale and the UTC time of that peak. The route is `GET /api/v1/kp-interpretation`. It runs when the page loads. It is not a forecast and not a model.
+
 **Change Data View** (upper-left on each tile, faint until hover or focus) unwinds that ring into a time-on-x chart and back, about one second, like a rotary dial ([ADR 0029](../decisions/0029-radial-cartesian-unwind-toggle.md)). Each tile toggles on its own. Both layouts draw the same bins; only the geometry changes. `prefers-reduced-motion` skips the tween. The blurb above each plot links to the source’s main site under the source name (**NOAA SWPC** or **GFZ**). **Download CSV** saves `time_utc`, `kp`, and `g_scale` for the bins on that ring. Move the pointer over the plot to update the readout. The header chip repeats the latest Kp.
 
 ## 3. Data source & cadence
@@ -26,7 +36,7 @@ Each ring is one lap. Twelve o'clock is the start of that lap. Time runs clockwi
 |---|---|
 | Provider | [NOAA SWPC](https://www.swpc.noaa.gov/products/planetary-k-index), real-time estimated Kp. The page reads it from our API, not from SWPC directly. |
 | Satellite(s) / instrument(s) | Ground magnetometers. The 3-hour product names Sitka, Meanook, Ottawa, Fredericksburg, Hartland, Wingst, Niemegk, and Canberra. |
-| Endpoint | `GET /api/v1/kp-1m` for the day ring and the hero. `GET /api/v1/kp-gfz` for the 30-day, year, and 11-year rings. |
+| Endpoint | `GET /api/v1/kp-1m` for the day ring and the hero. `GET /api/v1/kp-gfz` for the 30-day, year, and 11-year rings. `GET /api/v1/kp-interpretation` for the sentence under each ring. |
 | Format / access | JSON over HTTP, no auth, same origin. The `web` container proxies `/api` to the API container. |
 | Upstream update cadence | 1-minute estimated Kp and 3-hour estimated Kp ([data_sources.md](../research/data_sources.md)). |
 | Our polling cadence | `SWPC_POLL_MINUTES` (5 in `.env.example`). |

@@ -13,6 +13,10 @@ export async function loadKp(nowMs) {
   return { minute, gfz };
 }
 
+export function loadInterpretation() {
+  return getJson("/api/v1/kp-interpretation");
+}
+
 async function readPage(path) {
   try {
     return { ok: true, page: await getJson(path) };

@@ -267,6 +267,17 @@ h2 {
   margin: 0.35rem 0 0.5rem;
 }
 
+.interpretation {
+  margin: 0.75rem 0 0;
+}
+
+.interpretation-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-bottom: 0.5rem;
+}
+
 .plot-card h3 {
   font-size: 1.4rem;
 }

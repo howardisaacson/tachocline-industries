@@ -15,12 +15,14 @@ from ti_api.main import app, get_connection, utc_now
 from ti_api.queries import (
     ALERTS_SQL,
     DECAY_SQL,
+    GFZ_DAY_SUMMARY_SQL,
     GFZ_KP_SQL,
     GOES_SQL,
     HEALTH_SQL,
     INGEST_LOG_SQL,
     KP_1M_SQL,
     KP_3H_SQL,
+    KP_DAY_SUMMARY_SQL,
     MAG_SQL,
     PERIGEE_SQL,
     SOLAR_WIND_SQL,
@@ -52,6 +54,11 @@ class FakeCursor:
         self.conn.calls.append((query, params))
 
     def fetchall(self) -> list[dict[str, object]]:
+        if self.conn.by_sql and self.conn.calls:
+            query = self.conn.calls[-1][0]
+            for key, rows in self.conn.by_sql.items():
+                if key in query:
+                    return rows
         return self.conn.rows
 
 
@@ -63,6 +70,7 @@ class FakeConn:
         self.fail = fail
         self.calls: list[tuple[str, tuple[object, ...]]] = []
         self.closed = False
+        self.by_sql: dict[str, list[dict[str, object]]] = {}
 
     def cursor(self) -> FakeCursor:
         return FakeCursor(self)
@@ -102,6 +110,8 @@ def test_queries_are_selects_with_placeholders() -> None:
         ALERTS_SQL,
         DECAY_SQL,
         GFZ_KP_SQL,
+        GFZ_DAY_SUMMARY_SQL,
+        KP_DAY_SUMMARY_SQL,
         PERIGEE_SQL,
     ):
         assert sql.startswith("SELECT")
@@ -429,6 +439,7 @@ def test_openapi_lists_the_read_routes(client: TestClient) -> None:
         "/api/v1/alerts",
         "/api/v1/satellite-perigee",
         "/api/v1/kp-gfz",
+        "/api/v1/kp-interpretation",
         "/api/v1/satellite-decay",
     }
     for path in paths:
@@ -438,3 +449,37 @@ def test_openapi_lists_the_read_routes(client: TestClient) -> None:
     assert alias.status_code == 200
     assert alias.json() == {"status": "ok", "database": "ok"}
     assert "/api/health" not in paths
+
+
+def test_interpretation_sentence_uses_the_returned_mean(client: TestClient) -> None:
+    """The day sentence's two-decimal mean is the JSON current_mean."""
+    today = datetime(2026, 10, 26, tzinfo=UTC)
+    day_rows = []
+    for offset in range(8):
+        start = today - timedelta(days=offset)
+        mean = 3.0 if offset else 3.25
+        day_rows.append(
+            {
+                "day_start": start,
+                "mean_kp": mean,
+                "max_kp": 6.2 if offset == 0 else 2.0,
+                "max_time": start.replace(hour=14),
+                "n": 1440,
+            }
+        )
+    client.conn.by_sql = {  # type: ignore[attr-defined]
+        "planetary_kp_1m": day_rows,
+        "gfz_kp_3h": [],
+    }
+    response = client.get("/api/v1/kp-interpretation?span=day")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["computed_at"] == "2026-10-26T05:00:00Z"
+    assert len(body["spans"]) == 1
+    span = body["spans"][0]
+    assert span["category"] != "insufficient"
+    shown = f"{span['current_mean']:.2f}"
+    assert shown in span["sentence"]
+    assert f"{span['current_max']:.2f}" in span["sentence"]
+    assert "G2" in span["sentence"]
+    assert "14:00" in span["sentence"]

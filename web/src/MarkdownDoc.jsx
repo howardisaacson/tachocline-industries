@@ -40,6 +40,12 @@ export function MarkdownDoc({ markdown, className = "about-doc" }) {
     <div className={className} ref={rootRef}>
       <ReactMarkdown
         components={{
+          h2({ children }) {
+            return <h2 id={slug(textOf(children))}>{children}</h2>;
+          },
+          h3({ children }) {
+            return <h3 id={slug(textOf(children))}>{children}</h3>;
+          },
           a({ href, children }) {
             const next = rewriteAboutHref(href ?? "");
             if (next.startsWith("/")) {
@@ -85,4 +91,18 @@ export function MarkdownDoc({ markdown, className = "about-doc" }) {
       </ReactMarkdown>
     </div>
   );
+}
+
+function textOf(children) {
+  if (children == null) return "";
+  if (typeof children === "string" || typeof children === "number") return String(children);
+  if (Array.isArray(children)) return children.map(textOf).join("");
+  return "";
+}
+
+function slug(text) {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 }

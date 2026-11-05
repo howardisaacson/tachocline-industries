@@ -1,6 +1,6 @@
 # About this page: Read-only API
 
-> **Last reviewed:** 2026-11-01 · **Owner:** Howard Isaacson
+> **Last reviewed:** 2026-11-05 · **Owner:** Howard Isaacson
 >
 > Written from [the About template](../about-this-page-template.md) ([ADR 0009](../decisions/0009-about-this-page-for-every-section.md)).
 
@@ -21,6 +21,7 @@ Gives the future website, and any agent, a way to read stored rows without a dat
 - **`GET /api/v1/kp-1m`:** 1-minute estimated Kp from `planetary_kp_1m`. The number to plot is `estimated_kp`. `kp` is the short string such as `5Z`.
 - **`GET /api/v1/kp-3h`:** estimated 3-hour Kp from `planetary_kp_3h`. `time_tag` is the start of the block. This is the series the Orbit decay dashboard shades when Kp is at least 5. The window may be 400 days and `limit` stops at 3300. The default `limit` is still 500. This is not the GFZ index.
 - **`GET /api/v1/kp-gfz`:** GFZ Kp and ap from `gfz_kp_3h`. `definitive` is false for a nowcast. The page field `citation` is `10.5880/Kp.0001`. The window may be 4200 days and `limit` stops at 40000, so the 11-year ring is one call. Minute routes stay at 7 days and 2000 rows.
+- **`GET /api/v1/kp-interpretation`:** one sentence for each ring (`day`, `month`, `year`, `solar`), plus the mean, peak, baseline count, and category the sentence was built from. Optional `span` keeps one of them. The day sentence reads `planetary_kp_1m`. The other three read `gfz_kp_3h`. There is no `from` or `to`. The method is [ADR 0036](../decisions/0036-plain-language-kp-sentences.md). A number in a sentence is `current_mean` or `current_max` rounded to two decimal places.
 - **`GET /api/v1/satellite-decay`:** `km_per_day` of two-body perigee. Negative means falling. The query reads 14 days before `from` so the first epoch in the window can see the previous one. A single epoch is omitted. The window may be 400 days and `limit` stops at 5000. Optional `norad_cat_id` keeps one satellite.
 - **`GET /api/v1/alerts`:** SWPC alert text from `swpc_alert`. The window filters `issue_datetime`. `limit` defaults to 50 and stops at 200, because messages are long.
 - **`GET /api/v1/satellite-perigee`:** `perigee_altitude_km` and `apogee_altitude_km` from `satellite_gp`, only where `provider` is `celestrak`. Optional `norad_cat_id` keeps one satellite, such as `25544`. The page field `altitude` says these are two-body kilometers. A rate is not included. `GET /api/v1/satellite-decay` uses the same filter, so a public rate is not computed from a Space-Track neighbor.

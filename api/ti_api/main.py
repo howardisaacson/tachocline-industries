@@ -16,6 +16,8 @@ for a ``limit`` outside the declared bounds, is rejected before a query
 runs. ``GET /api/v1/kp-3h`` is the exception: the year ring needs one
 call covering 365 days of 3-hour rows, so that route allows 400 days
 and 3300 rows. Minute-level routes stay at seven days.
+``GET /api/v1/kp-interpretation`` does not take a window. It aggregates
+the stored Kp itself.
 """
 
 from __future__ import annotations
@@ -29,15 +31,18 @@ from fastapi import APIRouter, Depends, FastAPI, HTTPException, Query
 from pydantic import BaseModel
 
 from ti_api.db import ConfigError, DatabaseSettings, connect
+from ti_api.kp_interpretation import build_spans
 from ti_api.queries import (
     ALERTS_SQL,
     DECAY_SQL,
+    GFZ_DAY_SUMMARY_SQL,
     GFZ_KP_SQL,
     GOES_SQL,
     HEALTH_SQL,
     INGEST_LOG_SQL,
     KP_1M_SQL,
     KP_3H_SQL,
+    KP_DAY_SUMMARY_SQL,
     MAG_SQL,
     PERIGEE_SQL,
     SOLAR_WIND_SQL,
@@ -268,6 +273,31 @@ class PerigeeRow(BaseModel):
     object_id: str
     perigee_altitude_km: float
     apogee_altitude_km: float
+
+
+class InterpretationSpan(BaseModel):
+    """One plot sentence. The numbers are the ones the sentence was built from."""
+
+    span: Literal["day", "month", "year", "solar"]
+    sentence: str
+    category: Literal[
+        "well_below", "below", "average", "above", "well_above", "insufficient"
+    ]
+    source: Literal["swpc-1m", "gfz-3h"]
+    current_mean: float | None
+    current_max: float | None
+    current_max_time: datetime | None
+    baseline_mean: float | None
+    baseline_sd: float | None
+    baseline_count: int
+    percentile_below: int | None
+
+
+class InterpretationPage(BaseModel):
+    """Four comparison sentences. Computed when the route is called."""
+
+    computed_at: datetime
+    spans: list[InterpretationSpan]
 
 
 class PerigeePage(BaseModel):
@@ -571,6 +601,32 @@ def satellite_perigee(
         time_to=end,
         limit=limit,
         rows=[PerigeeRow.model_validate(row) for row in rows],
+    )
+
+
+@router.get("/kp-interpretation", response_model=InterpretationPage)
+def kp_interpretation(
+    conn: Annotated[psycopg.Connection, Depends(get_connection)],
+    now: Annotated[datetime, Depends(utc_now)],
+    span: Annotated[Literal["day", "month", "year", "solar"] | None, Query()] = None,
+) -> InterpretationPage:
+    """Plain-language comparison for each Kp ring (issue #96).
+
+    The day sentence uses 1-minute estimated Kp. The other three use GFZ
+    3-hour Kp. ``span`` keeps one of them. The numbers in each sentence
+    are the ``current_mean`` and ``current_max`` on that object, rounded
+    to two decimal places.
+    """
+    moment = now.astimezone(UTC)
+    today = moment.replace(hour=0, minute=0, second=0, microsecond=0)
+    day_rows = _query(conn, KP_DAY_SUMMARY_SQL, (today - timedelta(days=7), moment))
+    gfz_rows = _query(conn, GFZ_DAY_SUMMARY_SQL, (moment,))
+    spans = build_spans(moment, day_rows, gfz_rows)
+    if span is not None:
+        spans = [item for item in spans if item.span == span]
+    return InterpretationPage(
+        computed_at=moment,
+        spans=[InterpretationSpan.model_validate(item.__dict__) for item in spans],
     )
 
 
