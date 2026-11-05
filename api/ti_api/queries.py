@@ -85,6 +85,36 @@ ORDER BY time_tag DESC
 LIMIT %s
 """.strip()
 
+# One row per UTC day. The interpretation sentences compare day means.
+# date_trunc on "AT TIME ZONE 'UTC'" keeps the day boundary on UT midnight
+# even if the database session is set to another zone.
+KP_DAY_SUMMARY_SQL = """
+SELECT (date_trunc('day', time_tag AT TIME ZONE 'UTC') AT TIME ZONE 'UTC') AS day_start,
+       avg(estimated_kp)::float8 AS mean_kp,
+       max(estimated_kp)::float8 AS max_kp,
+       (array_agg(time_tag ORDER BY estimated_kp DESC, time_tag ASC))[1] AS max_time,
+       count(*)::int AS n
+FROM planetary_kp_1m
+WHERE time_tag >= %s AND time_tag < %s
+  AND estimated_kp IS NOT NULL
+GROUP BY 1
+ORDER BY 1
+""".strip()
+
+GFZ_DAY_SUMMARY_SQL = """
+SELECT (date_trunc('day', time_tag AT TIME ZONE 'UTC') AT TIME ZONE 'UTC') AS day_start,
+       avg(kp)::float8 AS mean_kp,
+       max(kp)::float8 AS max_kp,
+       (array_agg(time_tag ORDER BY kp DESC, time_tag ASC))[1] AS max_time,
+       count(*)::int AS n
+FROM gfz_kp_3h
+WHERE time_tag >= TIMESTAMPTZ '1932-01-01 00:00:00+00'
+  AND time_tag < %s
+  AND kp IS NOT NULL
+GROUP BY 1
+ORDER BY 1
+""".strip()
+
 # The inner query keeps the epoch just before the window so LAG can see it.
 # The outer query drops that lookback row and any first point with no rate.
 DECAY_SQL = """

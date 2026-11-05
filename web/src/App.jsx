@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-import { loadKp } from "./api.js";
+import { loadInterpretation, loadKp } from "./api.js";
 import {
   MONTH_MS,
   YEAR_MS,
@@ -67,9 +67,15 @@ export function App() {
   useEffect(() => {
     const nowMs = Date.now();
     let cancelled = false;
-    loadKp(nowMs)
-      .then((pages) => {
-        if (!cancelled) setState({ status: "ready", nowMs, pages });
+    Promise.all([
+      loadKp(nowMs),
+      loadInterpretation().then(
+        (page) => ({ ok: true, page }),
+        (error) => ({ ok: false, message: error.message }),
+      ),
+    ])
+      .then(([pages, words]) => {
+        if (!cancelled) setState({ status: "ready", nowMs, pages, words });
       })
       .catch((error) => {
         if (!cancelled) setState({ status: "error", nowMs, message: error.message });
@@ -198,8 +204,20 @@ function PlotCard({ plot, state, fixedScale }) {
         fixedScale={fixedScale}
         onDownloadCsv={() => download(`${plot.id}-kp.csv`, toCsv(csvRows))}
       />
+      <p className="interpretation">{sentenceFor(plot, state)}</p>
+      <Link className="interpretation-link" to="/about/space-weather#how-the-sentence-is-worked-out">
+        How is this worked out?
+      </Link>
     </article>
   );
+}
+
+function sentenceFor(plot, state) {
+  if (state.status !== "ready") return "";
+  const words = state.words;
+  if (!words || !words.ok) return "The comparison is unavailable.";
+  const span = (words.page.spans ?? []).find((item) => item.span === plot.id);
+  return span ? span.sentence : "";
 }
 
 function rowsFor(plot, state) {

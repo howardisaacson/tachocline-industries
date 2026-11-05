@@ -105,5 +105,6 @@ What becomes easier? What becomes harder? What new risks or follow-up work does 
 | [0033](0033-time-ordered-decay-backtest.md) | Score decay forecasts only with elements from before the cutoff | Proposed |
 | [0034](0034-svg-perigee-chart-on-the-public-site.md) | Draw the public perigee chart in SVG | Proposed |
 | [0035](0035-what-may-be-shown-publicly.md) | Show CelesTrak orbits publicly and keep Space-Track private | Proposed |
+| [0036](0036-plain-language-kp-sentences.md) | Plain-language Kp sentences from fixed rules | Proposed |
 
 Tooling (optional): [adr-tools](https://github.com/npryce/adr-tools) is a small CLI that creates numbered ADR files. Copying the template by hand works just as well.

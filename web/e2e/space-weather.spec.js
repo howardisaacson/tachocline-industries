@@ -23,6 +23,38 @@ test.beforeEach(async ({ page }) => {
   // Mock /api so CI needs no database or internet (issue #40).
   await page.route("**/api/**", async (route) => {
     const url = route.request().url();
+    if (url.includes("/api/v1/kp-interpretation")) {
+      await route.fulfill({
+        json: {
+          computed_at: new Date().toISOString(),
+          spans: [
+            {
+              span: "day",
+              sentence:
+                "Today's space weather is about average for the last 7 days. Mean Kp is 3.40.",
+              category: "average",
+            },
+            {
+              span: "month",
+              sentence: "The last 30 days are about average for the previous year. Mean Kp is 2.50.",
+              category: "average",
+            },
+            {
+              span: "year",
+              sentence: "The last 365 days are about average for years since 1932. Mean Kp is 2.80.",
+              category: "average",
+            },
+            {
+              span: "solar",
+              sentence:
+                "The last 11 years are about average for earlier 11-year stretches since 1932. Mean Kp is 2.70.",
+              category: "average",
+            },
+          ],
+        },
+      });
+      return;
+    }
     if (url.includes("/api/v1/kp-1m")) {
       await route.fulfill({
         json: pageBody([
@@ -112,6 +144,8 @@ test("layout at 375, 768, and 1280 with no horizontal scroll at 320", async ({ p
 
   await page.setViewportSize({ width: 375, height: 812 });
   await assertNoHorizontalScroll(page);
+  await expect(page.getByText("about average for the last 7 days")).toBeVisible();
+  await expect(page.getByRole("link", { name: "How is this worked out?" }).first()).toBeVisible();
   const dayPhone = await day.boundingBox();
   const monthPhone = await month.boundingBox();
   const yearPhone = await year.boundingBox();
@@ -128,6 +162,8 @@ test("layout at 375, 768, and 1280 with no horizontal scroll at 320", async ({ p
   expect(yearTablet.y).toBeGreaterThan(monthTablet.y + monthTablet.height - 1);
 
   await page.setViewportSize({ width: 1280, height: 900 });
+  await expect(page.getByText("about average for the last 7 days")).toBeVisible();
+  await assertNoHorizontalScroll(page);
   const dayWide = await day.boundingBox();
   const monthWide = await month.boundingBox();
   const yearWide = await year.boundingBox();
