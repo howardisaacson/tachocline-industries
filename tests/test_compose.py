@@ -94,6 +94,7 @@ def test_issue_25_migrations_and_readonly_env() -> None:
         "0004_satellite_gp.sql",
         "0005_gfz_kp_3h.sql",
         "0006_satellite_gp_provider.sql",
+        "0007_solar_rv.sql",
     ]
     assert "TI_READONLY_USER:" in COMPOSE
     assert "TI_READONLY_PASSWORD:" in COMPOSE

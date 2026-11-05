@@ -10,9 +10,9 @@ The public page is `/links` on the React site. It renders [`docs/data-links.md`]
 Shows visitors and interviewers exactly which upstream feeds TI uses or plans to use, with one-sentence descriptions and credit notes. It supports the provenance story in the data science workflow ([ADR 0016](../decisions/0016-data-science-workflow-as-first-class-feature.md)).
 
 ## 2. What you're seeing
-- **Category headings:** solar wind, flares, Kp, alerts, orbits, solar images.
+- **Category headings:** solar wind, flares, Kp, alerts, orbits, solar radial velocity, solar images.
 - **Link + one sentence** per feed or product page.
-- **Credits and terms** for NOAA SWPC, GFZ (with DOI), CelesTrak, Space-Track, and solar-image providers.
+- **Credits and terms** for NOAA SWPC, GFZ (with DOI), CelesTrak, Space-Track, NEID and EXPRES, and solar-image providers.
 
 This page is documentation, not a live data dashboard. Some listed sources (for example solar images) are not ingested yet; the markdown says so.
 

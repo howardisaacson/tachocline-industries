@@ -17,7 +17,8 @@ runs. ``GET /api/v1/kp-3h`` is the exception: the year ring needs one
 call covering 365 days of 3-hour rows, so that route allows 400 days
 and 3300 rows. Minute-level routes stay at seven days.
 ``GET /api/v1/kp-interpretation`` does not take a window. It aggregates
-the stored Kp itself.
+the stored Kp itself. ``GET /api/v1/solar-rv`` defaults to 7 days and
+allows 14, which is as far back as the table is kept.
 """
 
 from __future__ import annotations
@@ -45,6 +46,7 @@ from ti_api.queries import (
     KP_DAY_SUMMARY_SQL,
     MAG_SQL,
     PERIGEE_SQL,
+    SOLAR_RV_SQL,
     SOLAR_WIND_SQL,
     SOURCES_SQL,
 )
@@ -58,6 +60,12 @@ DEFAULT_LOG_LIMIT = 50
 MAX_SOURCE_LIMIT = 100
 DEFAULT_RANGE = timedelta(hours=6)
 MAX_RANGE = timedelta(days=7)
+# NEID solar exposures over 14 days are a few thousand rows. 5000 covers
+# both instruments for the default week. 20000 is the poller's TAP cap.
+DEFAULT_SOLAR_RV_LIMIT = 5000
+MAX_SOLAR_RV_LIMIT = 20000
+DEFAULT_SOLAR_RV_RANGE = timedelta(days=7)
+MAX_SOLAR_RV_RANGE = timedelta(days=14)
 # One year of 3-hour Kp is 365 * 8 = 2920 rows. 400 days and 3300 rows
 # cover that ring, including a lap that starts on 1 January, without
 # opening the same window on the 1-minute tables.
@@ -300,6 +308,30 @@ class InterpretationPage(BaseModel):
     spans: list[InterpretationSpan]
 
 
+class SolarRvRow(BaseModel):
+    """One exposure. ``rv_m_s`` is null when the archive omitted the velocity."""
+
+    time_tag: datetime
+    instrument: Literal["neid", "expres"]
+    rv_m_s: float | None
+    rv_error_m_s: float | None
+    snr: float | None
+    exptime_s: float | None
+    archive_jd: float | None
+    archive_time_scale: Literal["BJD", "JD"]
+
+
+class SolarRvPage(BaseModel):
+    """Sun-as-a-star Level 2 radial velocity. Not a spectrum and not Kp."""
+
+    processing_level: Literal["solar-l2-rv"] = "solar-l2-rv"
+    unit: Literal["m/s"] = "m/s"
+    time_from: datetime
+    time_to: datetime
+    limit: int
+    rows: list[SolarRvRow]
+
+
 class PerigeePage(BaseModel):
     """Perigee is the series to plot. Apogee is the matching high point."""
 
@@ -369,9 +401,11 @@ def _window(
     time_to: datetime | None,
     now: datetime,
     max_range: timedelta = MAX_RANGE,
+    *,
+    default_range: timedelta = DEFAULT_RANGE,
 ) -> tuple[datetime, datetime]:
     end = _aware(time_to, "to") if time_to is not None else now.astimezone(UTC)
-    start = _aware(time_from, "from") if time_from is not None else end - DEFAULT_RANGE
+    start = _aware(time_from, "from") if time_from is not None else end - default_range
     if start >= end:
         raise HTTPException(status_code=422, detail="from must be earlier than to")
     if end - start > max_range:
@@ -577,6 +611,35 @@ def alerts(
         time_to=end,
         limit=limit,
         rows=[AlertRow.model_validate(row) for row in rows],
+    )
+
+
+@router.get("/solar-rv", response_model=SolarRvPage)
+def solar_rv(
+    conn: Annotated[psycopg.Connection, Depends(get_connection)],
+    now: Annotated[datetime, Depends(utc_now)],
+    time_from: Annotated[datetime | None, Query(alias="from")] = None,
+    time_to: Annotated[datetime | None, Query(alias="to")] = None,
+    limit: Annotated[int, Query(ge=1, le=MAX_SOLAR_RV_LIMIT)] = DEFAULT_SOLAR_RV_LIMIT,
+) -> SolarRvPage:
+    """NEID and EXPRES Sun-as-a-star radial velocity, in meters per second.
+
+    The default window is 7 days. The table keeps 14. ``rv_m_s`` null is
+    a gap in the archive, not a velocity of zero.
+    """
+    start, end = _window(
+        time_from,
+        time_to,
+        now,
+        MAX_SOLAR_RV_RANGE,
+        default_range=DEFAULT_SOLAR_RV_RANGE,
+    )
+    rows = _query(conn, SOLAR_RV_SQL, (start, end, limit))
+    return SolarRvPage(
+        time_from=start,
+        time_to=end,
+        limit=limit,
+        rows=[SolarRvRow.model_validate(row) for row in rows],
     )
 
 

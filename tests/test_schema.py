@@ -138,6 +138,21 @@ def test_satellite_gp_migration_adds_a_hypertable_and_a_grant() -> None:
     assert "double precision" in sql
 
 
+def test_solar_rv_migration_adds_a_table_and_a_grant() -> None:
+    """Issue #76. The new file does not create a role or an extension."""
+    sql = (ROOT / "db" / "migrations" / "0007_solar_rv.sql").read_text(encoding="utf-8")
+    assert "\nBEGIN" not in sql
+    assert "\nCOMMIT" not in sql
+    assert "CREATE TABLE solar_rv" in sql
+    assert "PRIMARY KEY (time_tag, instrument)" in sql
+    assert "create_hypertable(\n    'solar_rv'," in sql
+    assert "CREATE ROLE" not in sql
+    assert "CREATE EXTENSION" not in sql
+    assert "GRANT SELECT ON TABLE solar_rv" in sql
+    assert "rv_m_s" in sql
+    assert "change-me" not in sql
+
+
 def test_readonly_role_does_not_embed_a_password() -> None:
     assert "CREATE ROLE" in SOLAR
     assert "GRANT SELECT ON TABLE" in SOLAR

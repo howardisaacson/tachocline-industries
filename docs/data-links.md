@@ -32,6 +32,10 @@ Each entry is a live URL plus one sentence. Credits and citation notes are at th
 - [Space-Track](https://www.space-track.org/documentation): the US Space Force satellite catalog. A free account can supply past orbits for private checks. Those rows are not shown on this site or the public API.
 - [KeepTrack](https://keeptrack.space/): a public 3D view of tracked objects. This site links to it. Tachocline does not download KeepTrack data.
 
+## Solar radial velocity (NEID and EXPRES)
+
+- [NExScI Solar RV Archive](https://neid.ipac.caltech.edu/search_solar.php): public Sun-as-a-star radial velocities from NEID at WIYN and EXPRES at Lowell. The poller reads the Level 2 velocity table. It does not download the spectra. The [help page](https://neid.ipac.caltech.edu/help_solar.php) describes the columns.
+
 ## Solar images
 
 - [NASA SDAC Solar Images](https://umbra.nascom.nasa.gov/newsite/images.html): NASA Goddard's Solar Data Analysis Center gallery of current solar images from several observatories (added by Howard 2026-10-30; not yet ingested).
@@ -44,3 +48,4 @@ Each entry is a live URL plus one sentence. Credits and citation notes are at th
 - **CelesTrak:** GP elements used for the public perigee chart. Credit CelesTrak (Dr. T.S. Kelso). The [usage policy](https://celestrak.org/usage-policy.php) (updated 2026 May 22) is an access rule: download only what you need, once per update (GP data every 2 hours), and stop on any HTTP status other than 200. It is not a license to republish Space-Track data.
 - **Space-Track (18th Space Defense Squadron):** the [user agreement](https://www.space-track.org/documentation) forbids transferring the data or analysis of it without approval. Tachocline does not put Space-Track rows, or altitudes and rates derived from them, on the public site or the public API. Local Grafana may still read them.
 - **NASA SDAC / SDO AIA / LMSAL:** public solar imagery galleries; credit the observatory named on each image page when imagery is shown on TI.
+- **NEID and EXPRES, via NExScI:** public solar Level 2 velocities. Credit NEID (WIYN, NN-EXPLORE), EXPRES (Lowell Discovery Telescope), and the NASA Exoplanet Science Institute. The acknowledgement text is on the [solar help page](https://neid.ipac.caltech.edu/help_solar.php). Checked 2026-11-05. The spectra stay on the archive.

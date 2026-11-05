@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-import { loadInterpretation, loadKp } from "./api.js";
+import { loadInterpretation, loadKp, loadSolarRv } from "./api.js";
 import {
   MONTH_MS,
   YEAR_MS,
@@ -12,6 +12,8 @@ import {
 } from "./kp.js";
 import { RadialPlot } from "./RadialPlot.jsx";
 import { SiteChrome } from "./SiteChrome.jsx";
+import { SolarRvChart } from "./SolarRvChart.jsx";
+import { SOLAR_INSTRUMENTS, SOLAR_RV_WINDOW_MS, seriesFromRows } from "./solarRv.js";
 
 const ABOUT_SLUG = "space-weather";
 
@@ -73,9 +75,10 @@ export function App() {
         (page) => ({ ok: true, page }),
         (error) => ({ ok: false, message: error.message }),
       ),
+      loadSolarRv(nowMs),
     ])
-      .then(([pages, words]) => {
-        if (!cancelled) setState({ status: "ready", nowMs, pages, words });
+      .then(([pages, words, solar]) => {
+        if (!cancelled) setState({ status: "ready", nowMs, pages, words, solar });
       })
       .catch((error) => {
         if (!cancelled) setState({ status: "error", nowMs, message: error.message });
@@ -158,6 +161,8 @@ export function App() {
           </div>
         </section>
 
+        <SolarRvSection state={state} />
+
         <section className="section about">
           <h2>About this page</h2>
           <p>
@@ -173,6 +178,52 @@ export function App() {
         </section>
       </main>
     </SiteChrome>
+  );
+}
+
+function SolarRvSection({ state }) {
+  const solar = state.status === "ready" ? state.solar : null;
+  const series = solar?.ok ? seriesFromRows(solar.page.rows) : [];
+  const fromMs = state.nowMs == null ? 0 : state.nowMs - SOLAR_RV_WINDOW_MS;
+  return (
+    <section id="solar-rv" className="section">
+      <h2>Sun-as-a-star radial velocity</h2>
+      <p className="section-copy">
+        One velocity per exposure of the whole solar disk, in meters per second.
+        NEID is the WIYN spectrograph. EXPRES is the Lowell Discovery Telescope
+        spectrograph. A gap is a time the archive did not publish. The line does
+        not cross a gap longer than 30 minutes.
+      </p>
+      {state.status === "loading" ? (
+        <p className="section-copy">Loading solar radial velocity…</p>
+      ) : null}
+      {solar && !solar.ok ? (
+        <p className="section-copy" role="status">
+          The API did not return solar radial velocity. The Kp rings above are
+          unchanged. Start the stack, then reload.
+        </p>
+      ) : null}
+      {solar?.ok ? (
+        <SolarRvChart series={series} fromMs={fromMs} toMs={state.nowMs} />
+      ) : null}
+      <ul className="perigee-legend">
+        {SOLAR_INSTRUMENTS.map((item) => (
+          <li key={item.id}>
+            <span className="swatch" style={{ background: item.color }} />
+            {item.name}
+          </li>
+        ))}
+      </ul>
+      <p>
+        <a
+          className="interpretation-link"
+          href="https://neid.ipac.caltech.edu/search_solar.php"
+          rel="noopener noreferrer"
+        >
+          NExScI Solar RV Archive
+        </a>
+      </p>
+    </section>
   );
 }
 

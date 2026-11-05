@@ -7,7 +7,7 @@
 The page is the public site at `http://127.0.0.1:8080` (host port `WEB_PORT`). The site renders **this markdown file** at `/about/space-weather` ([ADR 0024](../decisions/0024-render-about-markdown-in-react.md)); the header **About** link opens that route. There is no second copy of this prose in React. A license note under the markdown is shared by every About route. Grafana still has the time-on-x charts. This page does not replace them.
 
 ## 1. Purpose
-Shows how disturbed Earth's magnetic field is, at three zoom levels, without copying the usual "time on the x-axis" chart. The page is for a visitor who wants the current Kp and for an interviewer asking why the picture is a clock. The numbers are real-time SWPC estimates. They are not the definitive GFZ Kp and they are not a forecast.
+Shows how disturbed Earth's magnetic field is, at three zoom levels, without copying the usual "time on the x-axis" chart. The page is for a visitor who wants the current Kp and for an interviewer asking why the picture is a clock. The numbers are real-time SWPC estimates. They are not the definitive GFZ Kp and they are not a forecast. Under the rings, the page also shows 7 days of Sun-as-a-star radial velocity from NEID and EXPRES.
 
 ## 2. What you're seeing
 The hero is the latest 1-minute `estimated_kp`. Below G1 means Kp is under 5. G1 and above follow [NOAA's scale](https://www.swpc.noaa.gov/noaa-scales-explanation).
@@ -29,6 +29,10 @@ The label is how far the current mean sits from the mean of those baseline windo
 
 Numbers in the sentence are those means and peaks rounded to two decimal places. The year sentence also gives the percent of earlier complete years whose mean is strictly lower, rounded to the nearest whole percent. A peak of Kp 5 or more adds the NOAA G-scale and the UTC time of that peak. The route is `GET /api/v1/kp-interpretation`. It runs when the page loads. It is not a forecast and not a model.
 
+### Sun-as-a-star radial velocity
+
+Under the rings, one time-on-x chart draws the last 7 days of solar radial velocity from NEID and EXPRES ([ADR 0037](../decisions/0037-solar-rv-scalars-from-neid-and-expres.md)). The unit is meters per second. Each point is one exposure of the whole solar disk, not a spectrum and not a Kp. A line joins exposures that are 30 minutes apart or closer. A longer hole stays open. An archive uncertainty of 9999, or a velocity outside ±5000 m/s, is stored as a gap so a failed reduction cannot set the scale. An empty EXPRES series means the archive has not published an EXPRES day inside the window. Checked 2026-11-05, the newest EXPRES Level 2 row was 2026-04-25. The route is `GET /api/v1/solar-rv`. The caption links to the [NExScI Solar RV Archive](https://neid.ipac.caltech.edu/search_solar.php).
+
 **Change Data View** (upper-left on each tile, faint until hover or focus) unwinds that ring into a time-on-x chart and back, about one second, like a rotary dial ([ADR 0029](../decisions/0029-radial-cartesian-unwind-toggle.md)). Each tile toggles on its own. Both layouts draw the same bins; only the geometry changes. `prefers-reduced-motion` skips the tween. The blurb above each plot links to the source’s main site under the source name (**NOAA SWPC** or **GFZ**). **Download CSV** saves `time_utc`, `kp`, and `g_scale` for the bins on that ring. Move the pointer over the plot to update the readout. The header chip repeats the latest Kp.
 
 ## 3. Data source & cadence
@@ -36,7 +40,7 @@ Numbers in the sentence are those means and peaks rounded to two decimal places.
 |---|---|
 | Provider | [NOAA SWPC](https://www.swpc.noaa.gov/products/planetary-k-index), real-time estimated Kp. The page reads it from our API, not from SWPC directly. |
 | Satellite(s) / instrument(s) | Ground magnetometers. The 3-hour product names Sitka, Meanook, Ottawa, Fredericksburg, Hartland, Wingst, Niemegk, and Canberra. |
-| Endpoint | `GET /api/v1/kp-1m` for the day ring and the hero. `GET /api/v1/kp-gfz` for the 30-day, year, and 11-year rings. `GET /api/v1/kp-interpretation` for the sentence under each ring. |
+| Endpoint | `GET /api/v1/kp-1m` for the day ring and the hero. `GET /api/v1/kp-gfz` for the 30-day, year, and 11-year rings. `GET /api/v1/kp-interpretation` for the sentence under each ring. `GET /api/v1/solar-rv` for the velocity chart. |
 | Format / access | JSON over HTTP, no auth, same origin. The `web` container proxies `/api` to the API container. |
 | Upstream update cadence | 1-minute estimated Kp and 3-hour estimated Kp ([data_sources.md](../research/data_sources.md)). |
 | Our polling cadence | `SWPC_POLL_MINUTES` (5 in `.env.example`). |
@@ -63,13 +67,13 @@ The poller stores the rows. The page asks the API for them. FastAPI checks the w
 | API | FastAPI | The page reads Kp through GET routes. | [ADR 0006](../decisions/0006-fastapi-for-backend-api.md) |
 | Runtime | nginx in the `web` container | Static files, and `/api` stays on the page's origin. | [ADR 0014](../decisions/0014-when-to-use-more-than-one-docker-container.md) |
 
-Key code: [`web/src/App.jsx`](../../web/src/App.jsx), [`web/src/kp.js`](../../web/src/kp.js), [`web/src/plotLayout.js`](../../web/src/plotLayout.js), [`web/src/RadialPlot.jsx`](../../web/src/RadialPlot.jsx), [`api/ti_api/main.py`](../../api/ti_api/main.py).
+Key code: [`web/src/App.jsx`](../../web/src/App.jsx), [`web/src/kp.js`](../../web/src/kp.js), [`web/src/plotLayout.js`](../../web/src/plotLayout.js), [`web/src/RadialPlot.jsx`](../../web/src/RadialPlot.jsx), [`web/src/solarRv.js`](../../web/src/solarRv.js), [`web/src/SolarRvChart.jsx`](../../web/src/SolarRvChart.jsx), [`api/ti_api/main.py`](../../api/ti_api/main.py).
 
 ## 6. Known limitations
 - The day ring is an SWPC estimate. The longer rings are GFZ Kp. They are not the same product. A GFZ nowcast is labeled `definitive: false` on the API row. The ring draws the number either way. The daily GFZ file also contains ap and F10.7. That whole file is kept in the raw zone with a sha256 manifest. The rings read Kp only.
 - The page does not poll. Reload it to see a newer minute.
 - Radius auto-scale makes a quiet day look as large as a storm. The G-scale colors and the fixed 0–9 switch are there for that. The under-plot readout and CSV have the exact numbers.
-- Alerts, solar wind, GOES, and satellite altitude stay on the API and on Grafana. This page is Kp only.
+- Alerts, solar wind, and GOES stay on Grafana. This page draws Kp and the 7-day solar radial-velocity chart. Satellite altitude is on Satellite Tracking.
 - The hero background is Phil Hart’s Exmouth (20 Apr 2023) total-eclipse corona photograph at 40% opacity over black (`assets/brand/CoronaExmouth_Hart_1920.jpg`, CC BY-NC-SA 4.0). A credit line links to his expedition write-up.
 - Moving the pointer over a ring updates the centered readout under that plot with UTC time and Kp. There is no floating tooltip on the graphic itself.
 - The layout is dark on purpose, from the design brief. `prefers-reduced-motion` turns off the live-dot blink, the view-toggle transition, and the radial↔Cartesian unwind (the view still flips instantly).

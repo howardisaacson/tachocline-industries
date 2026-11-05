@@ -329,6 +329,7 @@ def test_scheduler_registers_xray_beside_solar_wind() -> None:
         lambda: None,
         lambda: None,
         lambda: None,
+        lambda: None,
     )
     assert {item.id for item in both.get_jobs()} == {
         JOB_ID,
@@ -337,9 +338,11 @@ def test_scheduler_registers_xray_beside_solar_wind() -> None:
         CELESTRAK_JOB_ID,
         "gfz_kp",
         "satcat_decay",
+        "solar_rv",
     }
     with_history = build_scheduler(
         5,
+        lambda: None,
         lambda: None,
         lambda: None,
         lambda: None,

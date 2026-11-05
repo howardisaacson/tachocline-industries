@@ -30,6 +30,16 @@ The file `Kp_ap_Ap_SN_F107_since_1932.txt` says, in its header:
 
 Cite Matzka et al., doi:[10.5880/Kp.0001](https://doi.org/10.5880/Kp.0001). This repo stores Kp and ap and does not store the sunspot number ([ADR 0022](../decisions/0022-store-gfz-kp-apart-from-swpc-estimates.md)).
 
+## NExScI Solar RV Archive (NEID and EXPRES)
+
+Source: [Solar RV Archive help](https://neid.ipac.caltech.edu/help_solar.php), checked 2026-11-05.
+
+The page says NEID and EXPRES solar data are public and visible to all users. It does not state a copyright license. It does ask for this acknowledgement when NEID data appear in a publication:
+
+> This paper contains data taken with the NEID instrument, which was funded by the NASA-NSF Exoplanet Observational Research (NN-EXPLORE) partnership and built by Pennsylvania State University. NEID is installed on the WIYN telescope, which is operated by the National Optical Astronomy Observatory, and the NEID archive is operated by the NASA Exoplanet Science Institute at the California Institute of Technology. NN-EXPLORE is managed by the Jet Propulsion Laboratory, California Institute of Technology under contract with the National Aeronautics and Space Administration.
+
+Plain language: the public site may plot the solar velocities if the page credits NEID, EXPRES, and the NExScI archive and links to that help page. Tachocline stores the Level 2 scalar columns only. It does not redistribute the FITS files. EXPRES is released on the same archive. This check did not find a separate EXPRES copyright grant. Recheck with the NEID section on or before 2027-11-01.
+
 ## Space-Track
 
 The user agreement, summarized from the text on the [Space-Track documentation](https://www.space-track.org/documentation) page and quoted in issue #105, forbids transferring data received from that site, or the analysis of it, without prior express approval. Public pages and the public API count as a transfer. Local Grafana and private notebooks do not. No approval email has been sent. If one is granted, record it here and revisit [ADR 0035](../decisions/0035-what-may-be-shown-publicly.md).

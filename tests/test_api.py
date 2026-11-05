@@ -25,6 +25,7 @@ from ti_api.queries import (
     KP_DAY_SUMMARY_SQL,
     MAG_SQL,
     PERIGEE_SQL,
+    SOLAR_RV_SQL,
     SOLAR_WIND_SQL,
     SOURCES_SQL,
 )
@@ -113,6 +114,7 @@ def test_queries_are_selects_with_placeholders() -> None:
         GFZ_DAY_SUMMARY_SQL,
         KP_DAY_SUMMARY_SQL,
         PERIGEE_SQL,
+        SOLAR_RV_SQL,
     ):
         assert sql.startswith("SELECT")
         assert _WRITE_SQL.search(sql) is None
@@ -441,6 +443,7 @@ def test_openapi_lists_the_read_routes(client: TestClient) -> None:
         "/api/v1/kp-gfz",
         "/api/v1/kp-interpretation",
         "/api/v1/satellite-decay",
+        "/api/v1/solar-rv",
     }
     for path in paths:
         assert list(paths[path]) == ["get"]
@@ -483,3 +486,34 @@ def test_interpretation_sentence_uses_the_returned_mean(client: TestClient) -> N
     assert f"{span['current_max']:.2f}" in span["sentence"]
     assert "G2" in span["sentence"]
     assert "14:00" in span["sentence"]
+
+
+def test_solar_rv_defaults_to_seven_days(client: TestClient) -> None:
+    client.conn.rows = [  # type: ignore[attr-defined]
+        {
+            "time_tag": MINUTE,
+            "instrument": "neid",
+            "rv_m_s": -640.1,
+            "rv_error_m_s": 0.3,
+            "snr": 400.0,
+            "exptime_s": 55.0,
+            "archive_jd": 2461346.2,
+            "archive_time_scale": "BJD",
+        }
+    ]
+    response = client.get("/api/v1/solar-rv")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["unit"] == "m/s"
+    assert body["processing_level"] == "solar-l2-rv"
+    assert body["rows"][0]["rv_m_s"] == -640.1
+    assert body["rows"][0]["instrument"] == "neid"
+    _query, params = client.conn.calls[-1]  # type: ignore[attr-defined]
+    assert params[0] == NOW - timedelta(days=7)
+    assert params[1] == NOW
+    assert params[2] == 5000
+    too_wide = client.get(
+        "/api/v1/solar-rv",
+        params={"from": "2026-10-01T00:00:00Z", "to": "2026-10-20T00:00:00Z"},
+    )
+    assert too_wide.status_code == 422
