@@ -106,6 +106,50 @@ test.beforeEach(async ({ page }) => {
       });
       return;
     }
+    if (url.includes("/api/v1/solar-rv")) {
+      await route.fulfill({
+        json: {
+          processing_level: "solar-l2-rv",
+          unit: "m/s",
+          time_from: new Date(now - 7 * 24 * 60 * 60 * 1000).toISOString(),
+          time_to: new Date(now).toISOString(),
+          limit: 5000,
+          rows: [
+            {
+              time_tag: iso(2 * 24 * 60 * 60 * 1000),
+              instrument: "neid",
+              rv_m_s: -640.1,
+              rv_error_m_s: 0.3,
+              snr: 400,
+              exptime_s: 55,
+              archive_jd: 2461000.5,
+              archive_time_scale: "BJD",
+            },
+            {
+              time_tag: iso(2 * 24 * 60 * 60 * 1000 - 2 * 60 * 1000),
+              instrument: "neid",
+              rv_m_s: -641,
+              rv_error_m_s: 0.3,
+              snr: 400,
+              exptime_s: 55,
+              archive_jd: 2461000.5,
+              archive_time_scale: "BJD",
+            },
+            {
+              time_tag: iso(2 * 24 * 60 * 60 * 1000),
+              instrument: "expres",
+              rv_m_s: -650.2,
+              rv_error_m_s: 0.2,
+              snr: 360,
+              exptime_s: 180,
+              archive_jd: 2461000.5,
+              archive_time_scale: "JD",
+            },
+          ],
+        },
+      });
+      return;
+    }
     if (url.includes("/api/v1/kp-gfz")) {
       await route.fulfill({
         json: pageBody([
@@ -145,6 +189,14 @@ test("layout at 375, 768, and 1280 with no horizontal scroll at 320", async ({ p
   await page.setViewportSize({ width: 375, height: 812 });
   await assertNoHorizontalScroll(page);
   await expect(page.getByText("about average for the last 7 days")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Sun-as-a-star radial velocity" })).toBeVisible();
+  const phoneChart = page.getByRole("img", { name: /radial velocity in meters per second/ });
+  await expect(phoneChart).toBeVisible();
+  await phoneChart.hover();
+  await expect(page.locator("#solar-rv .readout")).toContainText("UTC");
+  await expect(page.locator("#solar-rv .readout")).toContainText("m/s");
+  await expect(page.locator("#solar-rv .readout")).toContainText("SNR");
+  await expect(page.locator("#solar-rv .snr-key")).toContainText("SNR");
   await expect(page.getByRole("link", { name: "How is this worked out?" }).first()).toBeVisible();
   const dayPhone = await day.boundingBox();
   const monthPhone = await month.boundingBox();
@@ -163,6 +215,11 @@ test("layout at 375, 768, and 1280 with no horizontal scroll at 320", async ({ p
 
   await page.setViewportSize({ width: 1280, height: 900 });
   await expect(page.getByText("about average for the last 7 days")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Sun-as-a-star radial velocity" })).toBeVisible();
+  const desktopChart = page.getByRole("img", { name: /radial velocity in meters per second/ });
+  await desktopChart.hover();
+  await expect(page.locator("#solar-rv .readout")).toContainText("m/s");
+  await expect(page.locator("#solar-rv .readout")).toContainText("SNR");
   await assertNoHorizontalScroll(page);
   const dayWide = await day.boundingBox();
   const monthWide = await month.boundingBox();

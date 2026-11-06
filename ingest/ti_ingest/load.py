@@ -38,7 +38,7 @@ import json
 import logging
 from collections.abc import Sequence
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Protocol, Self
 
 from pydantic import ValidationError
@@ -53,10 +53,12 @@ from ti_ingest.models import (
     Kp1mRow,
     Kp3hRow,
     MagRow,
+    SolarRvRow,
     StoredRow,
     WindRow,
     XrayRow,
 )
+from ti_ingest.solar_rv import KEEP_DAYS, SOLAR_PRODUCTS, parse_solar_csv
 from ti_ingest.spacetrack_gp import product_name as gp_hist_name
 from ti_ingest.swpc import FetchResult
 
@@ -187,6 +189,27 @@ ON CONFLICT (time_tag) DO UPDATE SET
     definitive = EXCLUDED.definitive
 """.strip()
 
+SOLAR_RV_UPSERT = """
+INSERT INTO solar_rv (
+    time_tag, instrument, rv_m_s, rv_error_m_s,
+    snr, exptime_s, archive_jd, archive_time_scale
+) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+ON CONFLICT (time_tag, instrument) DO UPDATE SET
+    rv_m_s = EXCLUDED.rv_m_s,
+    rv_error_m_s = EXCLUDED.rv_error_m_s,
+    snr = EXCLUDED.snr,
+    exptime_s = EXCLUDED.exptime_s,
+    archive_jd = EXCLUDED.archive_jd,
+    archive_time_scale = EXCLUDED.archive_time_scale
+""".strip()
+
+# After a successful solar load, drop exposures older than the keep window.
+# A failed TAP call does not run this, so a bad day cannot wipe the table.
+SOLAR_RV_DELETE = """
+DELETE FROM solar_rv
+WHERE time_tag < %s
+""".strip()
+
 _UPSERTS: dict[str, tuple[type[StoredRow], str]] = {
     "rtsw_wind_1m": (WindRow, WIND_UPSERT),
     "rtsw_mag_1m": (MagRow, MAG_UPSERT),
@@ -196,6 +219,7 @@ _UPSERTS: dict[str, tuple[type[StoredRow], str]] = {
     "alerts": (AlertRow, ALERT_UPSERT),
     GFZ_PRODUCT: (GfzKpRow, GFZ_UPSERT),
 }
+_UPSERTS.update({name: (SolarRvRow, SOLAR_RV_UPSERT) for name in SOLAR_PRODUCTS})
 # gp- is CelesTrak. gp-hist- is Space-Track and must not clear a celestrak tag.
 _UPSERTS.update({f"gp-{catnr}": (GpRow, GP_UPSERT) for catnr in CATALOG_NUMBERS})
 _UPSERTS.update(
@@ -248,6 +272,9 @@ def parse_body(product: str, model: type[StoredRow], body: bytes) -> ParsedFile:
     """
     if product == GFZ_PRODUCT:
         rows, rejected, error = parse_gfz_text(body)
+        return ParsedFile(len(rows) + rejected, tuple(rows), rejected, error)
+    if product in SOLAR_PRODUCTS:
+        rows, rejected, error = parse_solar_csv(body, product)
         return ParsedFile(len(rows) + rejected, tuple(rows), rejected, error)
 
     try:
@@ -355,6 +382,11 @@ def store_fetch(
         with conn.cursor() as cur:
             if parsed.rows:
                 cur.executemany(sql, [row.as_params() for row in parsed.rows])
+            if fetch.product in SOLAR_PRODUCTS:
+                cur.execute(
+                    SOLAR_RV_DELETE,
+                    (started_at - timedelta(days=KEEP_DAYS),),
+                )
             cur.execute(INGEST_LOG_SQL, params)
         conn.commit()
     except Exception as exc:

@@ -144,6 +144,15 @@ ORDER BY epoch DESC
 LIMIT %s
 """.strip()
 
+SOLAR_RV_SQL = """
+SELECT time_tag, instrument, rv_m_s, rv_error_m_s,
+       snr, exptime_s, archive_jd, archive_time_scale
+FROM solar_rv
+WHERE time_tag >= %s AND time_tag < %s
+ORDER BY time_tag DESC
+LIMIT %s
+""".strip()
+
 PERIGEE_SQL = """
 SELECT epoch, norad_cat_id, object_name, object_id,
        perigee_altitude_km, apogee_altitude_km

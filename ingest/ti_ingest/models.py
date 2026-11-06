@@ -22,13 +22,15 @@ value is stored as UTC. The X-ray columns are in
 ``db/migrations/0002_goes_xray_flux.sql``. The Kp and alert columns are
 in ``db/migrations/0003_kp_alerts.sql``. A CelesTrak GP ``EPOCH`` is the
 same kind of naive UTC clock. Those columns, plus the derived altitudes,
-are in ``db/migrations/0004_satellite_gp.sql``.
+are in ``db/migrations/0004_satellite_gp.sql``. A solar RV
+row is built by ``ti_ingest.solar_rv`` after unit conversion. Those
+columns are in ``db/migrations/0007_solar_rv.sql``.
 """
 
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import (
     AliasChoices,
@@ -367,4 +369,69 @@ class GpRow(StoredRow):
             self.mean_motion_dot,
             perigee_km,
             apogee_km,
+        )
+
+
+class SolarRvRow(StoredRow):
+    """One Sun-as-a-star exposure, already converted to meters per second.
+
+    ``rv_m_s`` is null when the archive left ``ccfrvmod`` empty. That
+    null is a gap. The ±5000 m/s and 0–100 m/s checks reject a row that
+    still looks like centimeters. They are unit guards, not a physical limit.
+    """
+
+    time_tag: datetime
+    instrument: Literal["neid", "expres"]
+    rv_m_s: float | None
+    rv_error_m_s: float | None
+    snr: float | None
+    exptime_s: float | None
+    archive_jd: float | None
+    archive_time_scale: Literal["BJD", "JD"]
+
+    @field_validator("time_tag")
+    @classmethod
+    def time_tag_as_utc(cls, value: datetime) -> datetime:
+        return _as_utc(value)
+
+    @field_validator("rv_m_s")
+    @classmethod
+    def rv_inside_unit_guard(cls, value: float | None) -> float | None:
+        if value is not None and abs(value) >= 5000:
+            raise ValueError("rv_m_s is outside the unit guard of 5000 m/s")
+        return value
+
+    @field_validator("rv_error_m_s")
+    @classmethod
+    def error_inside_unit_guard(cls, value: float | None) -> float | None:
+        if value is not None and (value < 0 or value > 100):
+            raise ValueError("rv_error_m_s is outside 0 to 100 m/s")
+        return value
+
+    @field_validator("snr", "exptime_s")
+    @classmethod
+    def nonnegative(cls, value: float | None) -> float | None:
+        if value is not None and value < 0:
+            raise ValueError("measurement is negative")
+        return value
+
+    @model_validator(mode="after")
+    def time_scale_matches_instrument(self) -> SolarRvRow:
+        expected = "BJD" if self.instrument == "neid" else "JD"
+        if self.archive_time_scale != expected:
+            raise ValueError("archive_time_scale does not match the instrument")
+        if self.archive_jd is not None and not 2_400_000 < self.archive_jd < 3_000_000:
+            raise ValueError("archive_jd is outside 2400000 to 3000000")
+        return self
+
+    def as_params(self) -> tuple[object, ...]:
+        return (
+            self.time_tag,
+            self.instrument,
+            self.rv_m_s,
+            self.rv_error_m_s,
+            self.snr,
+            self.exptime_s,
+            self.archive_jd,
+            self.archive_time_scale,
         )

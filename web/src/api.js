@@ -3,6 +3,7 @@
 // on the API, and this page does not add one.
 
 import { kpRequestPaths } from "./kp.js";
+import { solarRvRequestPath } from "./solarRv.js";
 
 export async function loadKp(nowMs) {
   const paths = kpRequestPaths(nowMs);
@@ -15,6 +16,10 @@ export async function loadKp(nowMs) {
 
 export function loadInterpretation() {
   return getJson("/api/v1/kp-interpretation");
+}
+
+export function loadSolarRv(nowMs) {
+  return readPage(solarRvRequestPath(nowMs));
 }
 
 async function readPage(path) {

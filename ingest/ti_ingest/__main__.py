@@ -44,6 +44,9 @@ from ti_ingest.migrate import DatabaseSettings
 from ti_ingest.satcat import POLL_MINUTES as SATCAT_POLL_MINUTES
 from ti_ingest.satcat import poll_satcat
 from ti_ingest.satcat import startup_line as satcat_startup_line
+from ti_ingest.solar_rv import POLL_MINUTES as SOLAR_RV_POLL_MINUTES
+from ti_ingest.solar_rv import fetch_solar_rv
+from ti_ingest.solar_rv import startup_line as solar_rv_startup_line
 from ti_ingest.spacetrack_gp import POLL_MINUTES as SPACETRACK_POLL_MINUTES
 from ti_ingest.spacetrack_gp import SpaceTrackSettings, poll_spacetrack
 from ti_ingest.spacetrack_gp import startup_line as spacetrack_startup_line
@@ -56,6 +59,7 @@ GOES_JOB_ID = "goes_xray"
 KP_JOB_ID = "kp_alerts"
 CELESTRAK_JOB_ID = "celestrak_gp"
 GFZ_JOB_ID = "gfz_kp"
+SOLAR_RV_JOB_ID = "solar_rv"
 SATCAT_JOB_ID = "satcat_decay"
 SPACETRACK_JOB_ID = "spacetrack_gp_history"
 # A start that is a few seconds late still runs once. Later than this,
@@ -193,6 +197,25 @@ def add_gfz_job(scheduler: BlockingScheduler, job: Callable[[], None]) -> Job:
     )
 
 
+def add_solar_rv_job(scheduler: BlockingScheduler, job: Callable[[], None]) -> Job:
+    """Register the daily NEID and EXPRES TAP pull. Not ``SWPC_POLL_MINUTES``.
+
+    The tables change when the archives publish a new day. Polling them
+    every five minutes would repeat the same query.
+    """
+    return scheduler.add_job(
+        job,
+        "interval",
+        minutes=SOLAR_RV_POLL_MINUTES,
+        id=SOLAR_RV_JOB_ID,
+        name="NEID and EXPRES solar radial velocity",
+        next_run_time=datetime.now(UTC),
+        max_instances=1,
+        coalesce=True,
+        misfire_grace_time=MISFIRE_GRACE_SECONDS,
+    )
+
+
 def add_satcat_job(scheduler: BlockingScheduler, job: Callable[[], None]) -> Job:
     """Register the daily SATCAT pull. Not the two-hour GP job."""
     return scheduler.add_job(
@@ -231,6 +254,7 @@ def build_scheduler(
     celestrak_job: Callable[[], None],
     gfz_job: Callable[[], None],
     satcat_job: Callable[[], None],
+    solar_rv_job: Callable[[], None],
     spacetrack_job: Callable[[], None] | None = None,
 ) -> BlockingScheduler:
     scheduler = BlockingScheduler(timezone=UTC)
@@ -240,6 +264,7 @@ def build_scheduler(
     add_celestrak_job(scheduler, celestrak_job)
     add_gfz_job(scheduler, gfz_job)
     add_satcat_job(scheduler, satcat_job)
+    add_solar_rv_job(scheduler, solar_rv_job)
     if spacetrack_job is not None:
         add_spacetrack_job(scheduler, spacetrack_job)
     return scheduler
@@ -451,6 +476,46 @@ def execute_gfz_job(
         conn.close()
 
 
+def execute_solar_rv_job(
+    settings: SwpcSettings,
+    database: DatabaseSettings,
+    *,
+    transport: httpx.BaseTransport | None = None,
+    connect_fn: Callable[[DatabaseSettings], DBConnection] = connect,
+    now: datetime | None = None,
+) -> None:
+    """One solar-RV run. Land the CSV files first, then open Postgres."""
+    started = now if now is not None else datetime.now(UTC)
+    with make_client(settings.user_agent, transport=transport) as client:
+        fetches = fetch_solar_rv(client, settings.raw_dir, started)
+    try:
+        conn = connect_fn(database)
+    except Exception:
+        logger.exception(
+            "Postgres is unavailable; raw solar RV files were kept and not upserted"
+        )
+        return
+    try:
+        for fetch in fetches:
+            try:
+                store_fetch(conn, fetch, started_at=started)
+            except Exception:
+                logger.exception("Solar RV store failed for %s", fetch.product)
+    finally:
+        conn.close()
+
+
+def make_solar_rv_job(
+    settings: SwpcSettings, database: DatabaseSettings
+) -> Callable[[], None]:
+    """One solar-RV run. The HTTP client closes before the next day."""
+
+    def job() -> None:
+        execute_solar_rv_job(settings, database)
+
+    return job
+
+
 def execute_satcat_job(
     settings: SwpcSettings,
     *,
@@ -541,6 +606,7 @@ def main() -> None:
     logger.info("%s", celestrak_startup_line(str(settings.raw_dir)))
     logger.info("%s", gfz_startup_line(str(settings.raw_dir)))
     logger.info("%s", satcat_startup_line(str(settings.raw_dir)))
+    logger.info("%s", solar_rv_startup_line(str(settings.raw_dir)))
     space = SpaceTrackSettings.from_env()
     logger.info("%s", spacetrack_startup_line(str(settings.raw_dir), space.enabled))
     scheduler = build_scheduler(
@@ -551,6 +617,7 @@ def main() -> None:
         make_celestrak_job(settings, database),
         make_gfz_job(settings, database),
         make_satcat_job(settings),
+        make_solar_rv_job(settings, database),
         make_spacetrack_job(settings, database, space) if space.enabled else None,
     )
 

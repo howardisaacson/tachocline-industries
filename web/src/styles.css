@@ -501,6 +501,24 @@ td {
   flex-shrink: 0;
 }
 
+.snr-key {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 44px;
+  margin: 0.5rem 0 0;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.snr-ramp {
+  width: 72px;
+  height: 14px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
 .sat-links {
   display: grid;
   gap: 0.75rem;
