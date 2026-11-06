@@ -1,14 +1,14 @@
 {
   "uid": "solar-rv",
   "title": "Solar radial velocity",
-  "description": "Sun-as-a-star Level 2 radial velocity from NEID and EXPRES, in meters per second (issue #76, ADR 0037). The value is archive ccfrvmod converted from km/s. NEID uncertainty is dvrms, also from km/s. EXPRES uncertainty is e_v, from cm/s, because a 2024-09-30 sample showed dvrms matched e_v rather than the TAP km/s label. Null velocities are omitted. A gap is not filled. The table keeps 14 days. EXPRES on the archive ended 2026-04-25 when checked on 2026-11-05, so this panel can show NEID alone until a newer EXPRES day is published. Narrow window: one full-width row. Below 640 px the page is tall, and Grafana's own menu can crowd a 320 px window. This is the internal view.",
+  "description": "Sun-as-a-star Level 2 radial velocity and spectral SNR from NEID and EXPRES (issue #76, ADR 0037). Velocity is archive ccfrvmod converted from km/s. NEID uncertainty is dvrms, also from km/s. EXPRES uncertainty is e_v, from cm/s, because a 2024-09-30 sample showed dvrms matched e_v rather than the TAP km/s label. SNR is extsnr, per pixel. Null velocities and null SNRs are omitted. Both panels draw one point per exposure and do not connect the points. The table keeps 14 days. EXPRES on the archive ended 2026-04-25 when checked on 2026-11-05, so these panels can show NEID alone until a newer EXPRES day is published. Narrow window: one full-width row. Below 640 px the page is tall, and Grafana's own menu can crowd a 320 px window. This is the internal view.",
   "tags": ["solar", "neid", "expres"],
   "timezone": "utc",
   "editable": true,
   "graphTooltip": 1,
   "refresh": "1h",
   "schemaVersion": 39,
-  "version": 1,
+  "version": 3,
   "time": {
     "from": "now-7d",
     "to": "now"
@@ -38,7 +38,7 @@
       "id": 1,
       "type": "timeseries",
       "title": "Radial velocity",
-      "description": "Meters per second. NEID and EXPRES are separate series. spanNulls is off, so a missing exposure is a break.",
+      "description": "Meters per second. NEID and EXPRES are separate series. Each exposure is one point. Points are not connected, so a missing exposure is a gap rather than a line across it.",
       "datasource": {
         "type": "postgres",
         "uid": "tachocline-pg"
@@ -56,11 +56,8 @@
           "custom": {
             "axisLabel": "m/s",
             "axisCenteredZero": false,
-            "drawStyle": "line",
-            "lineWidth": 1,
-            "fillOpacity": 0,
-            "showPoints": "auto",
-            "spanNulls": false
+            "drawStyle": "points",
+            "pointSize": 4
           }
         },
         "overrides": []
@@ -92,6 +89,64 @@
           "format": "time_series",
           "rawQuery": true,
           "rawSql": "SELECT\n  time_tag AS \"time\",\n  rv_m_s AS \"EXPRES\"\nFROM solar_rv\nWHERE $__timeFilter(time_tag)\n  AND instrument = 'expres'\n  AND rv_m_s IS NOT NULL\nORDER BY 1"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Spectral SNR",
+      "description": "extsnr, per pixel, for each exposure. NEID is the value at about 5530 angstroms when the TAP request does not name a wavelength. Each exposure is one point. Points are not connected. A null SNR is omitted, including a negative value the poller stored as null. This panel does not require a velocity, so a failed reduction can still show an SNR.",
+      "datasource": {
+        "type": "postgres",
+        "uid": "tachocline-pg"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 10
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 1,
+          "custom": {
+            "axisLabel": "SNR per pixel",
+            "axisCenteredZero": false,
+            "drawStyle": "points",
+            "pointSize": 4
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {"type": "postgres", "uid": "tachocline-pg"},
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  time_tag AS \"time\",\n  snr AS \"NEID\"\nFROM solar_rv\nWHERE $__timeFilter(time_tag)\n  AND instrument = 'neid'\n  AND snr IS NOT NULL\nORDER BY 1"
+        },
+        {
+          "refId": "B",
+          "datasource": {"type": "postgres", "uid": "tachocline-pg"},
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  time_tag AS \"time\",\n  snr AS \"EXPRES\"\nFROM solar_rv\nWHERE $__timeFilter(time_tag)\n  AND instrument = 'expres'\n  AND snr IS NOT NULL\nORDER BY 1"
         }
       ]
     }

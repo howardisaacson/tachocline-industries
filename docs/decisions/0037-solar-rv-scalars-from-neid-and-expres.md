@@ -38,7 +38,7 @@ Checked 2026-11-05:
 
 We will use **option C**.
 
-`solar_rv.rv_m_s` is `ccfrvmod` times 1000. NEID `rv_error_m_s` is `dvrms` times 1000. EXPRES `rv_error_m_s` is `e_v` times 0.01. The plot clock is `obsdate` as UTC. `ccfjdsum` is stored as BJD for NEID and as JD for EXPRES, because those are the names the archive publishes. A missing RV is NULL. The poller keeps 14 days so the 7-day plot can still fill when a file arrives late. Rows older than 14 days are deleted after a successful load. The job runs once a day. It does not download FITS.
+`solar_rv.rv_m_s` is `ccfrvmod` times 1000. NEID `rv_error_m_s` is `dvrms` times 1000. EXPRES `rv_error_m_s` is `e_v` times 0.01. The plot clock is `obsdate` as UTC. `ccfjdsum` is stored as BJD for NEID and as JD for EXPRES, because those are the names the archive publishes. A missing RV is NULL. The poller keeps 14 days so the 7-day Grafana panel can still fill when a file arrives late. The public chart asks for those 7 days, then draws the latest 24 hours as a scatter. Its time axis is 30 minutes before and after the newest exposure. Rows older than 14 days are deleted after a successful load. The job runs once a day. It does not download FITS.
 
 HARPS, HARPS-N, KPF, activity indices, and spectra stay on issue #76.
 
@@ -49,7 +49,7 @@ HARPS, HARPS-N, KPF, activity indices, and spectra stay on issue #76.
 
 ## How to explain this in an interview
 
-"NEID and EXPRES both publish a Sun-as-a-star radial velocity, but not in the same unit. I store meters per second from the kilometer column both tables share, and I take the EXPRES uncertainty from `e_v` because a sample row showed `dvrms` was in centimeters despite its TAP label. The public chart is the last seven days. An empty EXPRES line means the archive has not published a day in that window."
+"NEID and EXPRES both publish a Sun-as-a-star radial velocity, but not in the same unit. I store meters per second from the kilometer column both tables share, and I take the EXPRES uncertainty from `e_v` because a sample row showed `dvrms` was in centimeters despite its TAP label. The public chart is a scatter of the latest published day, zoomed to 30 minutes on either side of the newest exposure. Grafana stays on 7 days. An empty EXPRES series means the archive has not published an exposure in that day."
 
 ## Learn more
 

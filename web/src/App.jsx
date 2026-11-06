@@ -191,8 +191,14 @@ function SolarRvSection({ state }) {
       <p className="section-copy">
         One velocity per exposure of the whole solar disk, in meters per second.
         NEID is the WIYN spectrograph. EXPRES is the Lowell Discovery Telescope
-        spectrograph. A gap is a time the archive did not publish. The line does
-        not cross a gap longer than 30 minutes.
+        spectrograph. The chart is a scatter of the latest published day: the
+        24 hours ending at the newest exposure. The time axis runs from 30
+        minutes before that exposure to 30 minutes after it, so earlier points
+        from that day stay off the plot. Point color is the signal-to-noise
+        ratio of that exposure: dim blue is the lowest SNR on the chart, yellow
+        is the highest, and gray means the archive did not publish one. The
+        outline is the instrument. Points are not connected. Move the pointer
+        over the plot to read that exposure's UTC time, velocity, and SNR.
       </p>
       {state.status === "loading" ? (
         <p className="section-copy">Loading solar radial velocity…</p>

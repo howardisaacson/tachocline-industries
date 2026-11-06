@@ -7,12 +7,13 @@
 Grafana dashboard **Solar radial velocity**. The same rows are drawn on the public home page. This file is the internal view.
 
 ## 1. Purpose
-Shows the Sun-as-a-star radial velocity from NEID and EXPRES for the last 7 days, in meters per second. It is for checking that the daily TAP pull landed, and for an interviewer asking why the chart is one number per exposure rather than a spectrum.
+Shows the Sun-as-a-star radial velocity and the spectral SNR from NEID and EXPRES for the last 7 days. Velocity is in meters per second. SNR is `extsnr`, per pixel. It is for checking that the daily TAP pull landed, and for an interviewer asking why the chart is one number per exposure rather than a spectrum.
 
 ## 2. What you're seeing
-- **Radial velocity:** `rv_m_s` against UTC. NEID and EXPRES are two series. A missing point is a gap. The line does not fill it.
-- Units: meters per second. A quiet solar value in the rows checked on 2026-11-05 sat near −640 m/s. Interesting when one instrument jumps relative to the other, or when a series disappears.
-- The uncertainty is stored and not drawn on this panel.
+- **Radial velocity:** `rv_m_s` against UTC. NEID and EXPRES are two series. Each exposure is one point, and the points are not connected, so a missing exposure stays a gap. This panel follows the dashboard time picker, which opens on the last 7 days. The public home-page chart asks for the same 7 days, keeps the 24 hours ending at the newest exposure, and draws a scatter. Its time axis runs from 30 minutes before that exposure to 30 minutes after it. Points are not connected. Hovering it writes the nearest UTC time, velocity, and SNR under the plot.
+- **Spectral SNR:** `snr` against UTC, on the panel below. This is archive `extsnr`, per pixel. Each exposure is one point, and the points are not connected. A null SNR is omitted. The panel still draws a row whose velocity was stored as a gap. On the public chart the same number is the point color: dim blue is the lowest SNR in view, yellow is the highest, and gray means no SNR was published. The public point outline stays the instrument. Checked 2026-11-05, the stored NEID values ran from 0 to 339.7 per pixel, with a median of 328.7, so most points sit at the bright end and the dim points are the low-SNR tail.
+- Units: meters per second for velocity. SNR is per pixel, not a velocity. A quiet solar velocity in the rows checked on 2026-11-05 sat near −640 m/s. Interesting when one instrument jumps relative to the other, when a series disappears, or when SNR drops while the velocity line continues.
+- The uncertainty is stored and not drawn on this dashboard.
 
 ## 3. Data source & cadence
 | Item | Value |
