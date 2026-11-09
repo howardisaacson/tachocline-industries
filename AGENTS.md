@@ -61,6 +61,7 @@ Per [ADR 0012](docs/decisions/0012-responsive-design-mobile-and-desktop.md):
 | Runtime (dev) | Docker Compose, locally | [0002](docs/decisions/0002-build-locally-first-with-docker-compose.md) |
 | First source | NOAA SWPC real-time solar wind (`json/rtsw/*`) | [0003](docs/decisions/0003-first-data-source-noaa-swpc-real-time-solar-wind.md) |
 | Ingestion | Python + httpx + pydantic, APScheduler 3.x, raw landing zone | [0004](docs/decisions/0004-python-scheduled-pollers-with-raw-landing-zone.md) |
+| Python | 3.15.2 in Docker and CI | [0038](docs/decisions/0038-run-on-python-3-15.md) (Proposed) |
 | Storage | PostgreSQL + TimescaleDB (+ PostGIS later) | [0005](docs/decisions/0005-postgresql-timescaledb-for-time-series-storage.md) |
 | Migrations | Numbered SQL files applied in order by `psql` | [0019](docs/decisions/0019-apply-sql-migrations-in-order.md) |
 | API | FastAPI, paths under `/api/v1` | [0006](docs/decisions/0006-fastapi-for-backend-api.md), [0028](docs/decisions/0028-version-read-api-under-api-v1.md) (Proposed) |
@@ -124,7 +125,7 @@ ADRs 0001–0023 are **Accepted**. Newer ADRs start as **Proposed**. Ask before 
 - Never force-push `develop` or `main`, and never rewrite shared history.
 
 **Code and tests**
-- Python 3.12+, formatted and linted with `ruff`, type hints everywhere, `pytest` tests for parsing, validation, and upsert logic. Network calls are mocked in unit tests.
+- Python 3.15.2 in Docker and CI, formatted and linted with `ruff`, type hints everywhere, `pytest` tests for parsing, validation, and upsert logic. Network calls are mocked in unit tests.
 - SQL changes only via new numbered files in `db/migrations/`; never edit an applied migration.
 - Pollers are polite: timeouts, descriptive `User-Agent`, respect documented rate limits (CelesTrak: at most once per 2 h per group), and stop and log on 4xx rather than retry-hammering.
 - CI (GitHub Actions) runs lint and tests on every PR.

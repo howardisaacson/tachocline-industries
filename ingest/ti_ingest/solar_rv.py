@@ -162,7 +162,7 @@ def _row_from_record(
         snr = _optional_float(_cell(record, "extsnr"))
         exptime = _optional_float(_cell(record, "exptime"))
         archive_jd = _optional_float(_cell(record, "ccfjdsum"))
-    except (TypeError, ValueError):
+    except TypeError, ValueError:
         return None
     if observed is None:
         return None

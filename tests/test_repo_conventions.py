@@ -12,12 +12,12 @@ def _text(relative: str) -> str:
     return (ROOT / relative).read_text(encoding="utf-8")
 
 
-def test_ci_workflow_lints_and_tests_on_python_312() -> None:
+def test_ci_workflow_lints_and_tests_on_python_315() -> None:
     workflow = _text(".github/workflows/ci.yml")
     assert "name: CI" in workflow
     assert "name: lint" in workflow
     assert "name: test" in workflow
-    assert 'python-version: "3.12"' in workflow
+    assert 'python-version: "3.15.2"' in workflow
     assert "ruff check ." in workflow
     assert "ruff format --check ." in workflow
     assert "run: pytest" in workflow

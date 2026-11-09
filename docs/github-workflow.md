@@ -64,7 +64,7 @@ Every Proposed ADR has a **"Review ADR NNNN: …"** issue (`type: adr`), as sub-
 
 ### Continuous integration
 
-A **GitHub Actions workflow** is a YAML file in `.github/workflows/` that GitHub runs when an event happens, such as opening a pull request. Ours is [`.github/workflows/ci.yml`](../.github/workflows/ci.yml). The workflow's name is `CI`. It runs on every pull request and on every push to `main` or `develop`, on Python 3.12.
+A **GitHub Actions workflow** is a YAML file in `.github/workflows/` that GitHub runs when an event happens, such as opening a pull request. Ours is [`.github/workflows/ci.yml`](../.github/workflows/ci.yml). The workflow's name is `CI`. It runs on every pull request and on every push to `main` or `develop`, on Python 3.15.2.
 
 A **status check** is the pass/fail result of one job. Branch protection can require a check by its exact name before a merge. These jobs are the checks:
 

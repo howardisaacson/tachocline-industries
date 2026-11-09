@@ -121,7 +121,7 @@ Bonus (not satellite-native but related): `https://api.wheretheiss.at/v1/satelli
 
 | Layer | Pick | Why / resume keyword |
 |---|---|---|
-| Language | **Python 3.12** + `httpx`, `pydantic` | Typed data validation at the ingestion boundary |
+| Language | **Python 3.15** + `httpx`, `pydantic` | Typed data validation at the ingestion boundary |
 | Ingestion | Small poller scripts run by **APScheduler** (or cron) to start; graduate to **Prefect** or **Dagster** later | "Built scheduled ETL pipelines"; orchestration comes later and is a visible upgrade |
 | Database | **PostgreSQL 16 + TimescaleDB** in Docker (add **PostGIS** for FIRMS) | Hypertables, continuous aggregates, retention policies. Skip SQLite: you would migrate in week 2 anyway. |
 | Raw layer | Save every raw response to `data/raw/<source>/<date>/…json` (later S3/MinIO), then parse into tables | Bronze/silver (medallion) pattern, replayability |
