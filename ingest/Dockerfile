@@ -1,6 +1,8 @@
 # Image shared by the migrate and ingest services (ADR 0014).
 # migrate applies SQL. ingest fetches SWPC files and upserts them.
-FROM python:3.12-slim-bookworm
+# 3.15.2 is the 2026-10-25 security release. The floating 3.15 tag moves,
+# so the patch is pinned (ADR 0038). Bookworm stays so psql stays Postgres 15.
+FROM python:3.15.2-slim-bookworm
 
 # Logs appear immediately instead of waiting for a full buffer.
 ENV PYTHONUNBUFFERED=1

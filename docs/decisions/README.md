@@ -107,5 +107,6 @@ What becomes easier? What becomes harder? What new risks or follow-up work does 
 | [0035](0035-what-may-be-shown-publicly.md) | Show CelesTrak orbits publicly and keep Space-Track private | Proposed |
 | [0036](0036-plain-language-kp-sentences.md) | Plain-language Kp sentences from fixed rules | Proposed |
 | [0037](0037-solar-rv-scalars-from-neid-and-expres.md) | Store NEID and EXPRES solar radial velocity as meters per second | Proposed |
+| [0038](0038-run-on-python-3-15.md) | Run the API and pollers on Python 3.15.2 | Proposed |
 
 Tooling (optional): [adr-tools](https://github.com/npryce/adr-tools) is a small CLI that creates numbered ADR files. Copying the template by hand works just as well.
