@@ -13,6 +13,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY --chown=app:app ti_api ./ti_api
 
+# No writable host mount, so this uid is not matched to the laptop.
+# The landing-zone match is the ingest entrypoint (ADR 0029).
 USER app
 EXPOSE 8000
 CMD ["uvicorn", "ti_api.main:app", "--host", "0.0.0.0", "--port", "8000"]

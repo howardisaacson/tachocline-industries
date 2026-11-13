@@ -56,6 +56,7 @@ Key code: [`dashboards/json/orbit-decay.json`](../../dashboards/json/orbit-decay
 ## 6. Known limitations
 - One epoch cannot draw a rate. The second point appears after the next successful two-hour poll for that catalog number. A laptop that is off collects neither point ([ADR 0002](../decisions/0002-build-locally-first-with-docker-compose.md)).
 - The rate is the change in the two-body perigee, not an SGP4 state and not a measured height. A new element set can move because the fit changed, not only because the satellite did. Treat a single step with that in mind.
+- Ingest writes `data/raw` as the owner of that directory ([ADR 0029](../decisions/0029-match-ingest-user-to-the-host.md)). On Linux, a root-owned `data/raw` stops the container. `RAW_DATA_DIR` is the container path `/data/raw`.
 - The shade assumes `time_tag` is the start of a three-hour block. The band is `time_tag` through `time_tag + 3 hours` for rows with `kp >= 5`. A quiet week has no bands. The 1-minute estimated Kp is not used for the shade, because the NOAA scale is the 3-hour index.
 - Kp and altitude are on one dashboard so the bands cross both charts. They are not a statistical test. A storm band sitting on a drop is a picture, not a fitted effect.
 - There is no history before the poller started. Space-Track `gp_history` was left optional.

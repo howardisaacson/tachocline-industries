@@ -1,5 +1,6 @@
 # Image shared by the migrate and ingest services (ADR 0014).
 # migrate applies SQL. ingest fetches SWPC files and upserts them.
+# linux/amd64 and linux/arm64/v8, checked 2026-11-13. No platform pin.
 FROM python:3.12-slim-bookworm
 
 # Logs appear immediately instead of waiting for a full buffer.
@@ -18,7 +19,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY --chown=app:app ti_ingest ./ti_ingest
 
-# uid 1000 matches a typical laptop user, so files under data/raw stay
-# editable on the host. The poller writes only that mounted directory.
-USER app
+# `app` is the account the entrypoint setuids to. 1000 is only the
+# fallback for migrate, which does not mount the landing zone. Ingest
+# points this account at the owner of /data/raw (ADR 0029). There is
+# no USER instruction: the entrypoint must start as root to call setuid.
+# Bytecode is not written next to the source, because /app may stay
+# owned by the build-time uid after that switch.
+ENV PYTHONDONTWRITEBYTECODE=1
+ENTRYPOINT ["python", "-m", "ti_ingest.entrypoint"]
 CMD ["python", "-m", "ti_ingest"]

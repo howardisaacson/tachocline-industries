@@ -43,20 +43,36 @@ Python pollers (APScheduler) → PostgreSQL + TimescaleDB → FastAPI → Grafan
 | [docs/about-this-page-template.md](docs/about-this-page-template.md) | Template for each page's About section |
 
 ## Quick start
-Install [Docker](https://docs.docker.com/get-started/get-docker/), then from this directory:
+Install [Docker](https://docs.docker.com/get-started/get-docker/). From this directory, copy the env file once and edit the passwords. Do not commit `.env`.
 
 ```bash
 cp .env.example .env
-# edit the passwords in .env; do not commit that file
+```
+
+One `docker-compose.yml` starts the database, the one-shot migration, ingest, the API, Grafana, and the website. It chooses the user id, keeps `RAW_DATA_DIR` at the container path `/data/raw`, and lets Docker pull the architecture for that machine.
+
+On a Mac, Docker Desktop (Apple Silicon or Intel) does not need sudo:
+
+```bash
 docker compose up --build
 ```
+
+On Omarchy Linux the Docker daemon is used with sudo:
+
+```bash
+sudo docker compose up --build
+```
+
+That sudo prefix is the only command difference between the two machines. Later examples in this file write `docker compose`; on Omarchy, put `sudo` in front of them. `./scripts/dev-compose up --build` runs the Mac command on Darwin and the sudo command on Linux.
+
+The website is [http://127.0.0.1:8080](http://127.0.0.1:8080) (host port `WEB_PORT`, default 8080). Grafana is [http://127.0.0.1:3000](http://127.0.0.1:3000) (host port `GRAFANA_PORT`, default 3000).
 
 - API: `http://127.0.0.1:8000/docs` (host port `API_PORT`, default 8000). Read-only. The container logs in as `TI_READONLY_USER`. See [docs/about/api.md](docs/about/api.md).
 - Public page: `http://127.0.0.1:8080` (host port `WEB_PORT`, default 8080). Three radial Kp plots. The container proxies `/api` to the API. See [docs/about/space-weather.md](docs/about/space-weather.md). Rebuild after a frontend change: `docker compose up -d --build web`.
 - Grafana: `http://127.0.0.1:3000` (user and password are `GF_SECURITY_ADMIN_USER` and `GF_SECURITY_ADMIN_PASSWORD` in `.env`). The **Solar wind** dashboard is loaded from `dashboards/`. After this file changes, recreate the container so it sees the new mounts and environment: `docker compose up -d grafana`. Edits to the dashboard JSON are picked up within 30 seconds. On a phone-width window the panels stack (each is a full-width row). Grafana's own menu and time picker stay, and the charts do not switch to a simplified axis, so below 640 px the page is tall and the menu can crowd a 320 px window.
 - Postgres: `127.0.0.1` and `POSTGRES_PORT` from `.env`. The data directory is the Docker named volume `pgdata`, not a folder in this repo.
 - `ingest` fetches the two solar-wind files and `xrays-6-hour.json` on startup and then every `SWPC_POLL_MINUTES`. Raw JSON lands in `data/raw/swpc_rtsw/` and `data/raw/goes_xray/`, which git ignores. Valid rows are upserted into `solar_wind`, `rtsw_mag_1m`, and `goes_xray_flux`. `migrate` applies the numbered files in `db/migrations/`, then exits. Copy `TI_READONLY_USER` and `TI_READONLY_PASSWORD` from `.env.example` into `.env` before the first migrate. Those two values are local-dev only.
-- After adding a SQL file, run `docker compose up --force-recreate migrate`. A one-shot container that already exited successfully is not run again by a plain `docker compose up`.
+- After adding a SQL file, run `docker compose up --force-recreate migrate` (with the `sudo` prefix on Omarchy, as in the quick start). A one-shot container that already exited successfully is not run again by a plain `docker compose up`.
 
 ## Data credits
 NOAA Space Weather Prediction Center, CelesTrak / 18th Space Defense Squadron, NASA (FIRMS, CMR, SDO, DONKI), ESA Copernicus, SatNOGS / Libre Space Foundation. See the research doc for details.

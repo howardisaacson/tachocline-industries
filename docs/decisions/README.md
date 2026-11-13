@@ -98,5 +98,6 @@ What becomes easier? What becomes harder? What new risks or follow-up work does 
 | [0026](0026-render-mermaid-in-doc-pages.md) | Render Mermaid diagrams client-side on doc pages | Proposed |
 | [0027](0027-eleven-year-kp-ring-with-gfz.md) | Ship the 11-year radial Kp ring using GFZ history since 1932 | Proposed |
 | [0028](0028-version-read-api-under-api-v1.md) | Version the read API under `/api/v1` | Proposed |
+| [0029](0029-match-ingest-user-to-the-host.md) | Match the ingest user to the host inside one Compose file | Proposed |
 
 Tooling (optional): [adr-tools](https://github.com/npryce/adr-tools) is a small CLI that creates numbered ADR files. Copying the template by hand works just as well.
