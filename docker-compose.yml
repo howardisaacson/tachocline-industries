@@ -16,6 +16,14 @@
 # files and proxies /api to the api container.
 #
 # https://docs.docker.com/compose/how-tos/startup-order/
+#
+# One file for macOS (Docker Desktop) and Omarchy (sudo). No platform
+# key and no host uid. TimescaleDB 2.31.0-pg17-oss, Grafana 13.2.4,
+# python:3.12-slim-bookworm, node:22.23.4-alpine, and nginx:1.27-alpine
+# publish linux/amd64 and linux/arm64 (checked 2026-11-13), so Docker
+# pulls the architecture of the machine. The ingest entrypoint matches
+# the landing-zone owner. ADR 0029. The sudo difference is in the README
+# quick start.
 
 name: tachocline
 
@@ -96,6 +104,9 @@ services:
     # swpc_rtsw/<date>/, goes_xray/<date>/, swpc_kp/<date>/, and
     # celestrak_gp/<date>/ here, then reads those files and upserts them.
     # POSTGRES_HOST is the Compose service name, not a path on the laptop.
+    # Do not set a Compose user id on this service. The entrypoint reads
+    # this mount's owner and setuids to that uid (ADR 0029). A fixed uid
+    # breaks the other OS.
     volumes:
       - ./data/raw:/data/raw
     depends_on:

@@ -1,0 +1,30 @@
+#!/usr/bin/env python3
+"""Run Docker Compose with the command this OS needs.
+
+Darwin (macOS, Docker Desktop): ``docker compose``.
+Linux (Omarchy): ``sudo docker compose``.
+
+The same docker-compose.yml is used either way. The ingest uid is chosen
+in the container entrypoint, because sudo would otherwise look like root.
+The sudo difference is documented in the README quick start.
+"""
+
+from __future__ import annotations
+
+import os
+import sys
+from pathlib import Path
+
+
+def main() -> None:
+    root = Path(__file__).resolve().parents[1]
+    sys.path.insert(0, str(root / "ingest"))
+    os.chdir(root)
+    from ti_ingest.dev_identity import compose_argv
+
+    argv = compose_argv(os.uname().sysname) + sys.argv[1:]
+    os.execvp(argv[0], argv)
+
+
+if __name__ == "__main__":
+    main()
